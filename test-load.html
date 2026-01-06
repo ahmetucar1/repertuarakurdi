@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Songs Loading</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    pre { background: #f0f0f0; padding: 10px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <h1>Songs Loading Test</h1>
+  <button onclick="testLoad()">Load Songs</button>
+  <div id="output"></div>
+  
+  <script src="firebase.js"></script>
+  <script src="common.js"></script>
+  
+  <script>
+    async function testLoad() {
+      const out = document.getElementById('output');
+      out.innerHTML = '<p>Loading...</p>';
+      try {
+        const songs = await loadSongs();
+        out.innerHTML = `
+          <h2>Success!</h2>
+          <p>Loaded ${songs.length} songs</p>
+          <pre>${JSON.stringify(songs.slice(0, 3), null, 2)}</pre>
+        `;
+      } catch(err) {
+        out.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

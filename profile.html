@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ku" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Profil | Repertûara Kurdî</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="home-page">
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a class="brand" href="index.html" aria-label="Serrûpel">
+        <div class="logo" aria-hidden="true">
+          <img src="assets/logo_web_assets/logo-256.webp" alt="Repertûara Kurdî logo">
+        </div>
+        <div>
+          <div class="brand__title brand__title--soft">Repertûara Kurdî</div><div class="brand__kurd"></div>
+        </div>
+      </a>
+      <div class="topbar__actions">
+        <a class="btn btn--ghost homeLink" href="index.html" aria-label="Serrûpel">
+          <svg class="iconHome" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-10.5z" fill="currentColor"/>
+          </svg>
+        </a>
+        <a class="btn btn--ghost btn--lg" href="all.html">Hemû</a>
+        <button id="addSongMenuBtn" class="btn btn--ghost btn--lg" type="button">Stran Zêde Bike</button>
+        <a class="btn btn--ghost btn--lg" href="index.html#sources">Çavkaniyên</a>
+        <a class="btn btn--ghost btn--lg" href="index.html#contact">Peywendî</a>
+        <a id="adminLink" class="btn btn--ghost btn--lg" href="admin.html" style="display:none;">Rêveber</a>
+        <div class="authWrap">
+          <button id="authOpen" class="btn btn--ghost btn--lg" type="button">Têkeve</button>
+          <div id="authPanel" class="authPanel" role="dialog" aria-label="Kirinên bikarhêner">
+            <div class="authTitle">Hesab</div>
+            <div class="authField">
+              <label class="authLabel" for="authEmail">E-name</label>
+              <input id="authEmail" class="authInput" type="email" autocomplete="email" placeholder="mînak@mail.com" />
+            </div>
+            <div class="authField">
+              <label class="authLabel" for="authPass">Şîfre</label>
+              <input id="authPass" class="authInput" type="password" autocomplete="current-password" placeholder="••••••••" />
+            </div>
+            <div class="authActions">
+              <button id="authSignIn" class="btn btn--ghost" type="button">Têkeve</button>
+              <button id="authSignUp" class="btn btn--ghost" type="button">Qeyd bibe</button>
+              <button id="authSignOut" class="btn btn--ghost" type="button" style="display:none;">Derkeve</button>
+            </div>
+            <div class="authAltActions">
+              <button id="authGoogle" class="btn btn--ghost" type="button">Bi Google re têkeve</button>
+              <button id="authReset" class="btn btn--ghost" type="button">Şîfreya te jibîr bû?</button>
+            </div>
+            <div id="authStatus" class="authStatus muted">Ji bo têketinê e-name û şîfre binivîse.</div>
+          </div>
+        </div>
+        <a id="profileLink" class="btn btn--ghost btn--lg" href="profile.html" style="display:none;">Profîl</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="resultsHeader" style="margin-top:10px;">
+      <div class="resultsHeader__left">
+        <div class="resultsHeader__title">Profîl</div>
+        <div class="muted" id="profileSubtitle">Agahiyên hesabê</div>
+      </div>
+    </section>
+
+    <section class="visualCard" style="margin-top:16px;">
+      <div class="visualCard__top profileHeader">
+        <div class="profileIdentity">
+          <div class="profileAvatarWrap">
+            <img id="profileAvatar" class="profileAvatar" alt="" />
+            <span id="profileAvatarFallback" class="profileAvatar profileAvatar--fallback">👤</span>
+          </div>
+          <div>
+            <div class="visualCard__title" id="profileName">—</div>
+            <div class="muted" id="profileEmail">—</div>
+          </div>
+        </div>
+        <div class="profileActions">
+          <div class="muted" id="profileStatus">—</div>
+          <button id="profileSignOut" class="btn btn--ghost" type="button">Derkeve</button>
+        </div>
+      </div>
+      <div class="profileEdit">
+        <div class="authField">
+          <label class="authLabel" for="profilePhotoUrl">URL ya wêneya profîlê</label>
+          <input id="profilePhotoUrl" class="authInput" type="url" placeholder="https://..." />
+        </div>
+        <div class="authActions">
+          <button id="profilePhotoSave" class="btn btn--ghost" type="button">Tomar bike</button>
+        </div>
+        <div id="profilePhotoStatus" class="authStatus muted"></div>
+      </div>
+    </section>
+
+    <section class="resultsHeader" style="margin-top:26px;">
+      <div class="resultsHeader__left">
+        <div class="resultsHeader__title">Stranên Favorî</div>
+        <div class="muted"><span id="favCount">0</span> stran</div>
+      </div>
+    </section>
+    <section id="favList" class="list"></section>
+
+    <section class="resultsHeader" style="margin-top:26px;">
+      <div class="resultsHeader__left">
+        <div class="resultsHeader__title">Hunermendên Favorî</div>
+        <div class="muted"><span id="favArtistCount">0</span> hunermend</div>
+      </div>
+    </section>
+    <section id="favArtistList" class="list"></section>
+
+    <section class="resultsHeader" style="margin-top:26px;">
+      <div class="resultsHeader__left">
+        <div class="resultsHeader__title">Stranên min</div>
+        <div class="muted"><span id="newCount">0</span> stran</div>
+      </div>
+      <div class="resultsHeader__right">
+        <select id="newFilter" class="authInput" style="max-width:180px;">
+          <option value="all">Hemû</option>
+          <option value="pending">Li benda pejirandinê</option>
+          <option value="approved">Pejirandî</option>
+          <option value="rejected">Redkirî</option>
+        </select>
+      </div>
+    </section>
+    <section id="newList" class="list"></section>
+
+    <section class="resultsHeader" style="margin-top:26px;">
+      <div class="resultsHeader__left">
+        <div class="resultsHeader__title">Guhartinên min</div>
+        <div class="muted"><span id="editCount">0</span> guhartin</div>
+      </div>
+      <div class="resultsHeader__right">
+        <select id="editFilter" class="authInput" style="max-width:180px;">
+          <option value="all">Hemû</option>
+          <option value="pending">Li benda pejirandinê</option>
+          <option value="approved">Pejirandî</option>
+          <option value="rejected">Redkirî</option>
+        </select>
+      </div>
+    </section>
+    <section id="editList" class="list"></section>
+
+    <footer class="footer muted">
+      <div class="footerInner">
+        <section class="homeGrid footerGrid">
+          <div class="homeMid">
+            <div class="visualCard visualCard--photo visualCard--logo" style="background-image:url('assets/logo.png');">
+              <div class="visualCard__overlay">
+                <div class="visualCard__overlayTitle">Repertûara Kurdî</div>
+                <div class="muted">Repertûara Stranan</div>
+              </div>
+            </div>
+          </div>
+          <div class="homeSide">
+            <div class="visualCard">
+              <div class="visualCard__top">
+                <div class="visualCard__title">Repertûar</div>
+                <div class="muted">Agahîya Lîsteyê</div>
+              </div>
+              <div class="stats" id="stats" style="margin-top:12px;">
+                <div class="stat">
+                  <div class="stat__n" id="statSongs">—</div>
+                  <div class="stat__t muted">Stran</div>
+                </div>
+                <div class="stat">
+                  <div class="stat__n" id="statArtists">—</div>
+                  <div class="stat__t muted">Hunermend</div>
+                </div>
+                <div class="stat">
+                  <div class="stat__n" id="statUpdated">2</div>
+                  <div class="stat__t muted">Repertûar</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <div class="footerRow" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+          <span class="muted" style="text-align:left;">© Repertûara Kurdî</span>
+          <span class="muted" style="text-align:right;">Pêşvebir: Ahmet Uçar</span>
+        </div>
+      </div>
+    </footer>
+  </main>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore-compat.js"></script>
+  <script src="firebase.js"></script>
+  <script src="common.js"></script>
+  <script src="profile.js"></script>
+</body>
+</html>

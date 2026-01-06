@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Debug Songs Loading</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #fff; }
+    .box { border: 1px solid #444; padding: 15px; margin: 10px 0; background: #2a2a2a; border-radius: 4px; }
+    .success { border-color: #4a4; color: #4a4; }
+    .error { border-color: #a44; color: #a44; }
+    .info { border-color: #44a; color: #44a; }
+    code { background: #111; padding: 2px 6px; }
+    h2 { margin-top: 0; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Songs Loading Debug</h1>
+  
+  <div id="status" class="box info">
+    <h2>Checking...</h2>
+    <p id="statusText">Checking songs.json...</p>
+  </div>
+  
+  <div id="output"></div>
+  
+  <script>
+    async function test() {
+      const output = document.getElementById('output');
+      const statusText = document.getElementById('statusText');
+      
+      try {
+        // Test 1: Check songs.json
+        const res = await fetch('assets/songs.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const songs = await res.json();
+        statusText.textContent = `✓ Loaded ${songs.length} songs from JSON`;
+        
+        // Test 2: Check if common.js functions are available
+        output.innerHTML = `
+          <div class="box success">
+            <h2>✓ songs.json</h2>
+            <p>Loaded <code>${songs.length}</code> songs successfully</p>
+            <p>First 3 songs:</p>
+            <ul>
+              ${songs.slice(0, 3).map(s => `<li>"${s.song}" by ${s.artist}`).join('')}
+            </ul>
+          </div>
+        `;
+        
+        // Test 3: Check if formatSongTitle exists
+        if (window.formatSongTitle) {
+          const formatted = window.formatSongTitle(songs[0].song);
+          output.innerHTML += `
+            <div class="box success">
+              <h2>✓ formatSongTitle function</h2>
+              <p>Example: <code>"${songs[0].song}"</code> → <code>"${formatted}"</code></p>
+            </div>
+          `;
+        } else {
+          output.innerHTML += `
+            <div class="box error">
+              <h2>✗ formatSongTitle function</h2>
+              <p>common.js not loaded or function not exposed</p>
+            </div>
+          `;
+        }
+        
+        // Test 4: Check if loadSongs function exists
+        if (window.loadSongs) {
+          output.innerHTML += `
+            <div class="box success">
+              <h2>✓ loadSongs function available</h2>
+              <p>Try calling: <code>loadSongs()</code></p>
+            </div>
+          `;
+        } else {
+          output.innerHTML += `
+            <div class="box error">
+              <h2>✗ loadSongs function not available</h2>
+              <p>Check if common.js is loaded</p>
+            </div>
+          `;
+        }
+        
+        // Test 5: Check if $ helper exists
+        if (window.$) {
+          const listEl = document.querySelector('#test-list');
+          output.innerHTML += `
+            <div class="box success">
+              <h2>✓ $ helper function available</h2>
+              <p>Can select elements</p>
+            </div>
+          `;
+        }
+        
+      } catch (err) {
+        statusText.textContent = `✗ Error: ${err.message}`;
+        document.getElementById('status').className = 'box error';
+        output.innerHTML = `
+          <div class="box error">
+            <h2>✗ Error</h2>
+            <p><code>${err.message}</code></p>
+            <pre>${err.stack}</pre>
+          </div>
+        `;
+      }
+    }
+    
+    // Load common.js first, then test
+    const script = document.createElement('script');
+    script.src = 'common.js';
+    script.onload = () => {
+      setTimeout(test, 100);
+    };
+    script.onerror = () => {
+      document.getElementById('status').className = 'box error';
+      document.getElementById('statusText').textContent = '✗ Failed to load common.js';
+    };
+    document.head.appendChild(script);
+  </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ku" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin | Repertûara Kurdî</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="home-page">
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a class="brand" href="index.html" aria-label="Serrûpel">
+        <div class="logo" aria-hidden="true">
+          <img src="assets/logo_web_assets/logo-256.webp" alt="Repertûara Kurdî logo">
+        </div>
+        <div>
+          <div class="brand__title brand__title--soft">Repertûara Kurdî</div><div class="brand__kurd"></div>
+        </div>
+      </a>
+      <div class="topbar__actions">
+        <a class="btn btn--ghost homeLink" href="index.html" aria-label="Serrûpel">
+          <svg class="iconHome" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-10.5z" fill="currentColor"/>
+          </svg>
+        </a>
+        <a class="btn btn--ghost btn--lg" href="all.html">Hemû</a>
+        <button id="addSongMenuBtn" class="btn btn--ghost btn--lg" type="button">Stran Zêde Bike</button>
+        <a class="btn btn--ghost btn--lg" href="index.html#sources">Çavkaniyên</a>
+        <a class="btn btn--ghost btn--lg" href="index.html#contact">Peywendî</a>
+        <a id="adminLink" class="btn btn--ghost btn--lg" href="admin.html" style="display:none;">Rêveber</a>
+        <div class="authWrap">
+          <button id="authOpen" class="btn btn--ghost btn--lg" type="button">Têkeve</button>
+          <div id="authPanel" class="authPanel" role="dialog" aria-label="Kirinên bikarhêner">
+            <div class="authTitle">Hesab</div>
+            <div class="authField">
+              <label class="authLabel" for="authEmail">E-name</label>
+              <input id="authEmail" class="authInput" type="email" autocomplete="email" placeholder="mînak@mail.com" />
+            </div>
+            <div class="authField">
+              <label class="authLabel" for="authPass">Şîfre</label>
+              <input id="authPass" class="authInput" type="password" autocomplete="current-password" placeholder="••••••••" />
+            </div>
+            <div class="authActions">
+              <button id="authSignIn" class="btn btn--ghost" type="button">Têkeve</button>
+              <button id="authSignUp" class="btn btn--ghost" type="button">Qeyd bibe</button>
+              <button id="authSignOut" class="btn btn--ghost" type="button" style="display:none;">Derkeve</button>
+            </div>
+            <div class="authAltActions">
+              <button id="authGoogle" class="btn btn--ghost" type="button">Bi Google re têkeve</button>
+              <button id="authReset" class="btn btn--ghost" type="button">Şîfreya te jibîr bû?</button>
+            </div>
+            <div id="authStatus" class="authStatus muted">Ji bo têketinê e-name û şîfre binivîse.</div>
+          </div>
+        </div>
+        <a id="profileLink" class="btn btn--ghost btn--lg" href="profile.html" style="display:none;">Profîl</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="resultsHeader" style="margin-top:10px;">
+      <div class="resultsHeader__left">
+        <div class="resultsHeader__title">Pejirandina Rêveber</div>
+        <div class="muted" id="adminStatus">Li benda têketinê ye…</div>
+      </div>
+      <div class="resultsHeader__right">
+        <div class="muted"><span id="pendingCount">0</span> li bendê</div>
+      </div>
+    </section>
+
+    <section class="adminGrid" style="margin-top:16px;">
+      <div class="adminCol">
+        <div class="resultsHeader adminHeader">
+          <div class="resultsHeader__left">
+            <div class="resultsHeader__title">Stranên nû</div>
+            <div class="muted"><span id="pendingNewCount">0</span> li bendê</div>
+          </div>
+          <div class="resultsHeader__right adminBulk">
+            <button id="selectAllNew" class="btn btn--ghost" type="button">Hemûyan hilbijêre</button>
+            <button id="approveAllNew" class="btn btn--ok" type="button">Hemûyan pejirîne</button>
+            <button id="approveSelectedNew" class="btn btn--ghost" type="button">Hilbijartiyan pejirîne</button>
+            <button id="rejectSelectedNew" class="btn btn--danger" type="button">Hilbijartiyan red bike</button>
+          </div>
+        </div>
+        <section id="adminNewList" class="list"></section>
+      </div>
+
+      <div class="adminCol">
+        <div class="resultsHeader adminHeader">
+          <div class="resultsHeader__left">
+            <div class="resultsHeader__title">Guhartin</div>
+            <div class="muted"><span id="pendingEditCount">0</span> li bendê</div>
+          </div>
+          <div class="resultsHeader__right adminBulk">
+            <button id="selectAllEdit" class="btn btn--ghost" type="button">Hemûyan hilbijêre</button>
+            <button id="approveAllEdit" class="btn btn--ok" type="button">Hemûyan pejirîne</button>
+            <button id="approveSelectedEdit" class="btn btn--ghost" type="button">Hilbijartiyan pejirîne</button>
+            <button id="rejectSelectedEdit" class="btn btn--danger" type="button">Hilbijartiyan red bike</button>
+          </div>
+        </div>
+        <section id="adminEditList" class="list"></section>
+      </div>
+    </section>
+
+    <section class="resultsHeader adminHeader" style="margin-top:24px;">
+      <div class="resultsHeader__left">
+        <div class="resultsHeader__title">Peyamên Peywendiyê</div>
+        <div class="muted"><span id="contactCount">0</span> peyam</div>
+      </div>
+    </section>
+    <section id="adminContactList" class="list"></section>
+
+    <footer class="footer muted">
+      <div class="footerInner">
+        <section class="homeGrid footerGrid">
+          <div class="homeMid">
+            <div class="visualCard visualCard--photo visualCard--logo" style="background-image:url('assets/logo.png');">
+              <div class="visualCard__overlay">
+                <div class="visualCard__overlayTitle">Repertûara Kurdî</div>
+                <div class="muted">Repertûara Stranan</div>
+              </div>
+            </div>
+          </div>
+          <div class="homeSide">
+            <div class="visualCard">
+              <div class="visualCard__top">
+                <div class="visualCard__title">Repertûar</div>
+                <div class="muted">Agahîya Lîsteyê</div>
+              </div>
+              <div class="stats" id="stats" style="margin-top:12px;">
+                <div class="stat">
+                  <div class="stat__n" id="statSongs">—</div>
+                  <div class="stat__t muted">Stran</div>
+                </div>
+                <div class="stat">
+                  <div class="stat__n" id="statArtists">—</div>
+                  <div class="stat__t muted">Hunermend</div>
+                </div>
+                <div class="stat">
+                  <div class="stat__n" id="statUpdated">2</div>
+                  <div class="stat__t muted">Repertûar</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <div class="footerRow" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+          <span class="muted" style="text-align:left;">© Repertûara Kurdî</span>
+          <span class="muted" style="text-align:right;">Pêşvebir: Ahmet Uçar</span>
+        </div>
+      </div>
+    </footer>
+  </main>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore-compat.js"></script>
+  <script src="firebase.js"></script>
+  <script src="common.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

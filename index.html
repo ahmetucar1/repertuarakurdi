@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="ku" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Repertûara Kurdî</title>
+<link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="home-page">
+
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a class="brand" href="index.html" aria-label="Serrûpel">
+  <div class="logo" aria-hidden="true">
+    <img src="assets/logo_web_assets/logo-256.webp" alt="Repertûara Kurdî logo">
+    
+  </div>
+  
+  <div>
+    <div class="brand__title brand__title--soft">Repertûara Kurdî</div><div class="brand__kurd"></div>
+  </div>
+</a>
+      <div class="topbar__center">
+        <div class="search search--header" aria-label="Lêgerîn">
+          <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
+            <path d="M16.8 16.8L21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          <input id="q" class="search__input" type="search" placeholder="Stran an hunermend bigere…" autocomplete="off" />
+          <button id="clear" class="search__clear" type="button" aria-label="Paqij bike">✕</button>
+        </div>
+      </div>
+      <div class="topbar__actions">
+        <a class="btn btn--ghost homeLink" href="index.html" aria-label="Serrûpel">
+          <svg class="iconHome" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-10.5z" fill="currentColor"/>
+          </svg>
+        </a>
+        <a class="btn btn--ghost btn--lg" href="all.html">Hemû</a>
+        <button id="addSongMenuBtn" class="btn btn--ghost btn--lg" type="button">Stran Zêde Bike</button>
+        <a class="btn btn--ghost btn--lg" href="#sources">Çavkaniyên</a>
+        <a class="btn btn--ghost btn--lg" href="#contact">Peywendî</a>
+        <a id="adminLink" class="btn btn--ghost btn--lg" href="admin.html" style="display:none;">Rêveber</a>
+        <div class="authWrap">
+          <button id="authOpen" class="btn btn--ghost btn--lg" type="button">Têkeve</button>
+          <div id="authPanel" class="authPanel" role="dialog" aria-label="Kirinên bikarhêner">
+            <div class="authTitle">Hesab</div>
+            <div class="authField">
+              <label class="authLabel" for="authEmail">E-name</label>
+              <input id="authEmail" class="authInput" type="email" autocomplete="email" placeholder="mînak@mail.com" />
+            </div>
+            <div class="authField">
+              <label class="authLabel" for="authPass">Şîfre</label>
+              <input id="authPass" class="authInput" type="password" autocomplete="current-password" placeholder="••••••••" />
+            </div>
+            <div class="authActions">
+              <button id="authSignIn" class="btn btn--ghost" type="button">Têkeve</button>
+              <button id="authSignUp" class="btn btn--ghost" type="button">Qeyd bibe</button>
+              <button id="authSignOut" class="btn btn--ghost" type="button" style="display:none;">Derkeve</button>
+            </div>
+            <div class="authAltActions">
+              <button id="authGoogle" class="btn btn--ghost" type="button">Bi Google re têkeve</button>
+              <button id="authReset" class="btn btn--ghost" type="button">Şîfreya te jibîr bû?</button>
+            </div>
+            <div id="authStatus" class="authStatus muted">Ji bo têketinê e-name û şîfre binivîse.</div>
+          </div>
+        </div>
+        <a id="profileLink" class="btn btn--ghost btn--lg" href="profile.html" style="display:none;">Profîl</a>
+        
+      </div>
+    </div>
+  </header>
+
+
+  <main class="container">
+    <section class="homeIntro">
+      <div class="heroCard">
+        <div class="heroCard__content">
+          <div class="heroCard__header">
+            <h1 class="heroCard__title">Akorên stranên kurdî li yek rûpelê bibîne.</h1>
+            <p class="heroCard__subtitle">Bigere, keşf bike, bitikîne, bibîne</p>
+          </div>
+          <div class="heroCard__actions">
+            <p class="heroCard__notice">Ji bo ku tu stran zêde bikî an jî biguherî, divê tu têkevî.</p>
+            <div class="heroCard__buttons">
+              <a href="all.html" class="btn btn--primary heroCard__btn">Hemûyan Bibîne</a>
+              <button id="addSongMenuBtn2" class="btn btn--primary heroCard__btn">Stran Zêde Bike</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="addSongPanel" class="editPanel is-hidden">
+      <div class="editPanel__top">
+        <div class="editPanel__title">Stran Nû Zêde Bike</div>
+      </div>
+      <div class="editGrid">
+        <div class="authField">
+          <label class="authLabel" for="addSongName">Navê Stranê</label>
+          <input id="addSongName" class="authInput" type="text" />
+        </div>
+        <div class="authField">
+          <label class="authLabel" for="addSongArtist">Hunermend</label>
+          <input id="addSongArtist" class="authInput" type="text" />
+          <div class="formHint muted">Hunermendê rast binivîse, ji bo ku stran li rûpela hunermendê xuya bibe.</div>
+          <div id="addSongArtistSuggest" class="suggestList"></div>
+        </div>
+        <div class="authField">
+          <label class="authLabel" for="addSongKey">Tonê Orijînal</label>
+          <select id="addSongKey" class="authInput">
+            <option value="">Ton Hilbijêre</option>
+            <option value="C">C</option>
+            <option value="Cm">Cm</option>
+            <option value="Db">Db</option>
+            <option value="Dbm">Dbm</option>
+            <option value="D">D</option>
+            <option value="Dm">Dm</option>
+            <option value="Eb">Eb</option>
+            <option value="Ebm">Ebm</option>
+            <option value="E">E</option>
+            <option value="Em">Em</option>
+            <option value="F">F</option>
+            <option value="Fm">Fm</option>
+            <option value="Gb">Gb</option>
+            <option value="Gbm">Gbm</option>
+            <option value="G">G</option>
+            <option value="Gm">Gm</option>
+            <option value="Ab">Ab</option>
+            <option value="Abm">Abm</option>
+            <option value="A">A</option>
+            <option value="Am">Am</option>
+            <option value="Bb">Bb</option>
+            <option value="Bbm">Bbm</option>
+            <option value="B">B</option>
+            <option value="Bm">Bm</option>
+          </select>
+        </div>
+      </div>
+      <div class="authField" style="margin-top:8px;">
+        <label class="authLabel" for="addSongText">Nivîsa Stranê</label>
+        <textarea id="addSongText" class="authInput editTextarea" placeholder="Nivîsa bi akorê li vir bike..."></textarea>
+      </div>
+      <div class="editActions">
+        <button id="addSongSave" class="btn" type="button">Bişîne</button>
+        <button id="addSongReset" class="btn btn--ghost" type="button">Paqij bike</button>
+        <button id="addSongClose" class="btn btn--ghost" type="button">Bigire</button>
+      </div>
+      <div id="addSongNotice" class="editNotice muted"></div>
+    </section>
+
+    <section class="homeListWrap">
+      <section class="resultsHeader">
+        <div class="resultsHeader__left">
+          <div id="resultsTitle" class="resultsHeader__title">Yên Berçav</div>
+          <div class="resultsMeta"><span id="count">0</span> encam</div>
+        </div>
+        <button id="scrollTop" class="btn btn--ghost" type="button">Jor</button>
+      </section>
+
+      <section id="list" class="list"></section>
+    </section>
+
+    <section id="sources" class="section">
+      <div class="sectionHeader">
+        <h2 class="sectionTitle">Çavkaniyên</h2>
+        <p class="sectionSub">Spas ji hevalên me yên ku vê repertuarê parve dikin.</p>
+      </div>
+      <div class="sourcesRow">
+        <div class="sourceItem">
+          <div class="sourceCircle sourceCircle--logo">
+            <img src="assets/Helezonîk Kreşendo logosu.png" alt="Helzenik Kreşendo logo">
+          </div>
+          <div class="sourceLabel">Helezonik Kreşendo</div>
+        </div>
+        <div class="sourceItem">
+          <div class="sourceCircle sourceCircle--empty"></div>
+        </div>
+        <div class="sourceItem">
+          <div class="sourceCircle sourceCircle--empty"></div>
+        </div>
+        <div class="sourceItem">
+          <div class="sourceCircle sourceCircle--empty"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section">
+      <div class="sectionHeader">
+        <h2 class="sectionTitle">Peywendî</h2>
+        <p class="sectionSub">Tu dikarî repertuara xwe an mijarek din bi me re parve bikî.</p>
+      </div>
+      <form id="contactForm" class="contactForm">
+        <div class="contactFields">
+          <div class="authField">
+            <label class="authLabel" for="contactName">Nav û Paşnav</label>
+            <input id="contactName" class="authInput" type="text" placeholder="Nav û Paşnav" />
+          </div>
+          <div class="authField">
+            <label class="authLabel" for="contactInfo">Peywendî</label>
+            <input id="contactInfo" class="authInput" type="text" placeholder="E-name an telefon" />
+          </div>
+        </div>
+        <div class="contactBottom">
+          <div class="authField">
+            <label class="authLabel" for="contactMessage">Peyam</label>
+            <textarea id="contactMessage" class="authInput editTextarea" placeholder="Kurtî binivîse..."></textarea>
+          </div>
+          <div class="authField">
+            <label class="authLabel" for="contactFiles">Pel Zêde Bike</label>
+            <input id="contactFiles" class="fileInput" type="file" accept=".pdf,.png,.jpg,.jpeg" multiple />
+          </div>
+        </div>
+        <div class="contactActions">
+          <button class="btn btn--primary" type="submit">Bişîne</button>
+        </div>
+        <div id="contactStatus" class="authStatus muted"></div>
+      </form>
+    </section>
+
+    <footer class="footer muted">
+      <div class="footerInner">
+        <section class="homeGrid footerGrid">
+          <div class="homeMid">
+            <div class="visualCard visualCard--footer">
+              <div class="footerLogoWrapper">
+                <img src="assets/logo_web_assets/logo-512.webp" alt="Repertûara Kurdî" class="footerLogoImg" />
+              </div>
+              <div class="footerLogoContent">
+                <div class="visualCard__overlayTitle">Repertûara Kurdî</div>
+                <div class="muted">Repertûara Stranan</div>
+              </div>
+            </div>
+          </div>
+          <div class="homeSide">
+            <div class="visualCard">
+              <div class="visualCard__top">
+                <div class="visualCard__title">Repertûar</div>
+                <div class="muted">Agahîya Lîsteyê</div>
+              </div>
+              <div class="stats" id="stats" style="margin-top:12px;">
+                <div class="stat">
+                  <div class="stat__n" id="statSongs">—</div>
+                  <div class="stat__t muted">Stran</div>
+                </div>
+                <div class="stat">
+                  <div class="stat__n" id="statArtists">—</div>
+                  <div class="stat__t muted">Hunermend</div>
+                </div>
+                <div class="stat">
+                  <div class="stat__n" id="statUpdated">2</div>
+                  <div class="stat__t muted">Repertûar</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <div class="footerRow" style="
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  width:100%;
+">
+          <span class="muted" style="text-align:left;">
+            © Repertûara Kurdî
+          </span>
+          <span class="muted" style="text-align:right;">
+            Pêşvebir: Ahmet Uçar
+          </span>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-storage-compat.js"></script>
+  <script src="firebase.js"></script>
+  <script src="common.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Test script - eğer bu görünüyorsa JavaScript çalışıyor
+    console.log("=== HTML SCRIPT LOADED ===");
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("=== DOMContentLoaded ===");
+      const listEl = document.getElementById('list');
+      const listWrap = document.querySelector('.homeListWrap');
+      console.log("Test - listEl:", listEl);
+      console.log("Test - listWrap:", listWrap);
+      
+      // Zorla görünür yap
+      if(listWrap) {
+        listWrap.style.display = "block";
+        listWrap.style.visibility = "visible";
+        listWrap.style.opacity = "1";
+        listWrap.style.height = "auto";
+        listWrap.style.overflow = "visible";
+      }
+      if(listEl) {
+        listEl.style.display = "grid";
+        listEl.style.visibility = "visible";
+        listEl.style.opacity = "1";
+        listEl.style.height = "auto";
+        listEl.style.overflow = "visible";
+      }
+    });
+  </script>
+</body>
+</html>
