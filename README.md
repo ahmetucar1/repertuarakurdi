@@ -1,1 +1,1 @@
-# kurtce-akorlar
+[# kurtce-akorlar](https://repertuarakurdi.netlify.app/)
