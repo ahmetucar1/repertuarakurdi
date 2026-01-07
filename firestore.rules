@@ -1,0 +1,84 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Email bazlı admin kontrolü (custom claim yoksa)
+    // common.js'teki ADMIN_EMAILS ile aynı olmalı
+    function isAdminByEmail() {
+      let userEmail = request.auth.token.email;
+      return isSignedIn() && userEmail != null && (
+        userEmail == "ucaraahmet@gmail.com"
+      );
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.admin == true ||
+        isAdminByEmail()
+      );
+    }
+    
+    // Şarkı gönderimleri koleksiyonu
+    match /song_submissions/{id} {
+      allow read: if resource.data.status in ["pending", "approved"]
+        || (isSignedIn() && resource.data.createdBy == request.auth.uid)
+        || isAdmin();
+
+      allow create: if isSignedIn()
+        && request.resource.data.status == "pending"
+        && request.resource.data.createdBy == request.auth.uid;
+
+      allow update, delete: if isAdmin();
+    }
+
+    // Kullanıcı profilleri
+    match /profiles/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Favoriler koleksiyonu - kullanıcılar sadece kendi favorilerini okuyup yazabilir
+    match /favorites/{id} {
+      // Read: where sorgusu için resource.data.uid kontrolü yeterli (her belge için ayrı kontrol edilir)
+      // Tek belge okuma için de aynı kural geçerli
+      allow read: if isSignedIn() && (
+        resource == null || 
+        resource.data.uid == request.auth.uid
+      );
+      allow create, update: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // Artist favorileri koleksiyonu
+    match /artist_favorites/{id} {
+      // Read: where sorgusu için resource.data.uid kontrolü yeterli (her belge için ayrı kontrol edilir)
+      allow read: if isSignedIn() && (
+        resource == null || 
+        resource.data.uid == request.auth.uid
+      );
+      allow create, update: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // Mail logları
+    match /mail_logs/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // İletişim mesajları koleksiyonu
+    match /contact_messages/{id} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // Varsayılan: Tüm diğer koleksiyonlara erişim yok
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

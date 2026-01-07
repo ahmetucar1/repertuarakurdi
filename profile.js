@@ -101,13 +101,88 @@ function renderArtistFavorites(list, items){
     list.innerHTML = `<div class="empty">Henûz favori sanatçı yok.</div>`;
     return;
   }
-  list.innerHTML = items.map(a => `
-    <div class="item">
+  
+  // artistKey fonksiyonunu tanımla (song.js'teki gibi)
+  const artistKey = (name) => {
+    return (name || "")
+      .toString()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/ı/g, "i")
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
+  };
+  
+  list.innerHTML = items.map(a => {
+    const artistName = a.artist || "";
+    const artistKeyValue = artistKey(artistName);
+    const artistLink = `artist.html?name=${encodeURIComponent(artistName)}`;
+    return `
+    <div class="item" data-artist-key="${escapeHtml(artistKeyValue)}">
       <div class="item__left">
-        <div class="item__title">${escapeHtml(window.formatArtistName ? window.formatArtistName(a.artist) : (a.artist || "—"))}</div>
+        <div class="item__title">${escapeHtml(window.formatArtistName ? window.formatArtistName(artistName) : artistName || "—")}</div>
+      </div>
+      <div class="badges">
+        <button class="favoriteBtn is-favorite" type="button" aria-label="Favoriden çıkar" data-artist-key="${escapeHtml(artistKeyValue)}" data-artist-name="${escapeHtml(artistName)}">
+          <svg class="favoriteIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+        <a class="open" href="${artistLink}">Veke</a>
       </div>
     </div>
-  `).join("");
+  `;
+  }).join("");
+  
+  // Favori butonlarına event listener ekle
+  const favoriteBtns = list.querySelectorAll(".favoriteBtn");
+  favoriteBtns.forEach(btn => {
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    newBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      
+      const artistKeyValue = newBtn.getAttribute("data-artist-key");
+      const artistName = newBtn.getAttribute("data-artist-name");
+      if(!artistKeyValue || !artistName) return;
+      
+      const auth = window.fbAuth;
+      const db = window.fbDb;
+      const user = auth?.currentUser;
+      
+      if(!user || !db){
+        window.requireAuthAction?.(() => {
+          // Giriş yapıldıktan sonra tekrar dene
+          newBtn.click();
+        }, "Ji bo favorîkirina hunermendê divê tu têkevî.");
+        return;
+      }
+      
+      const favRef = db.collection("artist_favorites").doc(`${user.uid}_${artistKeyValue}`);
+      
+      try{
+        const doc = await favRef.get();
+        if(doc.exists){
+          await favRef.delete();
+          // UI'dan kaldır
+          const item = newBtn.closest(".item");
+          if(item) item.remove();
+          // Sayacı güncelle
+          const count = $("#favArtistCount");
+          if(count) {
+            const currentCount = parseInt(count.textContent) || 0;
+            count.textContent = Math.max(0, currentCount - 1).toString();
+          }
+        }
+      }catch(err){
+        console.error("Favori çıkarılamadı:", err);
+      }
+    });
+  });
 }
 
 function renderSubmissions(list, items, emptyLabel){
@@ -265,7 +340,7 @@ function init(){
 
     if(profileName) profileName.textContent = user.displayName || "Kullanıcı";
     if(profileEmail) profileEmail.textContent = user.email || "—";
-    if(profileStatus) profileStatus.textContent = "Aktif";
+    if(profileStatus) profileStatus.textContent = "";
     if(profileSubtitle) profileSubtitle.textContent = "Hesabın ve içeriklerin";
     if(profilePhotoUrl) profilePhotoUrl.value = user.photoURL || "";
     setAvatar(user.photoURL || "");
@@ -285,6 +360,93 @@ function init(){
     renderArtistFavorites(favArtistList, favArtistItems);
     renderFiltered();
   });
+  
+  // Responsive search - icon'a tıklayınca açılması
+  function initResponsiveSearch() {
+    const searchHeaders = document.querySelectorAll(".search--header");
+    searchHeaders.forEach(searchEl => {
+      const input = searchEl.querySelector(".search__input");
+      const icon = searchEl.querySelector(".search__icon");
+      if(!input || !icon) return;
+      
+      function checkScreenSize() {
+        if(window.innerWidth <= 639) {
+          searchEl.classList.add("search--icon-only");
+        } else {
+          searchEl.classList.remove("search--icon-only", "search--open");
+          document.body.classList.remove("search-open");
+        }
+      }
+      
+      checkScreenSize();
+      window.addEventListener("resize", checkScreenSize);
+      
+      icon.addEventListener("click", (e) => {
+        if(window.innerWidth <= 639) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          const isOpen = searchEl.classList.contains("search--open");
+          if(isOpen) {
+            searchEl.classList.remove("search--open");
+            input.blur();
+            document.body.classList.remove("search-open");
+          } else {
+            searchEl.classList.add("search--open");
+            document.body.classList.add("search-open");
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                input.focus();
+              });
+            });
+          }
+        }
+      });
+      
+      input.addEventListener("click", (e) => {
+        if(window.innerWidth <= 639) {
+          e.stopPropagation();
+          if(!searchEl.classList.contains("search--open")) {
+            searchEl.classList.add("search--open");
+            document.body.classList.add("search-open");
+          }
+        }
+      });
+      
+      input.addEventListener("blur", (e) => {
+        if(window.innerWidth <= 639 && !input.value) {
+          const relatedTarget = e.relatedTarget;
+          if(relatedTarget && relatedTarget.closest(".search")) {
+            return;
+          }
+          setTimeout(() => {
+            if(document.activeElement !== input && !input.value) {
+              searchEl.classList.remove("search--open");
+              document.body.classList.remove("search-open");
+            }
+          }, 300);
+        }
+      });
+      
+      let scrollTimeout;
+      function handleScroll() {
+        if(window.innerWidth <= 639 && searchEl.classList.contains("search--open") && !input.value) {
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            if(!input.value) {
+              searchEl.classList.remove("search--open");
+              document.body.classList.remove("search-open");
+              input.blur();
+            }
+          }, 150);
+        }
+      }
+      
+      window.addEventListener("scroll", handleScroll, { passive: true });
+    });
+  }
+  
+  initResponsiveSearch();
 }
 
 init();

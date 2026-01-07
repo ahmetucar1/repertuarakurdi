@@ -22,16 +22,6 @@
     <div class="brand__title brand__title--soft">Repertûara Kurdî</div><div class="brand__kurd"></div>
   </div>
 </a>
-      <div class="topbar__center">
-        <div class="search search--header" aria-label="Lêgerîn">
-          <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
-            <path d="M16.8 16.8L21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
-          <input id="q" class="search__input" type="search" placeholder="Stran an hunermend bigere…" autocomplete="off" />
-          <button id="clear" class="search__clear" type="button" aria-label="Paqij bike">✕</button>
-        </div>
-      </div>
       <div class="topbar__actions">
         <a class="btn btn--ghost homeLink" href="index.html" aria-label="Serrûpel">
           <svg class="iconHome" viewBox="0 0 24 24" aria-hidden="true">
@@ -39,8 +29,8 @@
           </svg>
         </a>
         <a class="btn btn--ghost btn--lg" href="all.html">Hemû</a>
-        <button id="addSongMenuBtn" class="btn btn--ghost btn--lg" type="button">Stran Zêde Bike</button>
-        <a class="btn btn--ghost btn--lg" href="#sources">Çavkaniyên</a>
+        <button id="addSongMenuBtn" class="btn btn--ghost btn--lg" type="button">Zêdeke</button>
+        <a class="btn btn--ghost btn--lg" href="#sources">Çavkani</a>
         <a class="btn btn--ghost btn--lg" href="#contact">Peywendî</a>
         <a id="adminLink" class="btn btn--ghost btn--lg" href="admin.html" style="display:none;">Rêveber</a>
         <div class="authWrap">
@@ -67,6 +57,14 @@
             <div id="authStatus" class="authStatus muted">Ji bo têketinê e-name û şîfre binivîse.</div>
           </div>
         </div>
+        <div class="search search--header" aria-label="Lêgerîn">
+          <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
+            <path d="M16.8 16.8L21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          <input id="q" class="search__input" type="search" placeholder="Stran an hunermend bigere…" autocomplete="off" />
+          <button id="clear" class="search__clear" type="button" aria-label="Paqij bike">✕</button>
+        </div>
         <a id="profileLink" class="btn btn--ghost btn--lg" href="profile.html" style="display:none;">Profîl</a>
         
       </div>
@@ -83,70 +81,125 @@
             <p class="heroCard__subtitle">Bigere, keşf bike, bitikîne, bibîne</p>
           </div>
           <div class="heroCard__actions">
-            <p class="heroCard__notice">Ji bo ku tu stran zêde bikî an jî biguherî, divê tu têkevî.</p>
+            <div class="heroCard__welcome">
+              <h2 class="heroCard__welcomeText">
+                <span class="welcome-char">H</span>
+                <span class="welcome-char">û</span>
+                <span class="welcome-char">n</span>
+                <span class="welcome-char"> </span>
+                <span class="welcome-char">b</span>
+                <span class="welcome-char">i</span>
+                <span class="welcome-char"> </span>
+                <span class="welcome-char">x</span>
+                <span class="welcome-char">ê</span>
+                <span class="welcome-char">r</span>
+                <span class="welcome-char"> </span>
+                <span class="welcome-char">h</span>
+                <span class="welcome-char">a</span>
+                <span class="welcome-char">t</span>
+                <span class="welcome-char">i</span>
+                <span class="welcome-char">n</span>
+              </h2>
+            </div>
             <div class="heroCard__buttons">
-              <a href="all.html" class="btn btn--primary heroCard__btn">Hemûyan Bibîne</a>
-              <button id="addSongMenuBtn2" class="btn btn--primary heroCard__btn">Stran Zêde Bike</button>
+              <button id="addSongMenuBtn2" class="btn btn--primary heroCard__btn heroCard__btn--minimal">Zêdeke</button>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="addSongPanel" class="editPanel is-hidden">
+    <section id="addSongPanel" class="editPanel editPanel--paper is-hidden">
       <div class="editPanel__top">
         <div class="editPanel__title">Stran Nû Zêde Bike</div>
+        <div class="editPanel__fields">
+          <div class="authField">
+            <label class="authLabel required" for="addSongName">Navê stranê</label>
+            <input id="addSongName" class="authInput" type="text" required placeholder="Mînak: Stranên Kurdî" inputmode="text" autocomplete="off" />
+            <div id="addSongKeySuggestion" class="keySuggestion muted" style="display:none;"></div>
+          </div>
+          <div class="authField">
+            <label class="authLabel required" for="addSongArtist">
+              Hunermend
+              <span class="infoIcon" data-tooltip="Navê hunermendê rast binivîse, ji bo ku stran li ser rûpela hunermendê xuya bibe.">ℹ️</span>
+            </label>
+            <input id="addSongArtist" class="authInput" type="text" required placeholder="Mînak: Şivan Perwer" inputmode="text" autocomplete="off" />
+            <div id="addSongArtistSuggest" class="suggestList"></div>
+          </div>
+          <div class="authField">
+            <label class="authLabel required" for="addSongKey">Tonê orîjînal</label>
+            <select id="addSongKey" class="authInput" required>
+              <option value="">Tonê hilbijêre</option>
+              <option value="C">C</option>
+              <option value="Cm">Cm</option>
+              <option value="Db">Db</option>
+              <option value="Dbm">Dbm</option>
+              <option value="D">D</option>
+              <option value="Dm">Dm</option>
+              <option value="Eb">Eb</option>
+              <option value="Ebm">Ebm</option>
+              <option value="E">E</option>
+              <option value="Em">Em</option>
+              <option value="F">F</option>
+              <option value="Fm">Fm</option>
+              <option value="Gb">Gb</option>
+              <option value="Gbm">Gbm</option>
+              <option value="G">G</option>
+              <option value="Gm">Gm</option>
+              <option value="Ab">Ab</option>
+              <option value="Abm">Abm</option>
+              <option value="A">A</option>
+              <option value="Am">Am</option>
+              <option value="Bb">Bb</option>
+              <option value="Bbm">Bbm</option>
+              <option value="B">B</option>
+              <option value="Bm">Bm</option>
+            </select>
+          </div>
+        </div>
       </div>
-      <div class="editGrid">
-        <div class="authField">
-          <label class="authLabel" for="addSongName">Navê Stranê</label>
-          <input id="addSongName" class="authInput" type="text" />
-        </div>
-        <div class="authField">
-          <label class="authLabel" for="addSongArtist">Hunermend</label>
-          <input id="addSongArtist" class="authInput" type="text" />
-          <div class="formHint muted">Hunermendê rast binivîse, ji bo ku stran li rûpela hunermendê xuya bibe.</div>
-          <div id="addSongArtistSuggest" class="suggestList"></div>
-        </div>
-        <div class="authField">
-          <label class="authLabel" for="addSongKey">Tonê Orijînal</label>
-          <select id="addSongKey" class="authInput">
-            <option value="">Ton Hilbijêre</option>
-            <option value="C">C</option>
-            <option value="Cm">Cm</option>
-            <option value="Db">Db</option>
-            <option value="Dbm">Dbm</option>
-            <option value="D">D</option>
-            <option value="Dm">Dm</option>
-            <option value="Eb">Eb</option>
-            <option value="Ebm">Ebm</option>
-            <option value="E">E</option>
-            <option value="Em">Em</option>
-            <option value="F">F</option>
-            <option value="Fm">Fm</option>
-            <option value="Gb">Gb</option>
-            <option value="Gbm">Gbm</option>
-            <option value="G">G</option>
-            <option value="Gm">Gm</option>
-            <option value="Ab">Ab</option>
-            <option value="Abm">Abm</option>
-            <option value="A">A</option>
-            <option value="Am">Am</option>
-            <option value="Bb">Bb</option>
-            <option value="Bbm">Bbm</option>
-            <option value="B">B</option>
-            <option value="Bm">Bm</option>
-          </select>
+      <div class="editPanel__tools">
+        <div class="editToolsRow">
+          <div class="templateButtons">
+            <button type="button" class="btn btn--compact" id="addTemplateVerse">Verse</button>
+            <button type="button" class="btn btn--compact" id="addTemplateChorus">Chorus</button>
+            <button type="button" class="btn btn--compact" id="addTemplateBridge">Bridge</button>
+          </div>
+          <div class="chordDictionary">
+            <button type="button" class="btn btn--compact" id="toggleChordDict">Akorlar</button>
+            <div id="chordDictionary" class="chordDictionaryPanel is-hidden">
+              <div class="chordDictTitle">Akorlar</div>
+              <div class="chordDictGrid" id="chordDictGrid"></div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="authField" style="margin-top:8px;">
-        <label class="authLabel" for="addSongText">Nivîsa Stranê</label>
-        <textarea id="addSongText" class="authInput editTextarea" placeholder="Nivîsa bi akorê li vir bike..."></textarea>
+      <div class="authField editTextareaField">
+        <div class="editTextareaHeader">
+          <label class="authLabel" for="addSongText">Nivîsa stranê</label>
+          <div class="editTextareaMeta">
+            <span id="addSongCharCount" class="charCount muted">0 karakter</span>
+            <span id="addSongChordCount" class="chordCount muted">0 akor</span>
+            <button type="button" class="btn btn--tiny btn--ghost" id="addSongPreviewToggle">Önizleme</button>
+          </div>
+        </div>
+        <div class="editTextareaWrapper">
+          <div class="textareaWithLines">
+            <div id="addSongLineNumbers" class="lineNumbers"></div>
+            <textarea id="addSongText" class="authInput editTextarea" placeholder="Nivîsa bi akorê li virê bike..." inputmode="text" autocomplete="off"></textarea>
+            <div id="addSongPreview" class="editPreview is-hidden"></div>
+          </div>
+        </div>
+        <div id="addSongValidation" class="validationStatus"></div>
       </div>
       <div class="editActions">
-        <button id="addSongSave" class="btn" type="button">Bişîne</button>
-        <button id="addSongReset" class="btn btn--ghost" type="button">Paqij bike</button>
-        <button id="addSongClose" class="btn btn--ghost" type="button">Bigire</button>
+        <div class="editActionsLeft">
+          <span class="keyboardHint muted">Ctrl+S: Kaydet | Esc: Kapat</span>
+        </div>
+        <div class="editActionsRight">
+          <button id="addSongSave" class="btn" type="button">Tomar bike</button>
+          <button id="addSongClose" class="btn btn--ghost" type="button">Betal bike</button>
+        </div>
       </div>
       <div id="addSongNotice" class="editNotice muted"></div>
     </section>
@@ -157,10 +210,15 @@
           <div id="resultsTitle" class="resultsHeader__title">Yên Berçav</div>
           <div class="resultsMeta"><span id="count">0</span> encam</div>
         </div>
-        <button id="scrollTop" class="btn btn--ghost" type="button">Jor</button>
+        <div class="resultsHeader__right">
+          <a class="btn btn--ghost" href="all.html">Hemû</a>
+        </div>
       </section>
 
       <section id="list" class="list"></section>
+      <div class="homeListWrap__footer">
+        <a href="all.html" class="btn btn--primary">Hemûyan Bibîne</a>
+      </div>
     </section>
 
     <section id="sources" class="section">
@@ -169,21 +227,24 @@
         <p class="sectionSub">Spas ji hevalên me yên ku vê repertuarê parve dikin.</p>
       </div>
       <div class="sourcesRow">
-        <div class="sourceItem">
+        <a href="https://helezonikkresendo.com" target="_blank" rel="noopener noreferrer" class="sourceItem">
           <div class="sourceCircle sourceCircle--logo">
             <img src="assets/Helezonîk Kreşendo logosu.png" alt="Helzenik Kreşendo logo">
           </div>
           <div class="sourceLabel">Helezonik Kreşendo</div>
-        </div>
-        <div class="sourceItem">
-          <div class="sourceCircle sourceCircle--empty"></div>
-        </div>
-        <div class="sourceItem">
-          <div class="sourceCircle sourceCircle--empty"></div>
-        </div>
-        <div class="sourceItem">
-          <div class="sourceCircle sourceCircle--empty"></div>
-        </div>
+        </a>
+        <a href="https://helezonikkresendo.com/2024/07/kurtce-gitar-repertuari-pdf-olarak-yayinda/" target="_blank" rel="noopener noreferrer" class="sourceItem">
+          <div class="sourceCircle sourceCircle--logo">
+            <img src="assets/logo_yuvarlak.png" alt="Yuvarlak logo">
+          </div>
+          <div class="sourceLabel">Repertûara Stranan Kurdî Bo Gîtare</div>
+        </a>
+        <a href="https://helezonikkresendo.com/tag/serdar-turkmen/" target="_blank" rel="noopener noreferrer" class="sourceItem">
+          <div class="sourceCircle sourceCircle--logo">
+            <img src="assets/Gitar, müzik notaları ve logo.png" alt="Gitar notaları">
+          </div>
+          <div class="sourceLabel">Serdar Y. Türkmen</div>
+        </a>
       </div>
     </section>
 

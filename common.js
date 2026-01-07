@@ -666,7 +666,6 @@ function initAddSongPanel(onSaved){
   const addPanel = document.getElementById("addSongPanel");
   const addClose = document.getElementById("addSongClose");
   const addSave = document.getElementById("addSongSave");
-  const addReset = document.getElementById("addSongReset");
   const addNotice = document.getElementById("addSongNotice");
   const addSongName = document.getElementById("addSongName");
   const addSongArtist = document.getElementById("addSongArtist");
@@ -675,6 +674,12 @@ function initAddSongPanel(onSaved){
   const addArtistSuggest = document.getElementById("addSongArtistSuggest");
 
   if(!addPanel) return false;
+
+  const adjustTextareaHeight = (el) => {
+    if(!el) return;
+    el.style.height = "auto";
+    el.style.height = (el.scrollHeight) + "px";
+  };
 
   const setNotice = (msg, isError = false) => {
     if(!addNotice) return;
@@ -686,15 +691,163 @@ function initAddSongPanel(onSaved){
     if(addSongName) addSongName.value = "";
     if(addSongArtist) addSongArtist.value = "";
     if(addSongKey) addSongKey.value = "";
-    if(addSongText) addSongText.value = "";
+    if(addSongText) {
+      addSongText.value = "";
+      adjustTextareaHeight(addSongText);
+    }
   };
 
-  const closePanel = () => addPanel?.classList.add("is-hidden");
+  const closePanel = () => {
+    addPanel?.classList.add("is-hidden");
+    resetForm();
+  };
 
   if(addToggleWrap) addToggleWrap.style.display = "flex";
   if(addSongArtist && addArtistSuggest){
     initArtistSuggest(addSongArtist, addArtistSuggest);
   }
+  
+  // Artist input tooltip yönetimi
+  const artistInfoIcon = document.querySelector("#addSongArtist")?.previousElementSibling?.querySelector(".infoIcon");
+  if(artistInfoIcon && addSongArtist){
+    let tooltipElement = null;
+    let tooltipVisible = false;
+    
+    const createTooltip = () => {
+      if(tooltipElement) return tooltipElement;
+      const tooltip = document.createElement("div");
+      tooltip.className = "artist-tooltip";
+      tooltip.innerHTML = `
+        <button class="tooltip-close" aria-label="Kapat">✕</button>
+        <div class="tooltip-content">${artistInfoIcon.getAttribute("data-tooltip")}</div>
+      `;
+      document.body.appendChild(tooltip);
+      tooltipElement = tooltip;
+      
+      // Kapatma butonuna tıklayınca kapat
+      tooltip.querySelector(".tooltip-close").addEventListener("click", (e) => {
+        e.stopPropagation();
+        hideTooltip();
+      });
+      
+      return tooltip;
+    };
+    
+    const showTooltip = () => {
+      if(tooltipVisible) return;
+      tooltipVisible = true;
+      const tooltip = createTooltip();
+      tooltip.classList.add("tooltip-visible");
+      artistInfoIcon.classList.add("tooltip-active");
+    };
+    
+    const hideTooltip = () => {
+      if(!tooltipVisible) return;
+      tooltipVisible = false;
+      if(tooltipElement) {
+        tooltipElement.classList.remove("tooltip-visible");
+      }
+      artistInfoIcon.classList.remove("tooltip-active");
+    };
+    
+    // Input'a focus olduğunda göster
+    addSongArtist.addEventListener("focus", showTooltip);
+    
+    // Icon'a tıklayınca toggle
+    artistInfoIcon.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if(tooltipVisible) {
+        hideTooltip();
+      } else {
+        showTooltip();
+      }
+    });
+    
+    // Input'tan çıkınca kapat (biraz gecikmeyle)
+    addSongArtist.addEventListener("blur", () => {
+      setTimeout(() => {
+        if(document.activeElement !== addSongArtist && document.activeElement !== tooltipElement?.querySelector(".tooltip-close")) {
+          hideTooltip();
+        }
+      }, 200);
+    });
+    
+    // Panel kapanınca tooltip'i temizle
+    const panelObserver = new MutationObserver(() => {
+      if(addPanel.classList.contains("is-hidden")) {
+        hideTooltip();
+        if(tooltipElement) {
+          tooltipElement.remove();
+          tooltipElement = null;
+        }
+      }
+    });
+    panelObserver.observe(addPanel, { attributes: true, attributeFilter: ["class"] });
+  }
+  
+  // Textarea otomatik yükseklik ayarlaması
+  if(addSongText){
+    addSongText.addEventListener("input", () => {
+      adjustTextareaHeight(addSongText);
+    });
+    // İlk yüklemede de ayarla
+    setTimeout(() => adjustTextareaHeight(addSongText), 0);
+  }
+  
+  // Initialize enhancements (after panel is ready)
+  setTimeout(() => {
+    if(document.getElementById("chordDictionary")){
+      initChordDictionary("chordDictionary", "addSongText");
+    }
+    initEditPanelEnhancements(
+      "add",
+      "addSongText",
+      "addSongCharCount",
+      "addSongChordCount",
+      "addSongValidation",
+      "addSongPreview",
+      "addSongPreviewToggle"
+    );
+    
+    // Mobilde klavye navigasyonu - Enter ile sonraki alana geç
+    if(window.innerWidth <= 768){
+      const inputs = [addSongName, addSongArtist, addSongKey].filter(Boolean);
+      inputs.forEach((input, index) => {
+        if(input && inputs[index + 1]){
+          input.addEventListener("keydown", (e) => {
+            if(e.key === "Enter" && !e.shiftKey){
+              e.preventDefault();
+              inputs[index + 1].focus();
+              // Mobilde input görünür olsun
+              setTimeout(() => {
+                inputs[index + 1].scrollIntoView({ behavior: "smooth", block: "center" });
+              }, 100);
+            }
+          });
+        }
+      });
+      
+      // Input'lara focus olduğunda görünür olsun
+      [addSongName, addSongArtist, addSongKey, addSongText].forEach(input => {
+        if(input){
+          input.addEventListener("focus", () => {
+            setTimeout(() => {
+              input.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 300);
+          });
+        }
+      });
+    }
+  }, 100);
+  
+  // ESC key to close
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "Escape" && !addPanel.classList.contains("is-hidden")){
+      closePanel();
+    }
+  });
+  
   if(auth){
     auth.onAuthStateChanged((user) => {
       if(!user) closePanel();
@@ -706,12 +859,40 @@ function initAddSongPanel(onSaved){
     if(!window.fbAuth?.currentUser){
       window.requireAuthAction?.(() => {
         addPanel.classList.remove("is-hidden");
-        addPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+        // Mobilde panel açıldığında scroll ve focus
+        if(window.innerWidth <= 768){
+          setTimeout(() => {
+            addPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            if(addSongName){
+              setTimeout(() => {
+                addSongName.focus();
+                addSongName.scrollIntoView({ behavior: "smooth", block: "center" });
+              }, 300);
+            }
+          }, 50);
+        } else {
+          addPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        setTimeout(() => adjustTextareaHeight(addSongText), 100);
       }, "Ji bo stran zêde kirinê divê tu têkevî.");
       return;
     }
     addPanel.classList.remove("is-hidden");
-    addPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Mobilde panel açıldığında scroll ve focus
+    if(window.innerWidth <= 768){
+      setTimeout(() => {
+        addPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        if(addSongName){
+          setTimeout(() => {
+            addSongName.focus();
+            addSongName.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 300);
+        }
+      }, 50);
+    } else {
+      addPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    setTimeout(() => adjustTextareaHeight(addSongText), 100);
   };
 
   // openPanel fonksiyonunu global olarak expose et
@@ -725,7 +906,6 @@ function initAddSongPanel(onSaved){
     }
   });
   addClose?.addEventListener("click", closePanel);
-  addReset?.addEventListener("click", resetForm);
 
   addSave?.addEventListener("click", async () => {
     const user = window.fbAuth?.currentUser;
@@ -735,15 +915,65 @@ function initAddSongPanel(onSaved){
       }, "Ji bo stran zêde kirinê divê tu têkevî.");
       return;
     }
+    
+    // Validation
     const song = (addSongName?.value || "").trim();
-    const rawArtist = (addSongArtist?.value || "");
+    const rawArtist = (addSongArtist?.value || "").trim();
     const artist = normalizeArtistInput(rawArtist);
     const key = (addSongKey?.value || "").trim();
     const text = (addSongText?.value || "").toString();
-    if(!song || !text){
-      setNotice("Navê stranê û nivîs pêwîst in.", true);
-      return;
+    
+    // Remove error classes
+    if(addSongName) addSongName.classList.remove("error");
+    if(addSongArtist) addSongArtist.classList.remove("error");
+    if(addSongKey) addSongKey.classList.remove("error");
+    if(addSongText) addSongText.classList.remove("error");
+    
+    let hasError = false;
+    
+    if(!song){
+      setNotice("Navê stranê pêwîst e.", true);
+      if(addSongName){
+        addSongName.classList.add("error");
+        addSongName.focus();
+      }
+      hasError = true;
     }
+    
+    if(!rawArtist || !artist){
+      if(!hasError){
+        setNotice("Navê hunermendê pêwîst e.", true);
+        if(addSongArtist){
+          addSongArtist.classList.add("error");
+          addSongArtist.focus();
+        }
+        hasError = true;
+      }
+    }
+    
+    if(!key){
+      if(!hasError){
+        setNotice("Tonê orîjînal pêwîst e.", true);
+        if(addSongKey){
+          addSongKey.classList.add("error");
+          addSongKey.focus();
+        }
+        hasError = true;
+      }
+    }
+    
+    if(!text || !text.trim()){
+      if(!hasError){
+        setNotice("Nivîsa stranê pêwîst e.", true);
+        if(addSongText){
+          addSongText.classList.add("error");
+          addSongText.focus();
+        }
+        hasError = true;
+      }
+    }
+    
+    if(hasError) return;
 
     try{
       const stamp = window.firebase?.firestore?.FieldValue?.serverTimestamp?.() || null;
@@ -762,11 +992,24 @@ function initAddSongPanel(onSaved){
       });
 
       clearSongsCache?.();
-      resetForm();
-      setNotice("Niha me tomar kir. Li benda pejirandina edîtorê ye.");
-      if(typeof onSaved === "function") onSaved();
+      setNotice("Niha tomar kir. Guhertinên te ji bo pejirandina edîtorê li benda ne. Piştî pejirandinê guhertinên te dê xuya bibin.");
+      if(addNotice){
+        addNotice.style.color = "#059669";
+        addNotice.style.background = "rgba(5, 150, 105, 0.1)";
+        addNotice.style.border = "1px solid rgba(5, 150, 105, 0.2)";
+        addNotice.style.padding = "12px 16px";
+        addNotice.style.borderRadius = "8px";
+        addNotice.style.marginTop = "16px";
+      }
+      
+      // Mesajı 2 saniye göster, sonra formu temizle ve panel'i kapat
+      setTimeout(() => {
+        resetForm();
+        closePanel();
+        if(typeof onSaved === "function") onSaved();
+      }, 2000);
     }catch(err){
-      setNotice(err?.message || "Kaydedilemedi.", true);
+      setNotice(translateError(err) || "Nehat tomarkirin.", true);
     }
   });
 
@@ -782,6 +1025,329 @@ function initAddSongPanel(onSaved){
 
   return true;
 }
+
+// ============================================
+// EDIT PANEL ENHANCEMENTS
+// ============================================
+
+// Chord validation
+function validateChords(text){
+  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\b/g;
+  const matches = text.match(chordPattern) || [];
+  const validRoots = ["C","C#","Db","D","D#","Eb","E","F","F#","Gb","G","G#","Ab","A","A#","Bb","B"];
+  const errors = [];
+  const warnings = [];
+  
+  matches.forEach(chord => {
+    // Extract root note (before any modifiers)
+    const rootMatch = chord.match(/^([A-G][#b]?)/);
+    if(!rootMatch){
+      if(!errors.includes(chord)){
+        errors.push(chord);
+      }
+      return;
+    }
+    
+    const root = rootMatch[1];
+    if(!validRoots.includes(root)){
+      if(!errors.includes(chord)){
+        errors.push(chord);
+      }
+    }
+  });
+  
+  return { errors, warnings, chordCount: matches.length };
+}
+
+// Extract chords from text
+function extractChords(text){
+  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\b/g;
+  const matches = text.match(chordPattern) || [];
+  return [...new Set(matches)];
+}
+
+// Highlight chords in text (for preview)
+function highlightChordsInText(text){
+  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\b/g;
+  return escapeHtml(text).replace(chordPattern, '<strong class="chordTok">$1</strong>');
+}
+
+// Song templates - akorlar sözlerin üstünde, parantez yok
+const SONG_TEMPLATES = {
+  verse: "C        Am\nStranên te\nF        G\nBi stranên min\n\nC        Am\nLi hev bûn\nF        G\nEm bûn yek",
+  chorus: "C        Am\nNakokî\nF        G\nNakokî",
+  bridge: "Am       F\nBridge\nC        G\nBridge"
+};
+
+// Common chords for dictionary
+const COMMON_CHORDS = [
+  "C", "Cm", "C#", "C#m", "Db", "Dbm",
+  "D", "Dm", "D#", "D#m", "Eb", "Ebm",
+  "E", "Em", "F", "Fm", "F#", "F#m", "Gb", "Gbm",
+  "G", "Gm", "G#", "G#m", "Ab", "Abm",
+  "A", "Am", "A#", "A#m", "Bb", "Bbm",
+  "B", "Bm"
+];
+
+// Initialize chord dictionary
+function initChordDictionary(containerId, textareaId){
+  const container = document.getElementById(containerId);
+  const grid = container?.querySelector(".chordDictGrid");
+  const textarea = document.getElementById(textareaId);
+  
+  if(!grid || !textarea) return;
+  
+  grid.innerHTML = COMMON_CHORDS.map(chord => 
+    `<button type="button" class="chordDictBtn" data-chord="${chord}">${chord}</button>`
+  ).join("");
+  
+  grid.addEventListener("click", (e) => {
+    const btn = e.target.closest(".chordDictBtn");
+    if(!btn) return;
+    
+    const chord = btn.dataset.chord;
+    const textareaEl = document.getElementById(textareaId);
+    if(!textareaEl) return;
+    
+    const start = textareaEl.selectionStart;
+    const end = textareaEl.selectionEnd;
+    const text = textareaEl.value;
+    const before = text.substring(0, start);
+    const after = text.substring(end);
+    
+    // Akor parantez olmadan ekleniyor
+    textareaEl.value = before + chord + after;
+    textareaEl.selectionStart = textareaEl.selectionEnd = start + chord.length;
+    textareaEl.focus();
+    
+    // Trigger input event for validation
+    textareaEl.dispatchEvent(new Event("input"));
+  });
+}
+
+// Update line numbers
+function updateLineNumbers(textareaId, lineNumbersId){
+  const textarea = document.getElementById(textareaId);
+  const lineNumbers = document.getElementById(lineNumbersId);
+  
+  if(!textarea || !lineNumbers) return;
+  
+  const text = textarea.value;
+  const lines = text.split('\n');
+  const currentLine = text.substring(0, textarea.selectionStart).split('\n').length;
+  
+  // Calculate visible lines based on scroll
+  const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 2.2 * 14;
+  const scrollTop = textarea.scrollTop;
+  const visibleStart = Math.floor(scrollTop / lineHeight);
+  const visibleEnd = Math.ceil((scrollTop + textarea.clientHeight) / lineHeight);
+  
+  lineNumbers.innerHTML = lines.map((line, index) => {
+    const lineNum = index + 1;
+    const isCurrent = lineNum === currentLine;
+    const hasError = false; // Can be enhanced with per-line validation
+    
+    let className = "lineNumber";
+    if(isCurrent) className += " current-line";
+    if(hasError) className += " has-error";
+    
+    return `<span class="${className}" data-line="${lineNum}">${lineNum}</span>`;
+  }).join('\n');
+  
+  // Sync scroll
+  lineNumbers.scrollTop = textarea.scrollTop;
+}
+
+// Initialize edit panel enhancements
+function initEditPanelEnhancements(panelPrefix, textareaId, charCountId, chordCountId, validationId, previewId, previewToggleId){
+  const textarea = document.getElementById(textareaId);
+  const charCount = document.getElementById(charCountId);
+  const chordCount = document.getElementById(chordCountId);
+  const validation = document.getElementById(validationId);
+  const preview = document.getElementById(previewId);
+  const previewToggle = document.getElementById(previewToggleId);
+  const lineNumbersId = `${panelPrefix === "add" ? "addSong" : "edit"}LineNumbers`;
+  
+  if(!textarea) return;
+  
+  // Character and chord counting
+  const updateCounts = () => {
+    const text = textarea.value;
+    // Boşlukları (space, tab, newline, vb.) çıkararak karakter sayısı
+    const textWithoutSpaces = text.replace(/\s+/g, ''); // Tüm whitespace karakterleri
+    const charLength = textWithoutSpaces.length;
+    if(charCount) charCount.textContent = `${charLength} karakter`;
+    
+    const chords = extractChords(text);
+    if(chordCount) chordCount.textContent = `${chords.length} akor`;
+    
+    // Update line numbers
+    updateLineNumbers(textareaId, lineNumbersId);
+    
+    // Validation
+    if(validation){
+      const validationResult = validateChords(text);
+      validation.className = "validationStatus";
+      
+      if(validationResult.errors.length > 0){
+        validation.className += " has-errors";
+        validation.textContent = `⚠️ ${validationResult.errors.length} geçersiz akor: ${validationResult.errors.slice(0, 3).join(", ")}`;
+      } else if(text.length > 0 && chords.length === 0){
+        validation.className += " has-warnings";
+        validation.textContent = "ℹ️ Akor bulunamadı";
+      } else if(text.length > 0){
+        validation.className += " is-valid";
+        validation.textContent = "✓ Format doğru";
+      } else {
+        validation.textContent = "";
+      }
+    }
+    
+    // Preview
+    if(preview){
+      preview.innerHTML = highlightChordsInText(text);
+    }
+  };
+  
+  // Sync scroll between textarea and line numbers
+  const syncScroll = () => {
+    const lineNumbers = document.getElementById(lineNumbersId);
+    if(lineNumbers) lineNumbers.scrollTop = textarea.scrollTop;
+  };
+  
+  textarea.addEventListener("scroll", syncScroll);
+  
+  // Update on cursor move (cross-browser compatible)
+  const updateCursor = () => {
+    updateCounts();
+    syncScroll();
+  };
+  
+  textarea.addEventListener("keyup", updateCursor);
+  textarea.addEventListener("click", updateCursor);
+  textarea.addEventListener("input", () => {
+    updateCounts();
+    // Small delay to ensure cursor position is updated
+    setTimeout(syncScroll, 0);
+  });
+  
+  // Also update on mouse move in textarea
+  textarea.addEventListener("mousemove", () => {
+    if(document.activeElement === textarea){
+      updateCursor();
+    }
+  });
+  
+  textarea.addEventListener("input", updateCounts);
+  updateCounts();
+  
+  // Preview toggle
+  if(previewToggle && preview){
+    previewToggle.addEventListener("click", () => {
+      preview.classList.toggle("is-hidden");
+      previewToggle.textContent = preview.classList.contains("is-hidden") ? "Önizleme" : "Düzenle";
+    });
+  }
+  
+  // Template buttons
+  const verseBtn = document.getElementById(`${panelPrefix === "add" ? "add" : "edit"}TemplateVerse`);
+  const chorusBtn = document.getElementById(`${panelPrefix === "add" ? "add" : "edit"}TemplateChorus`);
+  const bridgeBtn = document.getElementById(`${panelPrefix === "add" ? "add" : "edit"}TemplateBridge`);
+  
+  const insertTemplate = (template) => {
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const before = text.substring(0, start);
+    const after = text.substring(end);
+    
+    const templateText = template + "\n\n";
+    textarea.value = before + templateText + after;
+    textarea.selectionStart = textarea.selectionEnd = start + templateText.length;
+    
+    // Textarea yüksekliğini içeriğe göre ayarla
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.max(300, textarea.scrollHeight) + 'px';
+    
+    textarea.focus();
+    updateCounts();
+    
+    // Scroll'u en üste al (mobilde görünürlük için)
+    setTimeout(() => {
+      textarea.scrollTop = 0;
+      const lineNumbers = document.getElementById(lineNumbersId);
+      if(lineNumbers) lineNumbers.scrollTop = 0;
+    }, 50);
+  };
+  
+  if(verseBtn) verseBtn.addEventListener("click", () => insertTemplate(SONG_TEMPLATES.verse));
+  if(chorusBtn) chorusBtn.addEventListener("click", () => insertTemplate(SONG_TEMPLATES.chorus));
+  if(bridgeBtn) bridgeBtn.addEventListener("click", () => insertTemplate(SONG_TEMPLATES.bridge));
+  
+  // Format help is now always visible when needed, no toggle button
+  
+  // Chord dictionary toggle
+  const chordDictToggle = document.getElementById(`toggleChordDict${panelPrefix === "add" ? "" : "Edit"}`);
+  const chordDictPanel = document.getElementById(`chordDictionary${panelPrefix === "add" ? "" : "Edit"}`);
+  if(chordDictToggle && chordDictPanel){
+    chordDictToggle.addEventListener("click", () => {
+      chordDictPanel.classList.toggle("is-hidden");
+    });
+    
+    // Close on outside click
+    document.addEventListener("click", (e) => {
+      if(!chordDictPanel.contains(e.target) && !chordDictToggle.contains(e.target)){
+        chordDictPanel.classList.add("is-hidden");
+      }
+    });
+  }
+  
+  // Keyboard shortcuts
+  textarea.addEventListener("keydown", (e) => {
+    // Ctrl/Cmd + S: Save
+    if((e.ctrlKey || e.metaKey) && e.key === "s"){
+      e.preventDefault();
+      const saveBtn = document.getElementById(`${panelPrefix === "add" ? "addSong" : "edit"}Save`);
+      if(saveBtn) saveBtn.click();
+    }
+  });
+  
+  // Key suggestion based on song name
+  const songNameInput = document.getElementById(`${panelPrefix === "add" ? "addSong" : "edit"}Name`) || document.getElementById(`${panelPrefix === "add" ? "addSong" : "edit"}Song`);
+  const keySuggestion = document.getElementById(`${panelPrefix === "add" ? "addSong" : "editSong"}KeySuggestion`);
+  const keySelect = document.getElementById(`${panelPrefix === "add" ? "addSong" : "edit"}Key`);
+  
+  if(songNameInput && keySuggestion){
+    songNameInput.addEventListener("input", () => {
+      const songName = songNameInput.value.toLowerCase();
+      // Simple heuristic: check if song name contains common key indicators
+      const keyMap = {
+        "c": "C", "d": "D", "e": "E", "f": "F", "g": "G", "a": "A", "b": "B"
+      };
+      
+      for(const [key, value] of Object.entries(keyMap)){
+        if(songName.includes(key)){
+          keySuggestion.textContent = `💡 Öneri: ${value} tonu`;
+          keySuggestion.style.display = "block";
+          if(keySelect && !keySelect.value){
+            // Auto-select if empty
+            const option = Array.from(keySelect.options).find(opt => opt.value === value);
+            if(option) keySelect.value = value;
+          }
+          return;
+        }
+      }
+      keySuggestion.style.display = "none";
+    });
+  }
+}
+
+window.initEditPanelEnhancements = initEditPanelEnhancements;
+window.initChordDictionary = initChordDictionary;
+window.validateChords = validateChords;
+window.extractChords = extractChords;
+window.highlightChordsInText = highlightChordsInText;
+window.updateLineNumbers = updateLineNumbers;
 
 window.initAddSongPanel = initAddSongPanel;
 
@@ -1121,9 +1687,61 @@ window.initAddSongPanel = initAddSongPanel;
     }
   };
 
+  // Firebase hata mesajlarını Kürtçeye çevir
+  const translateError = (error) => {
+    if(!error) return "Çewtiyek çêbû.";
+    
+    const code = error.code || "";
+    const message = error.message || "";
+    
+    // Firebase hata kodlarına göre Kürtçe mesajlar
+    const errorMap = {
+      "auth/unauthorized-domain": "Ev domain destûr nedaye. Firebase console'ê kontrol bike.",
+      "auth/popup-blocked": "Popup hate astengkirin.",
+      "auth/popup-closed-by-user": "Popup hate girtin.",
+      "auth/network-request-failed": "Girêdana înternetê tune.",
+      "auth/too-many-requests": "Gelek daxwaz. Pişt re bêje.",
+      "auth/user-disabled": "Bikarhêner hate astengkirin.",
+      "auth/user-not-found": "Bikarhêner nehate dîtin.",
+      "auth/wrong-password": "Şîfre çewt e.",
+      "auth/email-already-in-use": "E-name berê hat qeydkirin.",
+      "auth/weak-password": "Şîfre zêde nerm e.",
+      "auth/invalid-email": "E-name nederbasdar e.",
+      "auth/operation-not-allowed": "Operasyon destûr nedaye.",
+      "auth/requires-recent-login": "Dîsa têkeve.",
+      "auth/credential-already-in-use": "Kredensiyal berê hat bikaranîn."
+    };
+    
+    // Önce kod kontrolü
+    if(errorMap[code]) return errorMap[code];
+    
+    // Sonra mesaj kontrolü (İngilizce mesajları çevir)
+    if(message.includes("unauthorized-domain")) return "Ev domain destûr nedaye.";
+    if(message.includes("popup-blocked")) return "Popup hate astengkirin.";
+    if(message.includes("network")) return "Girêdana înternetê tune.";
+    if(message.includes("too many requests")) return "Gelek daxwaz. Pişt re bêje.";
+    if(message.includes("user not found")) return "Bikarhêner nehate dîtin.";
+    if(message.includes("wrong password")) return "Şîfre çewt e.";
+    if(message.includes("email already")) return "E-name berê hat qeydkirin.";
+    if(message.includes("weak password")) return "Şîfre zêde nerm e.";
+    if(message.includes("invalid email")) return "E-name nederbasdar e.";
+    
+    // Genel mesaj
+    return "Çewtiyek çêbû.";
+  };
+
   const setStatus = (msg, isError = false) => {
     if(!statusEl) return;
-    statusEl.textContent = msg || "";
+    // Eğer hata mesajı ise ve obje ise çevir
+    let displayMsg = msg;
+    if(isError && typeof msg === "object" && msg.code){
+      displayMsg = translateError(msg);
+    } else if(isError && typeof msg === "string" && msg.includes("Firebase:")){
+      // Firebase mesajını parse et ve çevir
+      const errorObj = { message: msg, code: msg.match(/\(([^)]+)\)/)?.[1] || "" };
+      displayMsg = translateError(errorObj);
+    }
+    statusEl.textContent = displayMsg || "";
     statusEl.style.color = isError ? "#ef4444" : "";
   };
 
@@ -1132,7 +1750,7 @@ window.initAddSongPanel = initAddSongPanel;
   }
 
   const setLoggedOut = () => {
-    openBtn.textContent = "Têketin";
+    openBtn.textContent = "Têkev";
     openBtn.style.display = "inline-flex";
     if(emailEl){ emailEl.value = ""; emailEl.disabled = false; }
     if(passEl){ passEl.value = ""; passEl.disabled = false; }
@@ -1194,7 +1812,7 @@ window.initAddSongPanel = initAddSongPanel;
       setStatus("Têketin serkeftî.");
       closePanel();
     }catch(err){
-      setStatus(err?.message || "Têketin bi ser neket.", true);
+      setStatus(translateError(err) || "Têketin bi ser neket.", true);
     }
   });
 
@@ -1210,7 +1828,7 @@ window.initAddSongPanel = initAddSongPanel;
       setStatus("Qeyd serkeftî.");
       closePanel();
     }catch(err){
-      setStatus(err?.message || "Qeyd bi ser neket.", true);
+      setStatus(translateError(err) || "Qeyd bi ser neket.", true);
     }
   });
 
@@ -1223,7 +1841,7 @@ window.initAddSongPanel = initAddSongPanel;
       closePanel();
       window.location.href = "index.html";
     }catch(err){
-      setStatus(err?.message || "Derketin bi ser neket.", true);
+      setStatus(translateError(err) || "Derketin bi ser neket.", true);
     }
   });
 
@@ -1248,11 +1866,11 @@ window.initAddSongPanel = initAddSongPanel;
           await auth.signInWithRedirect(redirectProvider);
           return;
         }catch(e){
-          setStatus(e?.message || "Têketina bi Google re bi ser neket.", true);
+          setStatus(translateError(e) || "Têketina bi Google re bi ser neket.", true);
           return;
         }
       }
-      setStatus(err?.message || "Têketina bi Google re bi ser neket.", true);
+      setStatus(translateError(err) || "Têketina bi Google re bi ser neket.", true);
     }
   });
 
@@ -1266,7 +1884,7 @@ window.initAddSongPanel = initAddSongPanel;
       await auth.sendPasswordResetEmail(email);
       setStatus("E-nameya şîfreya nû kirinê hate şandin.");
     }catch(err){
-      setStatus(err?.message || "Şîfre nû nekir.", true);
+      setStatus(translateError(err) || "Şîfre nû nekir.", true);
     }
   });
 

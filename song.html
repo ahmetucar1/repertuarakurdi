@@ -27,12 +27,12 @@
           </svg>
         </a>
         <a class="btn btn--ghost btn--lg" href="all.html">Hemû</a>
-        <button id="addSongMenuBtn" class="btn btn--ghost btn--lg" type="button">Stran Zêde Bike</button>
-        <a class="btn btn--ghost btn--lg" href="index.html#sources">Çavkaniyên</a>
+        <button id="addSongMenuBtn" class="btn btn--ghost btn--lg" type="button">Zêdeke</button>
+        <a class="btn btn--ghost btn--lg" href="index.html#sources">Çavkani</a>
         <a class="btn btn--ghost btn--lg" href="index.html#contact">Têkilî</a>
         <a id="adminLink" class="btn btn--ghost btn--lg" href="admin.html" style="display:none;">Rêveber</a>
         <div class="authWrap">
-          <button id="authOpen" class="btn btn--ghost btn--lg" type="button">Têketin</button>
+          <button id="authOpen" class="btn btn--ghost btn--lg" type="button">Têkev</button>
           <div id="authPanel" class="authPanel" role="dialog" aria-label="Kirinên bikarhêner">
             <div class="authTitle">Hesab</div>
             <div class="authField">
@@ -55,6 +55,14 @@
             <div id="authStatus" class="authStatus muted">Ji bo têketinê e-name û şîfre binivîse.</div>
           </div>
         </div>
+        <div class="search search--header" aria-label="Lêgerîn">
+          <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
+            <path d="M16.8 16.8L21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          <input id="q" class="search__input" type="search" placeholder="Stran an hunermend bigere…" autocomplete="off" />
+          <button id="clear" class="search__clear" type="button" aria-label="Paqij bike">✕</button>
+        </div>
         <a id="profileLink" class="btn btn--ghost btn--lg" href="profile.html" style="display:none;">Profîl</a>
       </div>
     </div>
@@ -66,23 +74,27 @@
       <section class="songWrap">
         <div class="songHeader">
           <div>
-            <div class="songHeader__info">
-              <div class="songTitleRow">
-                <div id="songName" class="brand__title">—</div>
+          <div class="songHeader__info">
+            <div class="songTitleRow">
+              <div id="songName" class="brand__title">—</div>
                 <span class="songTitleSep">—</span>
                 <div id="songArtist" class="brand__sub">—</div>
-                <span id="songPending" class="badge badge--pending" style="display:none;">Li benda pejirandinê</span>
-              </div>
-            </div>
-            <div class="songHeader__actions">
-              <div class="songActions">
-                <button id="favHeart" class="favHeart" type="button" aria-label="Favorî bike">❤</button>
-                <span id="favStatus" class="muted"></span>
-              </div>
+              <span id="songPending" class="badge badge--pending" style="display:none;">Li benda pejirandinê</span>
             </div>
           </div>
+          <div class="songHeader__actions">
+            <div class="songActions">
+              <button id="favoriteBtn" class="favoriteBtn" type="button" aria-label="Favorî bike">
+                <svg class="favoriteIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+              </button>
+              <span id="favStatus" class="muted"></span>
+            </div>
+          </div>
+        </div>
 
-          <div class="transposeBar" id="transposeBar" style="display:none;">
+        <div class="transposeBar" id="transposeBar" style="display:none;">
           <div class="transposeLine">
             <span class="muted">Orjînal:</span> <strong id="origKey">—</strong>
             <span class="muted">Niha:</span> <strong id="curKey">—</strong>
@@ -110,7 +122,12 @@
                   <span class="btn-icon">➕</span>
                   <span>Zêdeki</span>
                 </button>
-              </div>
+                <button id="favoriteBtn2" class="favoriteBtn" type="button" aria-label="Favorî bike">
+                  <svg class="favoriteIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </button>
+          </div>
             </div>
           </div>
         </div>
@@ -119,57 +136,93 @@
           <div class="editPanel__top">
             <div class="editPanel__title">Guhartin</div>
             <div class="editPanel__fields">
-              <div class="authField">
-                <label class="authLabel" for="editSong">Navê stranê</label>
-                <input id="editSong" class="authInput" type="text" />
-              </div>
-              <div class="authField">
-                <label class="authLabel" for="editArtist">
+            <div class="authField">
+              <label class="authLabel required" for="editSong">Navê stranê</label>
+              <input id="editSong" class="authInput" type="text" required placeholder="Mînak: Stranên Kurdî" inputmode="text" autocomplete="off" />
+              <div id="editSongKeySuggestion" class="keySuggestion muted" style="display:none;"></div>
+            </div>
+            <div class="authField">
+                <label class="authLabel required" for="editArtist">
                   Hunermend
                   <span class="infoIcon" data-tooltip="Navê hunermendê rast binivîse, ji bo ku stran li ser rûpela hunermendê xuya bibe.">ℹ️</span>
                 </label>
-                <input id="editArtist" class="authInput" type="text" />
-                <div id="editArtistSuggest" class="suggestList"></div>
+              <input id="editArtist" class="authInput" type="text" required placeholder="Mînak: Şivan Perwer" inputmode="text" autocomplete="off" />
+              <div id="editArtistSuggest" class="suggestList"></div>
+            </div>
+            <div class="authField">
+              <label class="authLabel required" for="editKey">Tonê orîjînal</label>
+              <select id="editKey" class="authInput" required>
+                <option value="">Tonê hilbijêre</option>
+                <option value="C">C</option>
+                <option value="Cm">Cm</option>
+                <option value="Db">Db</option>
+                <option value="Dbm">Dbm</option>
+                <option value="D">D</option>
+                <option value="Dm">Dm</option>
+                <option value="Eb">Eb</option>
+                <option value="Ebm">Ebm</option>
+                <option value="E">E</option>
+                <option value="Em">Em</option>
+                <option value="F">F</option>
+                <option value="Fm">Fm</option>
+                <option value="Gb">Gb</option>
+                <option value="Gbm">Gbm</option>
+                <option value="G">G</option>
+                <option value="Gm">Gm</option>
+                <option value="Ab">Ab</option>
+                <option value="Abm">Abm</option>
+                <option value="A">A</option>
+                <option value="Am">Am</option>
+                <option value="Bb">Bb</option>
+                <option value="Bbm">Bbm</option>
+                <option value="B">B</option>
+                <option value="Bm">Bm</option>
+              </select>
+            </div>
+          </div>
+          </div>
+          <div class="editPanel__tools">
+            <div class="editToolsRow">
+              <div class="templateButtons">
+                <button type="button" class="btn btn--compact" id="editTemplateVerse">Verse</button>
+                <button type="button" class="btn btn--compact" id="editTemplateChorus">Chorus</button>
+                <button type="button" class="btn btn--compact" id="editTemplateBridge">Bridge</button>
               </div>
-              <div class="authField">
-                <label class="authLabel" for="editKey">Tonê orîjînal</label>
-                <select id="editKey" class="authInput">
-                  <option value="">Tonê hilbijêre</option>
-                  <option value="C">C</option>
-                  <option value="Cm">Cm</option>
-                  <option value="Db">Db</option>
-                  <option value="Dbm">Dbm</option>
-                  <option value="D">D</option>
-                  <option value="Dm">Dm</option>
-                  <option value="Eb">Eb</option>
-                  <option value="Ebm">Ebm</option>
-                  <option value="E">E</option>
-                  <option value="Em">Em</option>
-                  <option value="F">F</option>
-                  <option value="Fm">Fm</option>
-                  <option value="Gb">Gb</option>
-                  <option value="Gbm">Gbm</option>
-                  <option value="G">G</option>
-                  <option value="Gm">Gm</option>
-                  <option value="Ab">Ab</option>
-                  <option value="Abm">Abm</option>
-                  <option value="A">A</option>
-                  <option value="Am">Am</option>
-                  <option value="Bb">Bb</option>
-                  <option value="Bbm">Bbm</option>
-                  <option value="B">B</option>
-                  <option value="Bm">Bm</option>
-                </select>
+              <div class="chordDictionary">
+                <button type="button" class="btn btn--compact" id="toggleChordDictEdit">Akorlar</button>
+                <div id="chordDictionaryEdit" class="chordDictionaryPanel is-hidden">
+                  <div class="chordDictTitle">Akorlar</div>
+                  <div class="chordDictGrid" id="chordDictGridEdit"></div>
+                </div>
               </div>
             </div>
           </div>
           <div class="authField editTextareaField">
-            <label class="authLabel" for="editText">Nivîsa stranê</label>
-            <textarea id="editText" class="authInput editTextarea" placeholder="Nivîsa bi akorê li virê bike..."></textarea>
+            <div class="editTextareaHeader">
+              <label class="authLabel" for="editText">Nivîsa stranê</label>
+              <div class="editTextareaMeta">
+                <span id="editCharCount" class="charCount muted">0 karakter</span>
+                <span id="editChordCount" class="chordCount muted">0 akor</span>
+                <button type="button" class="btn btn--tiny btn--ghost" id="editPreviewToggle">Önizleme</button>
+              </div>
+            </div>
+            <div class="editTextareaWrapper">
+              <div class="textareaWithLines">
+                <div id="editLineNumbers" class="lineNumbers"></div>
+                <textarea id="editText" class="authInput editTextarea" placeholder="Nivîsa bi akorê li virê bike..." inputmode="text" autocomplete="off"></textarea>
+                <div id="editPreview" class="editPreview is-hidden"></div>
+              </div>
+            </div>
+            <div id="editValidation" class="validationStatus"></div>
           </div>
           <div class="editActions">
-            <button id="editSave" class="btn" type="button">Tomar bike</button>
-            <button id="editClose" class="btn btn--ghost" type="button">Betal bike</button>
+            <div class="editActionsLeft">
+              <span class="keyboardHint muted">Ctrl+S: Kaydet | Esc: Kapat</span>
+            </div>
+            <div class="editActionsRight">
+              <button id="editSave" class="btn" type="button">Tomar bike</button>
+              <button id="editClose" class="btn btn--ghost" type="button">Betal bike</button>
+            </div>
           </div>
           <div id="editNotice" class="editNotice muted"></div>
         </div>
@@ -216,15 +269,19 @@
 </section>
 
         <div class="recsContainer">
-          <section class="resultsHeader" style="margin-top:0;">
-            <div class="resultsHeader__left">
-              <div class="resultsHeader__title">Pêşniyarên</div>
-              <div class="muted"></div>
-            </div>
-            <button id="shuffleRec" class="btn btn--ghost" type="button">Nû bike</button>
-          </section>
+<section class="resultsHeader" style="margin-top:0;">
+          <div class="resultsHeader__left">
+            <div class="resultsHeader__title">Pêşniyarên</div>
+            <div class="muted"></div>
+          </div>
+          <button id="shuffleRec" class="btn btn--ghost" type="button">Nû bike</button>
+        </section>
 
-          <section id="recs" class="list"></section>
+        <section id="recs" class="list"></section>
+          
+          <div class="recsContainer__footer">
+            <a href="all.html" class="btn btn--primary recsContainer__allBtn">Hemû</a>
+          </div>
         </div>
 
       </aside>

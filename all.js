@@ -146,31 +146,83 @@ function render(){
   // Favorileme butonlarına event listener ekle
   const favoriteBtns = list.querySelectorAll(".favoriteBtn");
   favoriteBtns.forEach(btn => {
-    btn.addEventListener("click", async (e) => {
+    // Eski event listener'ları temizlemek için butonu clone et ve değiştir
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    newBtn.addEventListener("click", async (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const songId = btn.getAttribute("data-song-id");
-      if(!songId) return;
+      e.stopImmediatePropagation();
+      
+      const songId = newBtn.getAttribute("data-song-id");
+      if(!songId) {
+        console.warn("No song ID found for favorite button");
+        return;
+      }
       
       // Stranê bibîne
       const song = paginatedItems.find(s => {
         const sId = window.songId?.(s) || "";
         return sId === songId;
       });
-      if(!song) return;
+      if(!song) {
+        console.warn("Song not found for ID:", songId);
+        return;
+      }
       
+      console.log("Toggling favorite for song:", songId);
       const result = await window.toggleFavoriteSong?.(song);
+      console.log("Toggle result:", result);
       
       if(result === true){
-        // Favorilere eklendi
-        btn.classList.add("is-favorite");
-        userFavorites.push(songId);
-        window.__allPageFavorites = userFavorites;
+        // Favorilere eklendi - hemen UI'ı güncelle
+        newBtn.classList.add("is-favorite");
+        console.log("Added is-favorite class to button");
+        
+        // Favorileri yeniden yükle
+        const auth = window.fbAuth;
+        if(auth?.currentUser) {
+          userFavorites = await window.loadUserFavorites?.(auth.currentUser.uid) || [];
+          window.__allPageFavorites = userFavorites;
+          console.log("Reloaded favorites:", userFavorites.length);
+          
+          // Tüm favori butonlarını güncelle
+          const allFavBtns = list.querySelectorAll(".favoriteBtn");
+          allFavBtns.forEach(b => {
+            const id = b.getAttribute("data-song-id");
+            if(id && userFavorites.includes(id)) {
+              b.classList.add("is-favorite");
+            } else {
+              b.classList.remove("is-favorite");
+            }
+          });
+        }
       } else if(result === false){
-        // Favoriden çıkarıldı
-        btn.classList.remove("is-favorite");
-        userFavorites = userFavorites.filter(id => id !== songId);
-        window.__allPageFavorites = userFavorites;
+        // Favoriden çıkarıldı - hemen UI'ı güncelle
+        newBtn.classList.remove("is-favorite");
+        console.log("Removed is-favorite class from button");
+        
+        // Favorileri yeniden yükle
+        const auth = window.fbAuth;
+        if(auth?.currentUser) {
+          userFavorites = await window.loadUserFavorites?.(auth.currentUser.uid) || [];
+          window.__allPageFavorites = userFavorites;
+          console.log("Reloaded favorites:", userFavorites.length);
+          
+          // Tüm favori butonlarını güncelle
+          const allFavBtns = list.querySelectorAll(".favoriteBtn");
+          allFavBtns.forEach(b => {
+            const id = b.getAttribute("data-song-id");
+            if(id && userFavorites.includes(id)) {
+              b.classList.add("is-favorite");
+            } else {
+              b.classList.remove("is-favorite");
+            }
+          });
+        }
+      } else {
+        console.warn("Toggle favorite returned null, user may need to login");
       }
     });
   });
@@ -379,6 +431,74 @@ async function init(){
     updateSearchState();
     render();
   });
+
+  // Responsive search - icon'a tıklayınca açılması
+  function initResponsiveSearch() {
+    const searchHeaders = document.querySelectorAll(".search--header");
+    searchHeaders.forEach(searchEl => {
+      const input = searchEl.querySelector(".search__input");
+      const icon = searchEl.querySelector(".search__icon");
+      if(!input || !icon) return;
+      
+      // Küçük ekranlarda icon-only modunu aktif et
+      function checkScreenSize() {
+        if(window.innerWidth <= 768) {
+          searchEl.classList.add("search--icon-only");
+        } else {
+          searchEl.classList.remove("search--icon-only", "search--open");
+        }
+      }
+      
+      checkScreenSize();
+      window.addEventListener("resize", checkScreenSize);
+      
+      // Icon'a tıklayınca aç/kapat
+      icon.addEventListener("click", (e) => {
+        if(window.innerWidth <= 768) {
+          e.preventDefault();
+          e.stopPropagation();
+          if(searchEl.classList.contains("search--open")) {
+            searchEl.classList.remove("search--open");
+            input.blur();
+            document.body.classList.remove("search-open");
+          } else {
+            searchEl.classList.add("search--open");
+            document.body.classList.add("search-open");
+            setTimeout(() => input.focus(), 100);
+          }
+        }
+      });
+      
+      // Input'tan çıkınca kapat (sadece küçük ekranlarda)
+      input.addEventListener("blur", () => {
+        if(window.innerWidth <= 768 && !input.value) {
+          setTimeout(() => {
+            if(document.activeElement !== input) {
+              searchEl.classList.remove("search--open");
+              document.body.classList.remove("search-open");
+            }
+          }, 200);
+        }
+      });
+      
+      // Sayfa kaydırılınca search input'u kapat
+      let scrollTimeout;
+      function handleScroll() {
+        if(window.innerWidth <= 768 && searchEl.classList.contains("search--open")) {
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            searchEl.classList.remove("search--open");
+            document.body.classList.remove("search-open");
+            input.blur();
+          }, 150);
+        }
+      }
+      
+      window.addEventListener("scroll", handleScroll, { passive: true });
+    });
+  }
+  
+  initResponsiveSearch();
   $("#filterBy")?.addEventListener("change", () => {
     currentPage = 1; // Filtre değiştiğinde ilk sayfaya dön
     window.__currentPage = 1;

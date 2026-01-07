@@ -5,9 +5,9 @@
   --text:#f9f6ef;
   --muted:#d5dbe4;
   --line:rgba(255,255,255,.28);
-  --glass:rgba(255,255,255,.22);
-  --glass-strong:rgba(255,255,255,.34);
-  --glass-soft:rgba(255,255,255,.12);
+  --glass:rgba(255,255,255,.08);
+  --glass-strong:rgba(255,255,255,.12);
+  --glass-soft:rgba(255,255,255,.05);
   --paper:rgba(255,255,255,.98);
   --shadow:0 20px 50px rgba(0,0,0,.22);
   --shadow-soft:0 12px 26px rgba(0,0,0,.16);
@@ -90,13 +90,26 @@ main.container{
 
 /* Header */
 .topbar{
-  position:sticky;
+  position:fixed;
   top:0;
+  left:0;
+  right:0;
   z-index:50;
   background: var(--bg);
   border-bottom:1px solid rgba(255,255,255,.08);
   box-shadow: 0 1px 3px rgba(0,0,0,.05);
   backdrop-filter: none;
+}
+
+/* Topbar için body padding ekle */
+body {
+  padding-top: 68px;
+}
+
+@media (max-width: 639px) {
+  body {
+    padding-top: 120px; /* Mobilde topbar yüksekliği (2 satır + gap) */
+  }
 }
 
 .topbar__inner{
@@ -106,6 +119,7 @@ main.container{
   justify-content:space-between;
   gap:24px;
   padding: 0 20px;
+  flex-wrap: nowrap; /* Varsayılan olarak tek satır */
 }
 
 .brand{
@@ -161,13 +175,7 @@ main.container{
 }
 
 .topbar__center{
-  flex:1 1 auto;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-width:0;
-  max-width:500px;
-  margin: 0 auto;
+  display:none; /* Artık kullanılmıyor, search topbar__actions içinde */
 }
 
 .topbar__actions{
@@ -201,12 +209,12 @@ main.container{
 }
 
 .favoriteBtn.is-favorite{
-  color: #ff4444;
+  color: #ff4444 !important;
 }
 
 .favoriteBtn.is-favorite:hover{
-  color: #ff6666;
-  background: rgba(255, 68, 68, 0.15);
+  color: #ff6666 !important;
+  background: rgba(255, 68, 68, 0.15) !important;
 }
 
 .favoriteIcon{
@@ -216,8 +224,8 @@ main.container{
 }
 
 .favoriteBtn.is-favorite .favoriteIcon{
-  fill: currentColor;
-  stroke: currentColor;
+  fill: #ff4444 !important;
+  stroke: #ff4444 !important;
 }
 
 .favoriteBtn:active{
@@ -276,6 +284,15 @@ main.container{
 
 .search--header{
   width:min(340px, 100%);
+  position: relative;
+  flex: 0 0 auto;
+}
+
+/* Search topbar__actions içinde olduğunda */
+.topbar__actions .search--header {
+  width: auto;
+  min-width: 200px;
+  max-width: 340px;
 }
 
 .search__icon{
@@ -283,6 +300,12 @@ main.container{
   height:16px;
   opacity:.6;
   flex-shrink:0;
+  cursor: pointer;
+}
+
+.search--header.search--icon-only .search__icon {
+  opacity: 1;
+  cursor: pointer;
 }
 
 .search__input{
@@ -294,6 +317,35 @@ main.container{
   color:var(--text);
   font-size:12px;
   line-height:1.4;
+  transition: all 0.2s ease;
+}
+
+/* Küçük ekranlarda input gizle, sadece icon göster */
+.search--header.search--icon-only .search__input {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+  padding: 0;
+}
+
+.search--header.search--icon-only.search--open .search__input {
+  position: static;
+  width: auto;
+  opacity: 1;
+  pointer-events: auto;
+  padding: 0;
+  min-width: 200px;
+}
+
+.search--header.search--icon-only .search__clear {
+  display: none;
+}
+
+.search--header.search--icon-only.search--open .search__clear {
+  display: inline-flex;
 }
 .search__clear{
   display:inline-flex;
@@ -426,7 +478,7 @@ main.container{
   z-index:1001;
   max-height: 90vh;
   overflow: auto;
-  backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(8px) saturate(140%);
 }
 .authPanel.is-open{ display:block; }
 
@@ -505,8 +557,23 @@ main.container{
 }
 
 .formHint{ font-size:12px; color:var(--muted); }
-.suggestList{ display:none; flex-wrap:wrap; gap:6px; margin-top:4px; }
-.suggestList.is-open{ display:flex; }
+.suggestList{ 
+  display:none; 
+  flex-wrap:wrap; 
+  gap:6px; 
+  margin-top:4px; 
+  justify-content: center;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.suggestList.is-open{ 
+  display:flex; 
+  justify-content: center;
+  align-items: center;
+}
 .suggestItem{
   appearance:none;
   border:1px solid var(--line);
@@ -523,12 +590,35 @@ main.container{
   width:44px;
   height:44px;
   padding:0;
-  border-radius:999px;
+  border-radius:50% !important; /* Daire */
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  overflow:hidden;
+  overflow:hidden; /* Fotoğrafın taşmasını önle */
 }
+
+/* Profil fotoğrafı dairenin tam içine yerleşsin, boşluk olmasın */
+.profileLink .profileAvatar{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  margin:0;
+  padding:0;
+  border-radius:0;
+}
+
+.profileLink .profileAvatar--fallback{
+  width:100%;
+  height:100%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  margin:0;
+  padding:0;
+}
+
 .profileAvatarWrap{
   width:56px;
   height:56px;
@@ -547,7 +637,7 @@ main.container{
 }
 .profileHeader{ display:flex; align-items:center; justify-content:space-between; gap:16px; }
 .profileIdentity{ display:flex; align-items:center; gap:12px; }
-.profileActions{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+.profileActions{ display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
 .profileEdit{ margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
 
 /* Home */
@@ -555,6 +645,13 @@ main.container{
   margin-top: 0;
   display: flex;
   justify-content: center;
+  padding-top: 40px;
+}
+
+@media (max-width: 639px) {
+  .homeIntro {
+    padding-top: 0;
+  }
 }
 
 .homeIntro.is-searching{
@@ -573,13 +670,13 @@ main.container{
   padding: 36px 32px;
   border-radius: 24px;
   background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.22) 0%, 
-    rgba(255, 255, 255, 0.14) 100%);
+    rgba(255, 255, 255, 0.06) 0%, 
+    rgba(255, 255, 255, 0.04) 100%);
   border: 1px solid rgba(255, 255, 255, 0.28);
   box-shadow: 
     0 20px 60px rgba(0, 0, 0, 0.28),
     0 0 0 1px rgba(255, 255, 255, 0.08) inset;
-  backdrop-filter: blur(20px) saturate(170%);
+  backdrop-filter: blur(10px) saturate(140%);
   position: relative;
   overflow: hidden;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -658,10 +755,21 @@ main.container{
 }
 
 .heroCard__actions{
-  display: flex;
+  display: flex !important;
   flex-direction: column;
   gap: 14px;
   align-items: flex-start;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.heroCard__search {
+  width: 100%;
+}
+
+.search--hero {
+  width: 100%;
+  max-width: 100%;
 }
 
 .heroCard__notice{
@@ -678,6 +786,7 @@ main.container{
   width: 100%;
   box-sizing: border-box;
   max-width: 100%;
+  display: none; /* Kaldırıldı */
 }
 
 .heroCard__buttons{
@@ -686,7 +795,112 @@ main.container{
   align-items: center;
   width: 100%;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: center;
+}
+
+.heroCard__welcome {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.heroCard__welcomeText {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+  display: inline-block;
+  line-height: 1.4;
+}
+
+.welcome-char {
+  display: inline-block !important;
+  visibility: visible !important;
+  background: linear-gradient(135deg, var(--accent), var(--accent2)) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  color: transparent !important;
+  opacity: 0;
+  transform: translateY(20px) scale(0.8);
+  animation: welcomeCharAppear 0.5s ease-out forwards, welcomeCharFloat 2s ease-in-out 1.5s infinite !important;
+  text-shadow: 0 0 20px rgba(244, 163, 64, 0.4);
+}
+
+.heroCard__welcomeText {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.heroCard__welcome {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.welcome-char:nth-child(1) { animation-delay: 0.1s, 1.6s; }
+.welcome-char:nth-child(2) { animation-delay: 0.15s, 1.65s; }
+.welcome-char:nth-child(3) { animation-delay: 0.2s, 1.7s; }
+.welcome-char:nth-child(4) { animation-delay: 0.25s, 1.75s; }
+.welcome-char:nth-child(5) { animation-delay: 0.3s, 1.8s; }
+.welcome-char:nth-child(6) { animation-delay: 0.35s, 1.85s; }
+.welcome-char:nth-child(7) { animation-delay: 0.4s, 1.9s; }
+.welcome-char:nth-child(8) { animation-delay: 0.45s, 1.95s; }
+.welcome-char:nth-child(9) { animation-delay: 0.5s, 2s; }
+.welcome-char:nth-child(10) { animation-delay: 0.55s, 2.05s; }
+.welcome-char:nth-child(11) { animation-delay: 0.6s, 2.1s; }
+.welcome-char:nth-child(12) { animation-delay: 0.65s, 2.15s; }
+.welcome-char:nth-child(13) { animation-delay: 0.7s, 2.2s; }
+.welcome-char:nth-child(14) { animation-delay: 0.75s, 2.25s; }
+.welcome-char:nth-child(15) { animation-delay: 0.8s, 2.3s; }
+.welcome-char:nth-child(16) { animation-delay: 0.85s, 2.35s; }
+.welcome-char:nth-child(17) { animation-delay: 0.9s, 2.4s; }
+
+@keyframes welcomeCharAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.8) rotateY(-90deg);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-5px) scale(1.1) rotateY(0deg);
+  }
+  100% {
+    opacity: 1 !important;
+    transform: translateY(0) scale(1) rotateY(0deg);
+  }
+}
+
+/* Animasyon bittikten sonra sürekli float efekti */
+.heroCard__welcomeText .welcome-char {
+  animation: welcomeCharAppear 0.5s ease-out forwards, welcomeCharFloat 2s ease-in-out 1.5s infinite;
+}
+
+.welcome-char:nth-child(1) { animation-delay: 0.1s, 1.6s; }
+.welcome-char:nth-child(2) { animation-delay: 0.15s, 1.65s; }
+.welcome-char:nth-child(3) { animation-delay: 0.2s, 1.7s; }
+.welcome-char:nth-child(4) { animation-delay: 0.25s, 1.75s; }
+.welcome-char:nth-child(5) { animation-delay: 0.3s, 1.8s; }
+.welcome-char:nth-child(6) { animation-delay: 0.35s, 1.85s; }
+.welcome-char:nth-child(7) { animation-delay: 0.4s, 1.9s; }
+.welcome-char:nth-child(8) { animation-delay: 0.45s, 1.95s; }
+.welcome-char:nth-child(9) { animation-delay: 0.5s, 2s; }
+.welcome-char:nth-child(10) { animation-delay: 0.55s, 2.05s; }
+.welcome-char:nth-child(11) { animation-delay: 0.6s, 2.1s; }
+.welcome-char:nth-child(12) { animation-delay: 0.65s, 2.15s; }
+.welcome-char:nth-child(13) { animation-delay: 0.7s, 2.2s; }
+.welcome-char:nth-child(14) { animation-delay: 0.75s, 2.25s; }
+.welcome-char:nth-child(15) { animation-delay: 0.8s, 2.3s; }
+.welcome-char:nth-child(16) { animation-delay: 0.85s, 2.35s; }
+.welcome-char:nth-child(17) { animation-delay: 0.9s, 2.4s; }
+
+@keyframes welcomeCharFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.02);
+  }
 }
 
 .heroCard__btn{
@@ -695,6 +909,13 @@ main.container{
   justify-content: center;
   padding: 10px 16px;
   font-size: 13.5px;
+}
+
+.heroCard__btn--minimal{
+  padding: 8px 14px;
+  font-size: 12.5px;
+  min-width: auto;
+  width: auto;
   font-weight: 600;
   border-radius: 9px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -774,7 +995,17 @@ main.container{
 .resultsHeader__left{
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 4px;
+  align-items: flex-start;
+  text-align: left;
+  flex: 1 1 auto;
+}
+
+.resultsHeader__right{
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  margin-left: auto;
 }
 
 .homeListWrap.is-searching .resultsHeader{
@@ -785,9 +1016,21 @@ main.container{
 }
 
 .resultsHeader__title{ font-weight:600; letter-spacing:-.01em; font-size:13px; }
-.resultsHeader__right{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.resultsHeader__left{ 
+  display:flex; 
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+  flex: 1 1 auto;
+}
 .resultsMeta{ font-size:13.5px; color:var(--muted); }
-.resultsHeader__left{ display:flex; flex-direction:column; gap:4px; }
+.resultsHeader__right{ 
+  display:flex; 
+  align-items: center;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
 .homeListWrap.is-searching .resultsHeader{
   border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
   box-shadow: 0 0 0 1px rgba(255,255,255,.08), var(--shadow-soft);
@@ -842,6 +1085,43 @@ main.container{
   opacity: 1 !important;
 }
 
+/* Mobilde arama yapıldığında sonuçları topbar'dan sonra başlat - genel kural */
+@media (max-width: 639px) {
+  .homeListWrap.is-searching {
+    margin-top: 200px !important;
+  }
+  
+  body.has-search-results.has-hero-search .homeListWrap.is-searching {
+    margin-top: 200px !important;
+  }
+  
+  /* has-search-results class'ı ile override et */
+  body.has-search-results:not(.has-hero-search) .homeListWrap {
+    margin-top: 200px !important;
+  }
+  
+  body.has-search-results.has-hero-search .homeListWrap {
+    margin-top: 0px !important;
+  }
+  
+  body.has-search-results.has-hero-search .homeListWrap.is-searching {
+    margin-top: 0px !important;
+  }
+}
+
+/* HomeListWrap footer - "Hemûyan Bibîne" butonu */
+.homeListWrap__footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px 16px;
+  margin-top: 24px;
+}
+
+.homeListWrap__footer .btn {
+  min-width: 200px;
+}
+
 #list{
   display: grid !important;
   visibility: visible !important;
@@ -869,10 +1149,10 @@ main.container{
 .visualCard{
   padding: 18px;
   border-radius: var(--radius);
-  background: rgba(255,255,255,.22);
+  background: rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.28);
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(8px) saturate(140%);
 }
 .visualCard__top{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
 .visualCard__title{ font-weight:700; letter-spacing:-.02em; }
@@ -954,6 +1234,28 @@ main.container{
   width: 100%;
   position: relative;
   z-index: 1;
+}
+
+/* Hemû butonu - recsContainer altında */
+.recsContainer__footer {
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.recsContainer__allBtn {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.2s ease;
 }
 
 /* Lists */
@@ -1096,6 +1398,15 @@ main.container{
   padding: 8px 12px;
   background: rgba(255,255,255,.05);
   border-radius: 8px;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+.nextSongMeta:hover{
+  background: rgba(255,255,255,.1);
+  transform: translateY(-1px);
+}
+.nextSongMeta:active{
+  transform: translateY(0);
+  background: rgba(255,255,255,.08);
 }
 .nextSongSep{ 
   color: var(--muted); 
@@ -1128,13 +1439,9 @@ main.container{
   height: auto !important;
   max-height: none !important;
 }
+/* Footer'ı songPage dışına taşı - her sayfa için sabit */
 .songPage > .footer{ 
-  grid-column: 1 / -1; 
-  margin-top: 60px; 
-  position: relative;
-  z-index: 1;
-  clear: both;
-  margin-bottom: 0;
+  display: none; /* songPage içindeki footer'ı gizle */
 }
 
 .songWrap{
@@ -1329,9 +1636,9 @@ main.container{
 .imgWrap{
   margin-top: 0;
   border-radius: 0 0 16px 16px;
-  overflow:hidden;
-  overflow-x: hidden;
+  overflow-x: auto;
   overflow-y: visible !important;
+  -webkit-overflow-scrolling: touch;
   border:1px solid rgba(255,255,255,.08);
   border-top: none;
   background: #ffffff;
@@ -1342,6 +1649,9 @@ main.container{
   z-index: 1;
   height: auto !important;
   max-height: none !important;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .imgWrap::before{
   content: "";
@@ -1385,6 +1695,7 @@ main.container{
   font-variant-ligatures: none;
   font-feature-settings: "liga" 0;
   overflow-x:auto;
+  overflow-y: visible !important;
   color:#1a1a1a;
   background: #ffffff;
   border:none;
@@ -1392,9 +1703,13 @@ main.container{
   box-shadow: none;
   tab-size: 4;
   width:100%;
+  max-width: 100%;
   display:block;
   padding: 32px 40px;
   position: relative;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  word-wrap: normal; /* break-word DEĞİL - txt formatındaki akorlar ve sözler kırılmamalı */
 }
 .chordText::after{
   content: "";
@@ -1463,25 +1778,32 @@ main.container{
 .editPanel__top{ 
   display:flex; 
   flex-direction: column;
-  gap:16px; 
-  margin-bottom:20px;
-  padding: 24px 40px;
+  gap:12px; 
+  margin-bottom:16px;
+  padding: 20px 28px;
   border-bottom: 1px solid rgba(0,0,0,.06);
 }
 .editPanel__fields{
   display:grid; 
-  gap:10px; 
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  margin-top: 8px;
+  gap:12px; 
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin-top: 4px;
+  padding: 0;
+}
+
+.editPanel__fields .authField {
+  padding: 0;
+  margin: 0;
 }
 .editPanel__title{ 
   font-weight:700; 
-  font-size: 24px;
+  font-size: 20px;
   color: #0f172a;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  margin-bottom: 4px;
 }
 .editPanel__title::before{
   content: "✏️";
@@ -1501,21 +1823,21 @@ main.container{
 }
 .editActions{ 
   display:flex; 
-  gap:16px; 
+  gap:12px; 
   flex-wrap:wrap; 
   justify-content: flex-end;
   margin-top:0;
-  padding: 28px 40px 36px 40px;
+  padding: 20px 28px 24px 28px;
   background: linear-gradient(to bottom, rgba(0,0,0,.02) 0%, transparent 100%);
   border-top: 1px solid rgba(0,0,0,.06);
 }
 .editActions .btn{
-  padding: 14px 32px;
-  font-size: 15px;
+  padding: 10px 24px;
+  font-size: 14px;
   font-weight: 600;
-  border-radius: 12px;
-  min-width: 140px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+  min-width: 120px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   letter-spacing: 0.01em;
   position: relative;
   overflow: hidden;
@@ -1611,27 +1933,56 @@ main.container{
   text-transform:none; 
   letter-spacing:0;
   font-weight: 600;
-  font-size: 11px;
-  margin-bottom: 4px;
-  display: block;
+  font-size: 12px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   line-height: 1.4;
+  position: relative;
+}
+
+.editPanel--paper .authLabel .infoIcon {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.editPanel--paper .authLabel.required::after {
+  content: "*";
+  color: #ef4444;
+  margin-left: 2px;
 }
 .editPanel--paper .authField{
   margin-bottom: 0;
+  align-items: stretch;
+}
+
+.editPanel--paper .authField .suggestList {
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+  width: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.editPanel--paper .authField .suggestList.is-open {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .editPanel--paper .editTextareaField{
-  padding: 0 40px;
-  margin-top: 20px;
+  padding: 0 28px;
+  margin-top: 16px;
   margin-bottom: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 .editPanel--paper .editTextareaField .authLabel{
   font-size: 13px;
   margin-bottom: 10px;
-}
-.editPanel--paper .editTextareaField{
-  padding: 0 40px;
-  margin-top: 20px;
-  margin-bottom: 0;
 }
 .infoIcon{
   display: inline-block;
@@ -1672,15 +2023,15 @@ main.container{
   color: #ffffff;
   font-size: 12px;
   line-height: 1.5;
-  white-space: nowrap;
+  white-space: normal;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,.2);
   z-index: 1000;
   pointer-events: none;
-  max-width: 400px;
-  min-width: 300px;
-  white-space: normal;
-  text-align: left;
+  max-width: 280px;
+  min-width: 200px;
+  width: max-content;
+  text-align: center;
   font-weight: 400;
 }
 .infoIcon[data-tooltip]:hover::before,
@@ -1699,46 +2050,77 @@ main.container{
   z-index: 1001;
   pointer-events: none;
 }
-/* Mobil için touch desteği */
-@media (max-width: 768px){
-  .infoIcon[data-tooltip]:active::after,
-  .infoIcon[data-tooltip]:focus::after{
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 100%;
+/* Artist Tooltip - Dinamik */
+.artist-tooltip {
+  position: fixed;
+  bottom: auto;
+  top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    margin-bottom: 8px;
-    padding: 10px 14px;
-    background: #1e293b;
+  transform: translate(-50%, -50%);
+  padding: 16px 40px 16px 20px;
+  background: #0f172a;
     color: #ffffff;
-    font-size: 12px;
-    line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.6;
     white-space: normal;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,.2);
-    z-index: 1000;
-    pointer-events: none;
-    max-width: 400px;
-    min-width: 300px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  z-index: 10000;
+  pointer-events: auto;
+  max-width: calc(100vw - 40px);
+  min-width: 240px;
+  width: auto;
     text-align: left;
     font-weight: 400;
-  }
-  .infoIcon[data-tooltip]:active::before,
-  .infoIcon[data-tooltip]:focus::before{
-    content: "";
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  border: 1px solid rgba(255,255,255,.2);
+}
+
+.artist-tooltip.tooltip-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.artist-tooltip .tooltip-content {
+  padding-right: 20px;
+}
+
+.tooltip-close {
     position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-bottom: 2px;
-    width: 0;
-    height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 6px solid #1e293b;
-    z-index: 1001;
-    pointer-events: none;
+  top: 8px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,.8);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 10001;
+  transition: color 0.2s ease;
+}
+
+.tooltip-close:hover {
+  color: #ffffff;
+}
+
+/* Mobil için sağa hizalı */
+@media (max-width: 768px){
+  .artist-tooltip {
+    top: 50%;
+    right: 20px;
+    left: auto;
+    transform: translateY(-50%);
+    max-width: calc(100vw - 40px);
   }
 }
 .editPanel--paper .editTextareaField .authLabel{
@@ -1748,15 +2130,52 @@ main.container{
 .editPanel--paper .authInput{
   background:#ffffff;
   color:#0f172a;
-  border: 1px solid rgba(0,0,0,.12);
-  font-size:11px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1.5px solid rgba(0,0,0,.12);
+  font-size:13px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 1px 2px rgba(0,0,0,.04);
   font-weight: 400;
   height: auto;
-  min-height: 28px;
+  min-height: 36px;
+  width: 100%;
+}
+
+.editPanel--paper .authInput:invalid {
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.editPanel--paper .authInput:focus:invalid {
+  border-color: #ef4444;
+  box-shadow: 
+    0 0 0 3px rgba(239, 68, 68, .1),
+    0 2px 6px rgba(0,0,0,.06);
+}
+
+.editPanel--paper .authInput.error,
+.editPanel--paper select.authInput.error {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.editPanel--paper .authInput.error:focus,
+.editPanel--paper select.authInput.error:focus {
+  border-color: #ef4444;
+  box-shadow: 
+    0 0 0 3px rgba(239, 68, 68, .15),
+    0 2px 6px rgba(0,0,0,.06);
+}
+
+.editPanel--paper select.authInput:invalid {
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.editPanel--paper select.authInput:focus:invalid {
+  border-color: #ef4444;
+  box-shadow: 
+    0 0 0 3px rgba(239, 68, 68, .1),
+    0 2px 6px rgba(0,0,0,.06);
 }
 .editPanel--paper .authInput:hover{
   border-color: rgba(0,0,0,.18);
@@ -1785,50 +2204,73 @@ main.container{
   font-size: 12px;
 }
 .editPanel--paper .editTextarea{
-  font-size:14px;
+  font-size:13px;
   line-height:2.2;
-  border: 2px solid rgba(0,0,0,.1);
+  border: none;
   border-radius: 0;
   background: #ffffff;
   color: #0f172a;
-  box-shadow: 
-    0 0 0 1px rgba(0,0,0,.05) inset,
-    0 2px 8px rgba(0,0,0,.04);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-weight: 400;
-  padding: 20px 24px;
-  min-height: 500px;
+  padding: 16px 20px;
+  min-height: 300px;
+  height: auto;
   max-height: none;
-  overflow: hidden !important;
-  overflow-y: hidden !important;
-  overflow-x: hidden !important;
+  overflow: auto !important;
   resize: vertical;
   font-family: var(--font-mono);
-  border-left: 4px solid #f97316;
+  /* TXT formatını koru - chordText ile aynı ayarlar */
+  white-space: pre !important; /* pre-wrap DEĞİL - txt formatını korumak için */
+  word-wrap: normal !important; /* break-word DEĞİL - akorlar ve sözler kırılmamalı */
+  tab-size: 4; /* Tab karakterleri için */
+  letter-spacing: 0; /* Karakter hizalaması için */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.editPanel--paper .editTextarea.error {
+  background: rgba(239, 68, 68, 0.05);
 }
 .editPanel--paper .editTextarea:hover{
-  border-color: rgba(0,0,0,.15);
-  box-shadow: 
-    0 0 0 1px rgba(0,0,0,.08) inset,
-    0 2px 8px rgba(0,0,0,.06);
+  background: #fafafa;
 }
 .editPanel--paper .editTextarea:focus{
   outline: none;
-  border-color: #f97316;
-  border-left-color: #f97316;
-  box-shadow: 
-    0 0 0 3px rgba(249,115,22,.1),
-    0 4px 12px rgba(0,0,0,.08);
   background: #ffffff;
 }
 .editPanel--paper .editNotice{ 
   color:#0f172a;
-  padding: 16px 20px;
+  padding: 12px 16px;
+  margin: 0 auto 16px auto;
+  max-width: calc(100% - 56px);
   background: linear-gradient(135deg, rgba(249,115,22,.08) 0%, rgba(249,115,22,.12) 100%);
-  border-radius: 12px;
-  border: 2px solid rgba(249,115,22,.2);
-  box-shadow: 0 2px 8px rgba(249,115,22,.1);
+  border-radius: 8px;
+  border: 1.5px solid rgba(249,115,22,.2);
+  box-shadow: 0 2px 6px rgba(249,115,22,.1);
   font-weight: 500;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+.editPanel--paper .editNotice.muted {
+  opacity: 1;
+  visibility: visible;
+}
+
+.editPanel--paper .editNotice:empty {
+  display: none;
+}
+
+.editPanel--paper .editNotice[style*="color: #ef4444"],
+.editPanel--paper .editNotice[style*="color:#ef4444"] {
+  background: linear-gradient(135deg, rgba(239,68,68,.08) 0%, rgba(239,68,68,.12) 100%);
+  border-color: rgba(239,68,68,.2);
+  box-shadow: 0 2px 6px rgba(239,68,68,.1);
 }
 .editPanel--paper .formHint{
   margin-top: 8px;
@@ -1909,6 +2351,12 @@ main.container{
   width: 100%;
   clear: both;
 }
+
+/* Footer'ı her sayfa için sabit konumda - main.container içinde */
+main.container > .footer {
+  margin-top: 60px;
+  padding: 0 20px;
+}
 .footerInner{
   display:flex;
   flex-direction:column;
@@ -1924,10 +2372,10 @@ main.container{
   margin-top: var(--space-3);
   padding: 24px;
   border-radius: var(--radius-lg);
-  background: rgba(255,255,255,.24);
+  background: rgba(255,255,255,.14);
   border:1px solid rgba(255,255,255,.32);
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(8px) saturate(140%);
 }
 .sectionHeader{ display:flex; flex-direction:column; gap:6px; margin-bottom: var(--space-2); }
 .sectionTitle{ margin:0; font-size: clamp(22px, 2.6vw, 32px); letter-spacing:-.02em; }
@@ -1946,6 +2394,13 @@ main.container{
   align-items:center;
   gap: 10px;
   min-width: 0;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease;
+}
+
+.sourceItem:hover{
+  transform: translateY(-2px);
 }
 
 .sourceCircle{
@@ -1956,7 +2411,7 @@ main.container{
   align-items:center;
   justify-content:center;
   overflow:hidden;
-  background: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
   border:1px solid rgba(255,255,255,.2);
   box-shadow: 0 4px 16px rgba(0,0,0,.12);
   backdrop-filter: blur(10px);
@@ -2004,7 +2459,8 @@ main.container{
   text-align: center;
   color: rgba(255,255,255,0.85);
   line-height: 1.3;
-  max-width: 120px;
+  max-width: 140px;
+  word-wrap: break-word;
 }
 .sourceCard{
   display:flex;
@@ -2093,10 +2549,10 @@ main.container{
   align-items:center;
   padding: 12px 16px;
   border-radius: var(--radius);
-  background: rgba(255,255,255,.22);
+  background: rgba(255,255,255,.12);
   border:1px solid rgba(255,255,255,.3);
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(8px) saturate(140%);
 }
 .filterGroup{
   display:flex;
@@ -2201,7 +2657,7 @@ main.container{
   border:1px solid rgba(255,255,255,.2);
   border-radius: var(--radius);
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(8px) saturate(140%);
 }
 
 .is-hidden{ display:none !important; }
@@ -2210,6 +2666,30 @@ main.container{
 @media (min-width: 860px){
   .homeGrid{ grid-template-columns: 1.15fr .85fr; gap: 16px; }
   .contactGrid{ grid-template-columns: 1.1fr .9fr; }
+  
+  /* Büyük ekranlarda animasyonlu yazıyı görünür yap */
+  .heroCard__welcome {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .heroCard__welcomeText {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .heroCard__actions {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .welcome-char {
+    display: inline-block !important;
+    visibility: visible !important;
+  }
 }
 
 @media (max-width: 960px){
@@ -2258,6 +2738,19 @@ main.container{
     padding: 9px 12px;
     font-size: 13px;
   }
+  
+  /* Mobilde song sayfasında favHeart'ı gizle, favoriteBtn'i göster */
+  .songHeader__actions .favHeart,
+  .transposeActions .favHeart,
+  .editToggleRow .favHeart {
+    display: none !important;
+  }
+  
+  .songHeader__actions .favoriteBtn,
+  .transposeActions .favoriteBtn,
+  .editToggleRow .favoriteBtn {
+    display: inline-flex !important;
+  }
 }
 
 @media (max-width: 780px){
@@ -2271,8 +2764,8 @@ main.container{
     padding: 12px 16px;
     gap:24px;
   }
-  .topbar__center{ order:3; width:100%; justify-content:center; margin-top:8px; }
-  .search--header{ width:100%; max-width:none; }
+  /* topbar__center artık kullanılmıyor */
+  .topbar__actions .search--header{ width:100%; max-width:none; }
   .topbar__actions{
     width:auto;
     justify-content:flex-end;
@@ -2565,77 +3058,565 @@ main.container{ animation: fadeUp .2s ease; }
    BREAKPOINT 1: MOBILE (< 640px)
    ============================================ */
 @media (max-width: 639px) {
-  /* Container & Layout */
+  /* Container & Layout - Mobilde padding yok */
   .container {
-    padding: 0 16px;
+    padding: 0 !important;
   }
   
-  /* Topbar - Mobile */
+  main.container {
+    padding: 0 !important;
+    overflow-x: visible !important;
+  }
+  
+  body {
+    overflow-x: hidden !important; /* Yatay kaydırmayı engelle */
+    position: relative;
+  }
+  
+  html {
+    overflow-x: hidden !important; /* Yatay kaydırmayı engelle */
+  }
+  
+  /* Topbar - Mobile - 2 Satır Düzeni */
   .topbar__inner {
     height: auto;
-    min-height: 60px;
-    padding: 10px 16px;
-    flex-wrap: wrap;
-    gap: 12px;
+    min-height: auto;
+    padding: 10px 12px;
+    flex-direction: column !important; /* Dikey düzen */
+    flex-wrap: nowrap !important;
+    gap: 8px;
+    overflow-x: visible;
+    align-items: stretch;
+  }
+  
+  /* 1. Satır: Logo + Repertûara Kurdî */
+  .brand {
+    margin-left: 12px; /* Logoyu daha fazla sağa kaydır */
+    flex-shrink: 0;
+    min-width: 0;
+    flex: 0 0 auto;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 11px;
   }
   
   .logo {
     width: 48px;
     height: 48px;
+    flex-shrink: 0;
   }
   
   .brand__title {
-    font-size: 18px;
+    font-size: 32px; /* Mobilde daha da büyük - alanı değerlendir */
+    line-height: 1.2; /* Aşağı kaymasın */
+    margin: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-weight: 700; /* Kalın yazı */
+    letter-spacing: -0.02em; /* Harfler arası boşluk */
   }
   
+  /* Arama çubuğu göster - responsive search ile */
   .topbar__center {
-    order: 3;
-    width: 100%;
-    margin-top: 8px;
-    max-width: 100%;
+    display: flex !important;
+    order: 2;
+    width: auto;
+    flex: 0 0 auto;
   }
   
-  .search--header {
-    width: 100%;
-    max-width: 100%;
+  /* Küçük ekranlarda search input'u gizle, sadece icon göster (sadece topbar için) */
+  .search--header.search--icon-only {
+    width: auto !important;
+    min-width: 40px;
+    padding: 6px !important;
+    justify-content: center;
   }
   
-  .topbar__actions {
-    gap: 4px;
-    flex-wrap: nowrap;
+  .search--header.search--icon-only .search__input {
+    display: none !important;
   }
   
-  .topbar__actions .btn,
-  .topbar__actions .homeLink,
-  .topbar__actions .profileLink {
-    height: 32px;
-    padding-inline: 8px;
-    font-size: 11px;
+  /* HeroCard search her zaman tam input olarak görünsün */
+  .search--hero {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .search--hero .search__input {
+    display: block !important;
+  }
+  
+  /* Topbar search açıldığında - ekran genişliğinde */
+  .search--header.search--icon-only.search--open {
+    position: fixed;
+    left: 0;
+    right: 0;
+    transform: none;
+    top: 120px; /* Topbar yüksekliği (mobilde 2 satır) */
+    width: 100% !important;
+    max-width: 100% !important;
+    z-index: 100;
     min-width: auto;
+    padding: 16px 20px !important;
+    min-height: 56px !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(255,255,255,.15) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15) !important;
+    margin: 0 16px !important;
+    width: calc(100% - 32px) !important;
   }
   
+  /* HeroCard search mobilde arama yapıldığında topbar'dan sonra fixed olarak göster - ekran genişliğinde */
+  /* Bu kural yukarıdaki daha spesifik kural tarafından override edilecek */
+  
+  body.has-search-results.has-hero-search .search--hero {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.1) !important;
+    border: 1px solid rgba(255,255,255,.15) !important;
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: rgba(0,0,0,.3) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 0 !important;
+    min-height: 48px !important;
+    margin: 0 16px !important;
+  }
+  
+  body.has-search-results.has-hero-search .search--hero .search__input {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    z-index: 1 !important;
+    background: transparent !important;
+    color: var(--text) !important;
+    -webkit-text-fill-color: var(--text) !important;
+    width: 100% !important;
+    flex: 1 !important;
+    padding: 12px 12px 12px 0 !important;
+    font-size: 15px !important;
+    border: none !important;
+    outline: none !important;
+    line-height: 1.4 !important;
+  }
+  
+  body.has-search-results.has-hero-search .search--hero .search__input::placeholder {
+    color: rgba(255,255,255,.6) !important;
+    opacity: 1 !important;
+  }
+  
+  body.has-search-results.has-hero-search .search--hero .search__icon {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin-left: 12px !important;
+    color: rgba(255,255,255,.7) !important;
+  }
+  
+  body.has-search-results.has-hero-search .search--hero .search__clear {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+    margin-right: 12px !important;
+    color: rgba(255,255,255,.7) !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 6px !important;
+    cursor: pointer !important;
+    font-size: 16px !important;
+  }
+  
+  /* Arama yapıldığında heroCard'ı gizle - ama heroCard search'ünden arama yapıldıysa gizleme */
+  body.has-search-results:not(.has-hero-search) .homeIntro {
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    margin: 0;
+    transition: opacity 0.3s ease, height 0.3s ease;
+  }
+  
+  /* HeroCard search'ünden arama yapıldığında homeIntro'yu gizleme, sadece içeriği gizle */
+  body.has-search-results.has-hero-search .homeIntro {
+    opacity: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+  }
+  
+  /* HeroCard içeriğini gizleme, sadece header ve buttons'ı gizle, search'ü göster */
+  body.has-search-results.has-hero-search .heroCard__content {
+    opacity: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+    position: relative !important;
+  }
+  
+  /* Sadece header ve buttons'ı gizle */
+  body.has-search-results.has-hero-search .heroCard__header,
+  body.has-search-results.has-hero-search .heroCard__buttons {
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* HeroCard search'ü her zaman görünür yap ve fixed yap */
+  body.has-search-results.has-hero-search .heroCard__actions {
+    opacity: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+  }
+  
+  body.has-search-results.has-hero-search .heroCard__search {
+    opacity: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+    position: fixed !important;
+    display: flex !important;
+    justify-content: center !important;
+    visibility: visible !important;
+    z-index: 100 !important;
+    top: 120px !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+  
+  /* Topbar search'ünden arama yapıldığında sonuçları search bar'ın altından başlat */
+  body.has-search-results:not(.has-hero-search) .homeListWrap {
+    margin-top: 200px !important; /* Topbar (120px) + search bar (~60px) + margin (20px) */
+    transition: margin-top 0.3s ease;
+  }
+  
+  /* HeroCard search'ünden arama yapıldığında sonuçları search'ün tam altından başlat */
+  body.has-search-results.has-hero-search .homeListWrap {
+    margin-top: 0px !important; /* Topbar (120px) + HeroCard search (48px) - çok yakın */
+    transition: margin-top 0.3s ease;
+  }
+  
+  /* Search açıldığında (ama arama yapılmadıysa) heroCard'ı aşağı kaydır */
+  body.search-open:not(.has-search-results) .homeIntro {
+    margin-top: 60px;
+    transition: margin-top 0.3s ease;
+  }
+  
+  /* Search açıldığında (ama arama yapılmadıysa) sonuçları search bar'dan sonra başlat */
+  body.search-open:not(.has-search-results) .homeListWrap {
+    margin-top: 200px;
+    transition: margin-top 0.3s ease;
+  }
+  
+  .search--header.search--icon-only.search--open .search__input,
+  .search--hero.search--icon-only.search--open .search__input {
+    display: block !important;
+    position: static;
+    width: 100%;
+    opacity: 1;
+    pointer-events: auto;
+    font-size: 16px !important;
+    padding: 0 !important;
+  }
+  
+  .search--header.search--icon-only .search__clear,
+  .search--hero.search--icon-only .search__clear {
+    display: none !important;
+  }
+  
+  .search--header.search--icon-only.search--open .search__clear,
+  .search--hero.search--icon-only.search--open .search__clear {
+    display: inline-flex !important;
+    position: absolute;
+    right: 6px;
+    z-index: 11;
+  }
+  
+  .search--header.search--icon-only .search__icon,
+  .search--hero.search--icon-only .search__icon {
+    opacity: 1;
+    cursor: pointer;
+  }
+  
+  /* 2. Satır: Menü Öğeleri - Komple Yeni Tasarım */
+  .topbar__actions {
+    gap: 6px !important;
+    flex-wrap: nowrap !important; /* Tek satırda kal */
+    flex-shrink: 0;
+    min-width: 0;
+    justify-content: center !important; /* Ortala */
+    order: 2;
+    width: 100%;
+    display: flex !important;
+    align-items: center;
+    padding-top: 4px !important; /* Üstten azıcık padding */
+    padding-bottom: 4px !important; /* Alttan azıcık padding */
+    overflow-x: auto; /* Taşarsa kaydırılabilir */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox scrollbar gizle */
+    -ms-overflow-style: none; /* IE/Edge scrollbar gizle */
+  }
+  
+  .topbar__actions::-webkit-scrollbar {
+    display: none; /* Chrome/Safari scrollbar gizle */
+  }
+  
+  /* Mobilde Çavkani, Peywendî, Têkilî butonlarını gizle */
+  .topbar__actions .btn[href*="#sources"],
+  .topbar__actions .btn[href*="#contact"],
+  .topbar__actions .btn[href*="contact"],
+  .topbar__actions a[href*="#sources"],
+  .topbar__actions a[href*="#contact"],
+  .topbar__actions a[href*="contact"] {
+    display: none !important;
+  }
+  
+  /* Minimal, Modern Buton Tasarımı */
+  .topbar__actions .btn,
   .topbar__actions .btn--lg {
-    font-size: 11px;
-    padding-inline: 8px;
+    height: 34px;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 500;
+    min-width: auto;
+    flex-shrink: 0;
+    white-space: nowrap;
+    border-radius: 8px;
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,.25);
+    color: rgba(255,255,255,.9);
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    box-shadow: none;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Buton hover efekti */
+  .topbar__actions .btn::before,
+  .topbar__actions .btn--lg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,.08);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  
+  .topbar__actions .btn:hover,
+  .topbar__actions .btn--lg:hover {
+    border-color: rgba(255,255,255,.4);
+    color: rgba(255,255,255,1);
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .topbar__actions .btn:hover::before,
+  .topbar__actions .btn--lg:hover::before {
+    opacity: 1;
+  }
+  
+  .topbar__actions .btn:active,
+  .topbar__actions .btn--lg:active {
+    transform: scale(0.98);
+    border-color: rgba(255,255,255,.3);
+  }
+  
+  /* Home Link - Minimal İkon Butonu */
+  .topbar__actions .homeLink {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 8px;
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,.25);
+    color: rgba(255,255,255,.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  
+  .topbar__actions .homeLink::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,.08);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  
+  .topbar__actions .homeLink:hover {
+    border-color: rgba(255,255,255,.4);
+    color: rgba(255,255,255,1);
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .topbar__actions .homeLink:hover::before {
+    opacity: 1;
+  }
+  
+  .topbar__actions .homeLink:active {
+    transform: scale(0.98);
+  }
+  
+  .topbar__actions .homeLink .iconHome {
+    width: 16px;
+    height: 16px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Profile Link - Daire Tasarım */
+  .topbar__actions .profileLink {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 50% !important; /* Daire */
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,.25);
+    color: rgba(255,255,255,.9);
+    transition: all 0.15s ease;
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  /* Mobilde profil fotoğrafı dairenin tam içine yerleşsin */
+  .topbar__actions .profileLink .profileAvatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+  }
+  
+  .topbar__actions .profileLink .profileAvatar--fallback {
+    width: 100%;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .topbar__actions .profileLink::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,.08);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  
+  .topbar__actions .profileLink:hover {
+    border-color: rgba(255,255,255,.4);
+    color: rgba(255,255,255,1);
+  }
+  
+  .topbar__actions .profileLink:hover::before {
+    opacity: 1;
+  }
+  
+  .topbar__actions .profileLink:active {
+    transform: scale(0.98);
   }
   
   /* Song Page - Mobile */
   .songPage {
     grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 16px;
+    gap: 12px;
+    padding: 8px 10px !important; /* Üst boşluk korundu, sağdan soldan 10px */
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    overflow-x: visible !important;
+    margin-top: 0;
+    display: flex !important; /* Grid yerine flex kullan */
+    flex-direction: column !important; /* Dikey düzen */
+  }
+  
+  /* Mobilde songWrap'ten sonra songAside gelsin */
+  .songWrap {
+    order: 1;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: visible !important;
+    box-sizing: border-box;
+    gap: 12px;
+    padding: 0 !important; /* songPage zaten padding veriyor, songWrap'te padding yok */
+  }
+  
+  .songAside {
+    order: 2; /* songWrap'ten sonra */
+    width: 100% !important; /* songWrap ile aynı genişlik */
+    max-width: 100% !important;
+    box-sizing: border-box;
+    padding: 0 !important; /* Padding'i kaldır, youtubeCard ve recsContainer songWrap genişliğinde olsun */
   }
   
   .songHeader {
-    padding: 20px 16px;
+    padding: 12px 16px;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
+    margin-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .songTitleRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 0;
   }
   
   #songName {
@@ -2647,37 +3628,163 @@ main.container{ animation: fadeUp .2s ease; }
     font-size: 14px;
   }
   
+  .songHeader__actions {
+    display: none !important;
+  }
+  
   .transposeBar {
     flex-direction: column;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 8px;
+    padding: 8px 0;
+    margin-top: 0;
   }
   
   .transposeLine {
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
     gap: 10px;
     width: 100%;
+    flex-wrap: wrap;
+    font-size: 12px;
+  }
+  
+  .transposeLine .muted {
+    font-size: 11px;
+  }
+  
+  .transposeLine strong {
+    font-size: 13px;
+  }
+  
+  .keyGrid {
+    gap: 3px;
+  }
+  
+  .keyBtn {
+    padding: 3px 6px;
+    font-size: 10px;
+    min-width: 28px;
+    border-radius: 4px;
   }
   
   .transposeActions {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+  
+  .editToggleRow {
+    display: flex !important;
+    gap: 8px;
+    align-items: center;
+    width: auto;
+    flex-wrap: wrap;
+  }
+  
+  .editToggleRow .favHeart {
+    display: inline-flex !important;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 16px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    margin: 0;
+    flex-shrink: 0;
+  }
+  
+  .transposeActions {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0;
+    margin-top: 4px;
+    flex-wrap: wrap;
   }
   
   .transposeBar .btn {
     font-size: 12px;
-    padding: 8px 12px;
+    padding: 6px 14px;
     min-width: auto;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    color: rgba(255,255,255,.9);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+  
+  .transposeBar .btn:hover {
+    background: rgba(255,255,255,.12);
+    border-color: rgba(255,255,255,.2);
+    transform: translateY(-1px);
+  }
+  
+  .transposeBar .btn .btn-icon {
+    font-size: 14px;
+  }
+  
+  .transposeBar .btn span:not(.btn-icon) {
+    font-size: 12px;
   }
   
   .imgWrap {
-    padding: 20px 16px;
-    border-radius: 12px;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-width: 100vw !important;
+    overflow-x: hidden !important; /* Yatay scroll YOK - sabit */
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch;
+    border-left: none !important;
+    border-right: none !important;
+    position: relative;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
   }
   
   .chordSheet {
-    font-size: 14px;
-    line-height: 1.8;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    overflow-x: hidden !important; /* Yatay scroll YOK */
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .chordText {
+    /* Txt dosyası formatını koru - ÖNEMLİ: white-space: pre olmalı */
+    font-size: 9px !important; /* Küçültüldü - kaydırma olmadan görünsün */
+    line-height: 1.5 !important; /* Daha kompakt */
+    padding: 14px 10px !important; /* Padding azaltıldı */
+    white-space: pre !important; /* pre-wrap DEĞİL - txt formatını korumak için */
+    word-wrap: normal !important; /* break-word DEĞİL - akorlar ve sözler kırılmamalı */
+    overflow-x: hidden !important; /* Yatay scroll YOK - sabit */
+    overflow-y: visible !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    font-family: var(--font-mono) !important; /* Monospace font - karakter hizalaması için */
+    tab-size: 4 !important; /* Tab karakterleri için */
+    letter-spacing: -0.03em !important; /* Karakterler arası boşluk azaltıldı */
+  }
+  
+  .chordText .chordTok {
+    font-size: 9px !important; /* Akorlar da küçültüldü */
+    display: inline; /* inline-block DEĞİL - düzeni bozmamak için */
+    white-space: pre; /* Akor token'ları da pre formatında */
   }
   
   .songAside {
@@ -2688,14 +3795,21 @@ main.container{ animation: fadeUp .2s ease; }
   .youtubeCard {
     padding: 16px;
     margin-bottom: 16px;
+    width: 100% !important; /* songWrap genişliği kadar */
+    max-width: 100% !important;
+    box-sizing: border-box;
   }
   
   .youtubeCard iframe {
     height: 200px;
+    width: 100%;
   }
   
   .recsContainer {
     padding: 0;
+    width: 100% !important; /* songWrap genişliği kadar */
+    max-width: 100% !important;
+    box-sizing: border-box;
   }
   
   .resultsHeader {
@@ -2709,13 +3823,16 @@ main.container{ animation: fadeUp .2s ease; }
   
   .list .item {
     padding: 10px 0;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: row !important; /* Buton şarkıyla aynı satırda */
+    align-items: center !important; /* Dikey ortalama */
+    gap: 12px;
+    justify-content: space-between;
   }
   
   .list .item__left {
-    width: 100%;
+    flex: 1; /* Kalan alanı kapla */
+    min-width: 0; /* Taşmayı önle */
+    width: auto;
   }
   
   .list .item__title {
@@ -2727,9 +3844,22 @@ main.container{ animation: fadeUp .2s ease; }
   }
   
   .list .open {
-    width: 100%;
-    padding: 8px;
+    width: auto !important; /* Otomatik genişlik */
+    min-width: auto;
+    padding: 6px 14px !important; /* Kompakt padding */
     font-size: 12px;
+    flex-shrink: 0; /* Küçülmesin */
+  }
+  
+  /* Mobilde Hemû butonu */
+  .recsContainer__footer {
+    padding: 12px 16px !important;
+    border-top: 1px solid rgba(255,255,255,.1);
+  }
+  
+  .recsContainer__allBtn {
+    padding: 10px 16px !important;
+    font-size: 13px !important;
   }
   
   /* Edit Panel - Mobile */
@@ -2751,20 +3881,56 @@ main.container{ animation: fadeUp .2s ease; }
     gap: 12px;
   }
   
+  .editPanel__fields .authField {
+    padding: 0;
+    margin: 0;
+    align-items: stretch;
+  }
+  
+  .editPanel__fields .authField .suggestList {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+    justify-content: center;
+  }
+  
   .editPanel--paper .authInput {
     font-size: 13px;
     padding: 10px 12px;
   }
   
   .editTextareaField {
-    padding: 0 16px;
+    padding: 0 !important; /* Padding kaldırıldı - tam genişlik için */
     margin-top: 16px;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
   
   .editPanel--paper .editTextarea {
-    font-size: 14px;
-    padding: 16px;
-    min-height: 400px;
+    /* Mobilde TXT formatını koru - chordText ile aynı ayarlar */
+    font-size: 11px !important; /* Biraz büyütüldü - okunabilirlik için */
+    line-height: 1.8 !important; /* Daha okunabilir */
+    padding: 12px 10px !important; /* Padding azaltıldı */
+    min-height: 300px !important; /* Minimum yükseklik - mobilde daha yüksek */
+    max-height: 60vh !important; /* Maksimum yükseklik - ekran yüksekliğinin %60'ı */
+    height: auto !important; /* İçeriğe göre otomatik */
+    max-height: none !important; /* Maksimum yükseklik yok */
+    white-space: pre !important; /* pre-wrap DEĞİL - txt formatını korumak için */
+    word-wrap: normal !important; /* break-word DEĞİL - akorlar ve sözler kırılmamalı */
+    overflow-x: auto !important; /* Yatay scroll VAR - uzun satırlar için */
+    overflow-y: auto !important; /* Dikey scroll VAR */
+    resize: vertical !important; /* Dikey resize */
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    font-family: var(--font-mono) !important; /* Monospace font - karakter hizalaması için */
+    tab-size: 4 !important; /* Tab karakterleri için */
+    letter-spacing: -0.03em !important; /* Karakterler arası boşluk azaltıldı */
   }
   
   .editActions {
@@ -2779,9 +3945,90 @@ main.container{ animation: fadeUp .2s ease; }
   }
   
   .editNotice {
-    margin: 0 16px 20px 16px;
+    margin: 0 auto 20px auto;
     padding: 12px;
     font-size: 12px;
+    max-width: calc(100% - 32px);
+    text-align: center;
+  }
+  
+  .editPanel--paper .editNotice {
+    margin: 0 auto 16px auto;
+    max-width: calc(100% - 32px);
+  }
+  
+  /* Song Nav Row - Mobile (2 Satır Düzeni) */
+  .songNavRow {
+    margin: 24px 0 0 !important;
+    padding: 16px 0 !important;
+    gap: 12px !important;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  
+  /* 1. Satır: Sol - Strana berê, Sağ - Strana paş */
+  .songNavRow #prevSongBtn {
+    order: 1;
+    flex: 0 0 auto;
+  }
+  
+  .songNavRow #nextSong {
+    order: 2;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  
+  .songNavRow .btn--lg {
+    font-size: 11px !important;
+    padding: 6px 12px !important;
+    height: 32px !important;
+    min-width: auto;
+  }
+  
+  /* 2. Satır: Sağ tarafta nextSongMeta (Strana paş butonunun altında) */
+  .nextSongInline {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 8px !important;
+    width: auto;
+  }
+  
+  .nextSongInline #nextSongBtn {
+    order: 1;
+  }
+  
+  .nextSongMeta {
+    order: 2;
+    padding: 6px 10px !important;
+    gap: 6px !important;
+    border-radius: 6px;
+    margin-top: 0;
+    cursor: pointer;
+  }
+  
+  .nextSongMeta:hover {
+    background: rgba(255,255,255,.12) !important;
+  }
+  
+  .nextSongMeta:active {
+    background: rgba(255,255,255,.1) !important;
+  }
+  
+  .nextSongTitle {
+    font-size: 11px !important;
+    font-weight: 600;
+  }
+  
+  .nextSongArtist {
+    font-size: 10px !important;
+  }
+  
+  .nextSongSep {
+    font-size: 10px;
   }
   
   /* All Songs Page - Mobile */
@@ -2790,13 +4037,22 @@ main.container{ animation: fadeUp .2s ease; }
   }
   
   .resultsHeader {
-    padding: 16px;
-    flex-direction: column;
+    padding: 12px 16px;
+    flex-direction: row;
     gap: 12px;
   }
   
   .resultsHeader__title {
-    font-size: 18px;
+    font-size: 14px;
+  }
+  
+  .resultsHeader__left {
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .resultsHeader__right {
+    align-items: center;
   }
   
   .filterBar {
@@ -2861,11 +4117,21 @@ main.container{ animation: fadeUp .2s ease; }
   .heroCard__buttons {
     flex-direction: column;
     gap: 10px;
+    align-items: center;
+    justify-content: center;
   }
   
   .heroCard__btn {
-    width: 100%;
+    width: auto;
     padding: 12px;
+  }
+  
+  .heroCard__welcomeText {
+    font-size: 24px;
+  }
+  
+  .welcome-char {
+    font-size: inherit;
   }
   
   .homeIntro {
@@ -2938,6 +4204,17 @@ main.container{ animation: fadeUp .2s ease; }
   .artistCard {
     padding: 16px;
     border-radius: 12px;
+  }
+  
+  /* Profil sayfası - Mobilde Derkeve butonunu sola al */
+  .profileActions {
+    align-items: flex-start !important;
+  }
+  
+  .profileHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 }
 
@@ -3047,12 +4324,71 @@ main.container{ animation: fadeUp .2s ease; }
     max-width: 480px;
     padding: 32px 28px;
   }
+  
+  /* Tablet'te de transposeActions içindeki favori ikonunu gizle */
+  .transposeActions .favHeart,
+  .editToggleRow .favHeart {
+    display: none !important;
+  }
+  
+  /* Tablet'te songHeader__actions içindeki favori ikonunu göster */
+  .songHeader__actions {
+    display: flex !important;
+  }
+  
+  /* Tablet'te animasyonlu yazıyı görünür yap */
+  .heroCard__welcome {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .heroCard__welcomeText {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .heroCard__actions {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .welcome-char {
+    display: inline-block !important;
+    visibility: visible !important;
+  }
 }
 
 /* ============================================
    BREAKPOINT 3: DESKTOP (> 1024px)
    ============================================ */
 @media (min-width: 1025px) {
+  /* Büyük ekranlarda animasyonlu yazıyı görünür yap */
+  .heroCard__welcome {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .heroCard__welcomeText {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .heroCard__actions {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .welcome-char {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
   /* Song Page - Desktop */
   .songPage {
     grid-template-columns: 1fr 320px;
@@ -3074,6 +4410,28 @@ main.container{ animation: fadeUp .2s ease; }
   /* Home Page - Desktop */
   .homeIntro {
     grid-template-columns: 1.15fr 0.85fr;
+  }
+  
+  /* PC'de transposeActions içindeki favori ikonunu gizle */
+  .transposeActions .favHeart,
+  .editToggleRow .favHeart {
+    display: none !important;
+  }
+  
+  /* PC'de songHeader__actions içindeki favori ikonunu göster */
+  .songHeader__actions {
+    display: flex !important;
+  }
+  
+  /* PC'de song sayfasında sadece songHeader__actions içindeki favoriteBtn'i göster */
+  .songHeader__actions .favoriteBtn {
+    display: inline-flex !important;
+  }
+  
+  /* PC'de transposeActions içindeki favoriteBtn'i gizle (çift kalp sorunu) */
+  .transposeActions .favoriteBtn,
+  .editToggleRow .favoriteBtn {
+    display: none !important;
   }
 }
 
@@ -3196,5 +4554,484 @@ main.container{ animation: fadeUp .2s ease; }
   body {
     background: white;
     color: black;
+  }
+}
+
+/* ============================================
+   EDIT PANEL ENHANCEMENTS
+   ============================================ */
+
+/* Tools Row */
+.editPanel__tools {
+  padding: 8px 28px;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  background: transparent;
+}
+
+.editToolsRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.btn--compact {
+  padding: 5px 10px;
+  font-size: 11px;
+  min-height: 28px;
+  border-radius: 5px;
+  background: #f1f5f9;
+  border: 1px solid rgba(0,0,0,.08);
+  color: #475569;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.btn--compact:hover {
+  background: #e2e8f0;
+  border-color: rgba(0,0,0,.12);
+  color: #334155;
+  transform: translateY(-1px);
+}
+
+.btn--compact:active {
+  transform: translateY(0);
+  background: #cbd5e1;
+}
+
+.templateButtons {
+  display: flex;
+  gap: 4px;
+}
+
+.chordDictionary {
+  position: relative;
+  margin-left: auto;
+}
+
+.btn--small {
+  padding: 5px 10px;
+  font-size: 11px;
+  min-height: 28px;
+  border-radius: 5px;
+}
+
+.btn--tiny {
+  padding: 4px 8px;
+  font-size: 10px;
+  min-height: 24px;
+  border-radius: 4px;
+}
+
+
+.chordDictionaryPanel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+  z-index: 100;
+  min-width: 300px;
+  max-width: 500px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.chordDictionaryPanel.is-hidden {
+  display: none;
+}
+
+.chordDictTitle {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 12px;
+  color: #0f172a;
+}
+
+.chordDictGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 8px;
+}
+
+.chordDictBtn {
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid rgba(0,0,0,.1);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.chordDictBtn:hover {
+  background: #f97316;
+  color: #ffffff;
+  border-color: #f97316;
+  transform: translateY(-1px);
+}
+
+
+
+/* Textarea Header */
+.editTextareaHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.editTextareaMeta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 11px;
+}
+
+.charCount,
+.chordCount {
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* Textarea Wrapper */
+.editTextareaWrapper {
+  position: relative;
+}
+
+/* Textarea with Line Numbers */
+.textareaWithLines {
+  position: relative;
+  display: flex;
+  background: #ffffff;
+  border: 2px solid rgba(0,0,0,.1);
+  border-left: 4px solid #f97316;
+  border-radius: 0;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.textareaWithLines:focus-within {
+  border-color: #f97316;
+  box-shadow: 
+    0 0 0 3px rgba(249,115,22,.1),
+    0 4px 12px rgba(0,0,0,.08);
+}
+
+.lineNumbers {
+  min-width: 45px;
+  padding: 16px 6px 16px 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 2.2;
+  color: #94a3b8;
+  background: #f8fafc;
+  border-right: 1px solid rgba(0,0,0,.08);
+  text-align: right;
+  user-select: none;
+  white-space: pre;
+  word-wrap: normal;
+  tab-size: 4;
+  letter-spacing: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.lineNumbers .lineNumber {
+  display: block;
+  min-height: 1.5em;
+  transition: color 0.2s ease;
+}
+
+.lineNumbers .lineNumber.current-line {
+  color: #f97316;
+  font-weight: 600;
+  background: rgba(249, 115, 22, 0.08);
+  padding: 0 4px;
+  margin: 0 -4px;
+  border-radius: 3px;
+}
+
+.lineNumbers .lineNumber.has-error {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 0 4px;
+  margin: 0 -4px;
+  border-radius: 3px;
+}
+
+.editTextareaWrapper .editTextarea {
+  flex: 1;
+  border: none;
+  border-left: none;
+  border-radius: 0;
+  padding: 16px 20px;
+  padding-left: 12px;
+  box-shadow: none;
+}
+
+.editTextareaWrapper .editTextarea:focus {
+  border: none;
+  box-shadow: none;
+  outline: none;
+}
+
+.editTextareaWrapper .editTextarea:hover {
+  border: none;
+  box-shadow: none;
+}
+
+.editTextareaWrapper .editPreview {
+  position: absolute;
+  top: 0;
+  left: 45px; /* Line numbers width */
+  right: 0;
+  bottom: 0;
+  padding: 16px 20px;
+  padding-left: 12px;
+  overflow: auto;
+}
+
+/* Responsive line numbers */
+@media (max-width: 768px) {
+  .lineNumbers {
+    min-width: 35px;
+    padding: 12px 4px 12px 6px;
+    font-size: 11px;
+  }
+  
+  .editTextareaWrapper .editPreview {
+    left: 35px;
+    padding: 12px 10px;
+    padding-left: 8px;
+  }
+  
+  .editTextareaWrapper .editTextarea {
+    padding: 12px 10px;
+    padding-left: 8px;
+    font-size: 11px;
+    line-height: 1.8;
+  }
+  
+  .textareaWithLines {
+    border-width: 1.5px;
+    border-left-width: 3px;
+  }
+}
+
+
+.editPreview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20px 24px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 2.2;
+  white-space: pre;
+  word-wrap: normal;
+  color: #0f172a;
+  background: #ffffff;
+  border: 2px solid rgba(0,0,0,.1);
+  border-left: 4px solid #f97316;
+  border-radius: 0;
+  pointer-events: none;
+  overflow: auto;
+  z-index: 10;
+}
+
+.editPreview.is-hidden {
+  display: none;
+}
+
+.editPreview :global(.chordTok) {
+  font-weight: 700;
+  color: #f97316;
+}
+
+/* Validation Status */
+.validationStatus {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  min-height: 18px;
+  line-height: 1.4;
+}
+
+.validationStatus.has-errors {
+  background: rgba(239, 68, 68, .1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, .2);
+}
+
+.validationStatus.has-warnings {
+  background: rgba(245, 158, 11, .1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, .2);
+}
+
+.validationStatus.is-valid {
+  background: rgba(34, 197, 94, .1);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, .2);
+}
+
+/* Key Suggestion */
+.keySuggestion {
+  margin-top: 4px;
+  font-size: 11px;
+  font-style: italic;
+}
+
+/* Edit Actions */
+.editActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 28px 40px 36px 40px;
+  background: linear-gradient(to bottom, rgba(0,0,0,.02) 0%, transparent 100%);
+  border-top: 1px solid rgba(0,0,0,.06);
+}
+
+.editActionsLeft {
+  flex: 1;
+}
+
+.editActionsRight {
+  display: flex;
+  gap: 10px;
+}
+
+.keyboardHint {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+/* Mobilde klavye kısayolu yazısını gizle */
+@media (max-width: 768px) {
+  .keyboardHint {
+    display: none;
+  }
+}
+
+/* Highlight chords in textarea (using overlay) */
+.editTextarea.highlight-chords {
+  position: relative;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .editPanel__tools {
+    padding: 8px 16px;
+  }
+  
+  .editToolsRow {
+    gap: 4px;
+    justify-content: space-between;
+  }
+  
+  .chordDictionary {
+    margin-left: 0;
+  }
+  
+  .btn--compact {
+    padding: 4px 8px;
+    font-size: 10px;
+    min-height: 26px;
+  }
+  
+  /* Mobilde input'lar için daha iyi görünürlük */
+  .editPanel--paper .authInput {
+    font-size: 16px !important; /* iOS zoom önleme */
+    padding: 12px 14px !important;
+    min-height: 44px !important; /* Touch-friendly */
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  
+  /* Mobilde textarea için scroll iyileştirmesi */
+  .editPanel--paper .editTextarea {
+    -webkit-overflow-scrolling: touch; /* iOS smooth scroll */
+    min-height: 300px !important; /* Minimum yükseklik - mobilde daha yüksek */
+    max-height: 60vh !important; /* Maksimum yükseklik - ekran yüksekliğinin %60'ı */
+  }
+  
+  /* Mobilde input focus olduğunda görünür olsun */
+  .editPanel--paper .authInput:focus {
+    scroll-margin: 20px;
+    scroll-padding: 20px;
+  }
+  
+  .editPanel--paper .editTextarea:focus {
+    scroll-margin: 20px;
+    scroll-padding: 20px;
+  }
+  
+  /* Mobilde klavye açıldığında panel'in görünür olması */
+  .editPanel--paper {
+    scroll-padding-top: 20px;
+  }
+  
+  /* Mobilde butonlar için daha büyük touch target */
+  .editActions .btn {
+    min-height: 44px !important;
+    font-size: 15px !important;
+    padding: 12px 20px !important;
+  }
+  
+  /* Mobilde select için daha iyi görünüm */
+  .editPanel--paper select.authInput {
+    font-size: 16px !important;
+    padding: 12px 40px 12px 14px !important;
+    min-height: 44px !important;
+  }
+  
+  .chordDictionaryPanel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90vw;
+    max-height: 70vh;
+  }
+  
+  .editTextareaHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .editActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .editActionsLeft {
+    order: 2;
+    text-align: center;
+  }
+  
+  .editActionsRight {
+    order: 1;
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .editActionsRight .btn {
+    width: 100%;
   }
 }

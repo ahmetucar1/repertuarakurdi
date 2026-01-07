@@ -167,31 +167,53 @@ function init(){
 
   const updateStatusBulk = async (ids, action) => {
     const user = auth.currentUser;
-    if(!user || !window.isAdminUser?.(user)) return;
-    if(!ids.length) return;
-    const stamp = window.firebase?.firestore?.FieldValue?.serverTimestamp?.() || null;
-    const batch = db.batch();
-    ids.forEach((id) => {
-      const ref = db.collection("song_submissions").doc(id);
-      if(action === "approve"){
-        batch.set(ref, {
-          status: "approved",
-          approvedAt: stamp,
-          approvedBy: user.uid,
-          approvedByEmail: user.email || ""
-        }, { merge: true });
-      }
-      if(action === "reject"){
-        batch.set(ref, {
-          status: "rejected",
-          rejectedAt: stamp,
-          rejectedBy: user.uid,
-          rejectedByEmail: user.email || ""
-        }, { merge: true });
-      }
-    });
-    await batch.commit();
-    clearSongsCache?.();
+    if(!user || !window.isAdminUser?.(user)) {
+      if(statusEl) statusEl.textContent = "Yetkin yok.";
+      return;
+    }
+    if(!ids.length) {
+      if(statusEl) statusEl.textContent = "Tiştek nehate hilbijartin.";
+      return;
+    }
+    
+    try {
+      if(statusEl) statusEl.textContent = action === "approve" ? "Pejirandin…" : "Redkirin…";
+      const stamp = window.firebase?.firestore?.FieldValue?.serverTimestamp?.() || null;
+      const batch = db.batch();
+      ids.forEach((id) => {
+        const ref = db.collection("song_submissions").doc(id);
+        if(action === "approve"){
+          batch.set(ref, {
+            status: "approved",
+            approvedAt: stamp,
+            approvedBy: user.uid,
+            approvedByEmail: user.email || ""
+          }, { merge: true });
+        }
+        if(action === "reject"){
+          batch.set(ref, {
+            status: "rejected",
+            rejectedAt: stamp,
+            rejectedBy: user.uid,
+            rejectedByEmail: user.email || ""
+          }, { merge: true });
+        }
+      });
+      await batch.commit();
+      window.clearSongsCache?.();
+      if(statusEl) statusEl.textContent = action === "approve" 
+        ? `${ids.length} şandî pejirandî.` 
+        : `${ids.length} şandî redkirî.`;
+      setTimeout(() => {
+        if(statusEl) statusEl.textContent = "Şandiyên li bendê";
+      }, 2000);
+    } catch(err) {
+      console.error("Admin işlemi başarısız:", err);
+      if(statusEl) statusEl.textContent = `Çewtiyek çêbû: ${err?.message || "Nenas"}`;
+      setTimeout(() => {
+        if(statusEl) statusEl.textContent = "Şandiyên li bendê";
+      }, 3000);
+    }
   };
 
   auth.onAuthStateChanged((user) => {
@@ -283,6 +305,93 @@ function init(){
 
   approveSelectedEdit?.addEventListener("click", () => updateStatusBulk(collectSelected(editListEl), "approve"));
   rejectSelectedEdit?.addEventListener("click", () => updateStatusBulk(collectSelected(editListEl), "reject"));
+  
+  // Responsive search - icon'a tıklayınca açılması
+  function initResponsiveSearch() {
+    const searchHeaders = document.querySelectorAll(".search--header");
+    searchHeaders.forEach(searchEl => {
+      const input = searchEl.querySelector(".search__input");
+      const icon = searchEl.querySelector(".search__icon");
+      if(!input || !icon) return;
+      
+      function checkScreenSize() {
+        if(window.innerWidth <= 639) {
+          searchEl.classList.add("search--icon-only");
+        } else {
+          searchEl.classList.remove("search--icon-only", "search--open");
+          document.body.classList.remove("search-open");
+        }
+      }
+      
+      checkScreenSize();
+      window.addEventListener("resize", checkScreenSize);
+      
+      icon.addEventListener("click", (e) => {
+        if(window.innerWidth <= 639) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          const isOpen = searchEl.classList.contains("search--open");
+          if(isOpen) {
+            searchEl.classList.remove("search--open");
+            input.blur();
+            document.body.classList.remove("search-open");
+          } else {
+            searchEl.classList.add("search--open");
+            document.body.classList.add("search-open");
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                input.focus();
+              });
+            });
+          }
+        }
+      });
+      
+      input.addEventListener("click", (e) => {
+        if(window.innerWidth <= 639) {
+          e.stopPropagation();
+          if(!searchEl.classList.contains("search--open")) {
+            searchEl.classList.add("search--open");
+            document.body.classList.add("search-open");
+          }
+        }
+      });
+      
+      input.addEventListener("blur", (e) => {
+        if(window.innerWidth <= 639 && !input.value) {
+          const relatedTarget = e.relatedTarget;
+          if(relatedTarget && relatedTarget.closest(".search")) {
+            return;
+          }
+          setTimeout(() => {
+            if(document.activeElement !== input && !input.value) {
+              searchEl.classList.remove("search--open");
+              document.body.classList.remove("search-open");
+            }
+          }, 300);
+        }
+      });
+      
+      let scrollTimeout;
+      function handleScroll() {
+        if(window.innerWidth <= 639 && searchEl.classList.contains("search--open") && !input.value) {
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            if(!input.value) {
+              searchEl.classList.remove("search--open");
+              document.body.classList.remove("search-open");
+              input.blur();
+            }
+          }, 150);
+        }
+      }
+      
+      window.addEventListener("scroll", handleScroll, { passive: true });
+    });
+  }
+  
+  initResponsiveSearch();
 }
 
 init();

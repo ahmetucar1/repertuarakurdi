@@ -312,9 +312,17 @@ async function init(){
   if(nextSong && nextBtn && nextTitle && nextArtist){
     nextTitle.textContent = window.formatSongTitle ? window.formatSongTitle(nextSong.song) : (nextSong.song || "—");
     nextArtist.innerHTML = artistLinks(nextSong.artist);
-    nextBtn.addEventListener("click", () => {
+    const nextSongClickHandler = () => {
       location.href = openLink(nextSong);
-    });
+    };
+    nextBtn.addEventListener("click", nextSongClickHandler);
+    
+    // nextSongMeta'ya da aynı işlevi ekle
+    const nextSongMeta = document.querySelector(".nextSongMeta");
+    if(nextSongMeta){
+      nextSongMeta.style.cursor = "pointer";
+      nextSongMeta.addEventListener("click", nextSongClickHandler);
+    }
   } else if(nextWrap) {
     nextWrap.style.display = "none";
   }
@@ -332,7 +340,8 @@ async function init(){
   const keyGrid = document.getElementById("keyGrid");
   const textPre = document.getElementById("songText");
   const favBtn = document.getElementById("favBtn");
-  const favHeart = document.getElementById("favHeart");
+  const favoriteBtn = document.getElementById("favoriteBtn");
+  const favoriteBtn2 = document.getElementById("favoriteBtn2");
   const favStatus = document.getElementById("favStatus");
   const editToggleRow = document.getElementById("editToggleRow");
   const editToggle = document.getElementById("editToggle");
@@ -422,13 +431,15 @@ async function init(){
     }
   };
   const updateFavUI = (animate = false) => {
-    if(favHeart){
-      favHeart.classList.toggle("is-active", favActive);
-      favHeart.setAttribute("aria-pressed", favActive ? "true" : "false");
-      if(animate){
-        favHeart.classList.add("is-anim");
-        setTimeout(() => favHeart.classList.remove("is-anim"), 220);
-      }
+    // favoriteBtn güncelle
+    if(favoriteBtn){
+      favoriteBtn.classList.toggle("is-favorite", favActive);
+      favoriteBtn.setAttribute("aria-pressed", favActive ? "true" : "false");
+    }
+    // favoriteBtn2 güncelle (transposeBar içindeki)
+    if(favoriteBtn2){
+      favoriteBtn2.classList.toggle("is-favorite", favActive);
+      favoriteBtn2.setAttribute("aria-pressed", favActive ? "true" : "false");
     }
   };
   updateFavUI();
@@ -450,29 +461,29 @@ async function init(){
         }, "Ji bo favorîkirinê divê tu têkevî.");
       } else {
         // Fallback: Manuel olarak auth panelini aç
-        const authPanel = document.getElementById("authPanel");
-        let authOverlay = document.getElementById("authOverlay");
-        
-        if(!authOverlay){
-          authOverlay = document.createElement("div");
-          authOverlay.id = "authOverlay";
-          authOverlay.className = "authOverlay";
-          document.body.appendChild(authOverlay);
-        }
-        
-        if(authPanel){
-          authPanel.classList.add("is-open");
-          authPanel.setAttribute("aria-hidden", "false");
-          document.body.classList.add("auth-open");
-        }
-        if(authOverlay){
-          authOverlay.classList.add("is-open");
-        }
-        const authStatus = document.getElementById("authStatus");
-        if(authStatus){
-          authStatus.textContent = "Ji bo favorîkirinê divê tu têkevî.";
-          authStatus.style.color = "#ef4444";
-        }
+      const authPanel = document.getElementById("authPanel");
+      let authOverlay = document.getElementById("authOverlay");
+      
+      if(!authOverlay){
+        authOverlay = document.createElement("div");
+        authOverlay.id = "authOverlay";
+        authOverlay.className = "authOverlay";
+        document.body.appendChild(authOverlay);
+      }
+      
+      if(authPanel){
+        authPanel.classList.add("is-open");
+        authPanel.setAttribute("aria-hidden", "false");
+        document.body.classList.add("auth-open");
+      }
+      if(authOverlay){
+        authOverlay.classList.add("is-open");
+      }
+      const authStatus = document.getElementById("authStatus");
+      if(authStatus){
+        authStatus.textContent = "Ji bo favorîkirinê divê tu têkevî.";
+        authStatus.style.color = "#ef4444";
+      }
       }
       return;
     }
@@ -505,13 +516,13 @@ async function init(){
   };
 
   // Tüm favori butonlarına event listener ekle
-  const favButtons = document.querySelectorAll(".favHeart");
+  const favButtons = document.querySelectorAll(".favoriteBtn");
   if(favButtons.length > 0){
     favButtons.forEach(btn => {
       btn.addEventListener("click", toggleFavorite);
     });
-  } else if(favHeart){
-    favHeart.addEventListener("click", toggleFavorite);
+  } else if(favoriteBtn){
+    favoriteBtn.addEventListener("click", toggleFavorite);
   }
 
   const auth = window.fbAuth;
@@ -549,6 +560,13 @@ async function init(){
     });
   }
 
+  // Textarea yüksekliğini içeriğe göre ayarla
+  const adjustTextareaHeight = (textarea) => {
+    if(!textarea) return;
+    textarea.style.height = 'auto'; // Önce sıfırla
+    textarea.style.height = textarea.scrollHeight + 'px'; // İçeriğe göre ayarla
+  };
+
   const fillEditForm = () => {
     if(editSong) editSong.value = current?.song || "";
     if(editArtist) editArtist.value = artistInputValue(current?.artist);
@@ -565,7 +583,11 @@ async function init(){
       }
       editKey.value = rawKey;
     }
-    if(editText) editText.value = (textPre?.dataset?.baseText || "").toString();
+    if(editText) {
+      editText.value = (textPre?.dataset?.baseText || "").toString();
+      // Textarea yüksekliğini ayarla
+      setTimeout(() => adjustTextareaHeight(editText), 0);
+    }
     if(editNotice) editNotice.textContent = "";
   };
 
@@ -591,10 +613,14 @@ async function init(){
           fillEditForm();
           if(imgWrap) imgWrap.style.display = "none";
           editPanel.classList.remove("is-hidden");
+          // Panel açıldıktan sonra textarea yüksekliğini ayarla
+          setTimeout(() => {
+            if(editText) adjustTextareaHeight(editText);
+          }, 100);
         }, "Ji bo guhertinê divê tu têkevî.");
       } else {
         // Fallback: Manuel olarak auth panelini aç
-        const authPanel = document.getElementById("authPanel");
+      const authPanel = document.getElementById("authPanel");
         let authOverlay = document.getElementById("authOverlay");
         
         if(!authOverlay){
@@ -602,21 +628,21 @@ async function init(){
           authOverlay.id = "authOverlay";
           authOverlay.className = "authOverlay";
           document.body.appendChild(authOverlay);
-        }
-        
-        if(authPanel){
-          authPanel.classList.add("is-open");
-          authPanel.setAttribute("aria-hidden", "false");
-          document.body.classList.add("auth-open");
-        }
+      }
+      
+      if(authPanel){
+        authPanel.classList.add("is-open");
+        authPanel.setAttribute("aria-hidden", "false");
+        document.body.classList.add("auth-open");
+      }
         if(authOverlay){
           authOverlay.classList.add("is-open");
-        }
+      }
         const authStatus = document.getElementById("authStatus");
-        if(authStatus){
-          authStatus.textContent = "Ji bo guhertinê divê tu têkevî.";
-          authStatus.style.color = "#ef4444";
-        }
+      if(authStatus){
+        authStatus.textContent = "Ji bo guhertinê divê tu têkevî.";
+        authStatus.style.color = "#ef4444";
+      }
       }
       return;
     }
@@ -630,6 +656,10 @@ async function init(){
       // Şarkı içeriğini gizle, düzenleme panelini göster
       if(imgWrap) imgWrap.style.display = "none";
       editPanel.classList.remove("is-hidden");
+      // Panel açıldıktan sonra textarea yüksekliğini ayarla
+      setTimeout(() => {
+        if(editText) adjustTextareaHeight(editText);
+      }, 100);
     } else {
       // Şarkı içeriğini göster, düzenleme panelini gizle
       if(imgWrap) imgWrap.style.display = "";
@@ -664,8 +694,8 @@ async function init(){
           editSave?.click();
         }, "Ji bo guhertinê divê tu têkevî.");
       } else {
-        editNotice.textContent = "Ji bo guhertinê divê tu têkevî.";
-        editNotice.style.color = "#ef4444";
+      editNotice.textContent = "Ji bo guhertinê divê tu têkevî.";
+      editNotice.style.color = "#ef4444";
       }
       return;
     }
@@ -702,7 +732,7 @@ async function init(){
         updatedAt: stamp,
         createdAt: stamp
       });
-      
+
       console.log("✅ Şarkı düzenlemesi veritabanına kaydedildi:", docRef.id);
       console.log("📝 Kaydedilen veri:", {
         type: "edit",
@@ -821,6 +851,94 @@ async function init(){
   renderRecs();
   const shuffleBtn = document.getElementById("shuffleRec");
   if(shuffleBtn) shuffleBtn.addEventListener("click", renderRecs);
+  
+  // Responsive search - icon'a tıklayınca açılması
+  function initResponsiveSearch() {
+    const searchHeaders = document.querySelectorAll(".search--header");
+    searchHeaders.forEach(searchEl => {
+      const input = searchEl.querySelector(".search__input");
+      const icon = searchEl.querySelector(".search__icon");
+      if(!input || !icon) return;
+      
+      // Küçük ekranlarda icon-only modunu aktif et
+      function checkScreenSize() {
+        if(window.innerWidth <= 639) {
+          searchEl.classList.add("search--icon-only");
+        } else {
+          searchEl.classList.remove("search--icon-only", "search--open");
+          document.body.classList.remove("search-open");
+        }
+      }
+      
+      checkScreenSize();
+      window.addEventListener("resize", checkScreenSize);
+      
+      icon.addEventListener("click", (e) => {
+        if(window.innerWidth <= 639) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          const isOpen = searchEl.classList.contains("search--open");
+          if(isOpen) {
+            searchEl.classList.remove("search--open");
+            input.blur();
+            document.body.classList.remove("search-open");
+          } else {
+            searchEl.classList.add("search--open");
+            document.body.classList.add("search-open");
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                input.focus();
+              });
+            });
+          }
+        }
+      });
+      
+      input.addEventListener("click", (e) => {
+        if(window.innerWidth <= 639) {
+          e.stopPropagation();
+          if(!searchEl.classList.contains("search--open")) {
+            searchEl.classList.add("search--open");
+            document.body.classList.add("search-open");
+          }
+        }
+      });
+      
+      input.addEventListener("blur", (e) => {
+        if(window.innerWidth <= 639 && !input.value) {
+          const relatedTarget = e.relatedTarget;
+          if(relatedTarget && relatedTarget.closest(".search")) {
+            return;
+          }
+          setTimeout(() => {
+            if(document.activeElement !== input && !input.value) {
+              searchEl.classList.remove("search--open");
+              document.body.classList.remove("search-open");
+            }
+          }, 300);
+        }
+      });
+      
+      let scrollTimeout;
+      function handleScroll() {
+        if(window.innerWidth <= 639 && searchEl.classList.contains("search--open") && !input.value) {
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            if(!input.value) {
+              searchEl.classList.remove("search--open");
+              document.body.classList.remove("search-open");
+              input.blur();
+            }
+          }, 150);
+        }
+      }
+      
+      window.addEventListener("scroll", handleScroll, { passive: true });
+    });
+  }
+  
+  initResponsiveSearch();
 }
 
 init().catch(console.error);

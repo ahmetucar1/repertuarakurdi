@@ -220,6 +220,74 @@ async function init(){
     updateSearchState();
     render();
   });
+
+  // Responsive search - icon'a tıklayınca açılması
+  function initResponsiveSearch() {
+    const searchHeaders = document.querySelectorAll(".search--header");
+    searchHeaders.forEach(searchEl => {
+      const input = searchEl.querySelector(".search__input");
+      const icon = searchEl.querySelector(".search__icon");
+      if(!input || !icon) return;
+      
+      // Küçük ekranlarda icon-only modunu aktif et
+      function checkScreenSize() {
+        if(window.innerWidth <= 768) {
+          searchEl.classList.add("search--icon-only");
+        } else {
+          searchEl.classList.remove("search--icon-only", "search--open");
+        }
+      }
+      
+      checkScreenSize();
+      window.addEventListener("resize", checkScreenSize);
+      
+      // Icon'a tıklayınca aç/kapat
+      icon.addEventListener("click", (e) => {
+        if(window.innerWidth <= 768) {
+          e.preventDefault();
+          e.stopPropagation();
+          if(searchEl.classList.contains("search--open")) {
+            searchEl.classList.remove("search--open");
+            input.blur();
+            document.body.classList.remove("search-open");
+          } else {
+            searchEl.classList.add("search--open");
+            document.body.classList.add("search-open");
+            setTimeout(() => input.focus(), 100);
+          }
+        }
+      });
+      
+      // Input'tan çıkınca kapat (sadece küçük ekranlarda)
+      input.addEventListener("blur", () => {
+        if(window.innerWidth <= 768 && !input.value) {
+          setTimeout(() => {
+            if(document.activeElement !== input) {
+              searchEl.classList.remove("search--open");
+              document.body.classList.remove("search-open");
+            }
+          }, 200);
+        }
+      });
+      
+      // Sayfa kaydırılınca search input'u kapat
+      let scrollTimeout;
+      function handleScroll() {
+        if(window.innerWidth <= 768 && searchEl.classList.contains("search--open")) {
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            searchEl.classList.remove("search--open");
+            document.body.classList.remove("search-open");
+            input.blur();
+          }, 150);
+        }
+      }
+      
+      window.addEventListener("scroll", handleScroll, { passive: true });
+    });
+  }
+  
+  initResponsiveSearch();
 }
 
 init().catch(err => {

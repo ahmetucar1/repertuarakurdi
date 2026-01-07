@@ -52,7 +52,9 @@ function renderList(){
     return;
   }
 
-  const q = norm($("#q")?.value || "");
+  const qTopbar = norm($("#q")?.value || "");
+  const q = qTopbar; // Sadece topbar search'ü kullan
+  
   let items = [];
   const intro = document.querySelector(".homeIntro");
 
@@ -61,6 +63,14 @@ function renderList(){
   }
   if(listWrap){
     listWrap.classList.toggle("is-searching", !!q);
+    // Mobilde arama yapıldığında body'ye class ekle
+    const isMobile = window.innerWidth <= 639;
+    if(isMobile && q) {
+      document.body.classList.add("has-search-results");
+      document.body.classList.remove("has-hero-search");
+    } else if(!q) {
+      document.body.classList.remove("has-search-results", "has-hero-search");
+    }
   }
   if(intro){
     // Tenê dema ku bi rastî lêgerîn hate kirin veşêre
@@ -147,32 +157,82 @@ function renderList(){
   // Favorileme butonlarına event listener ekle
   const favoriteBtns = listEl.querySelectorAll(".favoriteBtn");
   favoriteBtns.forEach(btn => {
-    btn.addEventListener("click", async (e) => {
+    // Eski event listener'ları temizlemek için butonu clone et ve değiştir
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    newBtn.addEventListener("click", async (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const songId = btn.getAttribute("data-song-id");
-      if(!songId) return;
+      e.stopImmediatePropagation();
+      
+      const songId = newBtn.getAttribute("data-song-id");
+      if(!songId) {
+        console.warn("No song ID found for favorite button");
+        return;
+      }
       
       // Stranê bibîne
       const song = items.find(s => {
         const sId = window.songId?.(s) || "";
         return sId === songId;
       });
-      if(!song) return;
+      if(!song) {
+        console.warn("Song not found for ID:", songId);
+        return;
+      }
       
-      const wasFavorite = btn.classList.contains("is-favorite");
+      console.log("Toggling favorite for song:", songId);
       const result = await window.toggleFavoriteSong?.(song);
+      console.log("Toggle result:", result);
       
       if(result === true){
-        // Favorilere eklendi
-        btn.classList.add("is-favorite");
-        userFavorites.push(songId);
+        // Favorilere eklendi - hemen UI'ı güncelle
+        newBtn.classList.add("is-favorite");
+        console.log("Added is-favorite class to button");
+        
+        // Favorileri yeniden yükle ve tüm butonları güncelle
+        const auth = window.fbAuth;
+        if(auth?.currentUser) {
+          userFavorites = await window.loadUserFavorites?.(auth.currentUser.uid) || [];
+          console.log("Reloaded favorites:", userFavorites.length);
+          
+          // Tüm favori butonlarını güncelle
+          const allFavBtns = listEl.querySelectorAll(".favoriteBtn");
+          allFavBtns.forEach(b => {
+            const id = b.getAttribute("data-song-id");
+            if(id && userFavorites.includes(id)) {
+              b.classList.add("is-favorite");
+            } else {
+              b.classList.remove("is-favorite");
+            }
+          });
+        }
       } else if(result === false){
-        // Favoriden çıkarıldı
-        btn.classList.remove("is-favorite");
-        userFavorites = userFavorites.filter(id => id !== songId);
+        // Favoriden çıkarıldı - hemen UI'ı güncelle
+        newBtn.classList.remove("is-favorite");
+        console.log("Removed is-favorite class from button");
+        
+        // Favorileri yeniden yükle ve tüm butonları güncelle
+        const auth = window.fbAuth;
+        if(auth?.currentUser) {
+          userFavorites = await window.loadUserFavorites?.(auth.currentUser.uid) || [];
+          console.log("Reloaded favorites:", userFavorites.length);
+          
+          // Tüm favori butonlarını güncelle
+          const allFavBtns = listEl.querySelectorAll(".favoriteBtn");
+          allFavBtns.forEach(b => {
+            const id = b.getAttribute("data-song-id");
+            if(id && userFavorites.includes(id)) {
+              b.classList.add("is-favorite");
+            } else {
+              b.classList.remove("is-favorite");
+            }
+          });
+        }
+      } else {
+        console.warn("Toggle favorite returned null, user may need to login");
       }
-      // result === null ise hata, değişiklik yapma
     });
   });
   
@@ -209,10 +269,10 @@ function renderList(){
 
 function updateSearchState(){
   const input = $("#q");
-  if(!input) return;
-  const wrap = input.closest(".search");
-  if(!wrap) return;
-  wrap.classList.toggle("has-value", !!input.value);
+  if(input){
+    const wrap = input.closest(".search");
+    if(wrap) wrap.classList.toggle("has-value", !!input.value);
+  }
 }
 
 function renderDiscover(){
@@ -431,9 +491,10 @@ async function init(){
         await loadFavorites(user);
       });
     } else {
-      console.log("Calling renderList()...");
+      console.log("Calling renderList() and renderHeroSearch()...");
       renderList();
-      console.log("renderList() completed");
+      renderHeroSearch();
+      console.log("renderList() and renderHeroSearch() completed");
     }
     
     // Son kontrol - eğer liste hala boşsa zorla render et
@@ -509,19 +570,136 @@ async function init(){
     }
   }
 
+  // Topbar search - HeroCard search'ten bağımsız
   $("#q")?.addEventListener("input", () => {
+    // HeroCard search ile senkronize etme - ayrı çalışsın
     updateSearchState();
+    // Mobilde arama yapıldığında body'ye class ekle
+    const isMobile = window.innerWidth <= 639;
+    if(isMobile && $("#q").value) {
+      document.body.classList.add("has-search-results");
+      document.body.classList.remove("has-hero-search");
+    } else if(!$("#q").value && !$("#qHero").value) {
+      document.body.classList.remove("has-search-results", "has-hero-search");
+    } else if(!$("#q").value) {
+      document.body.classList.remove("has-search-results");
+    }
     renderList();
   });
 
   $("#clear")?.addEventListener("click", () => {
     $("#q").value = "";
+    // Arama temizlendiğinde class'ları kaldır
+    document.body.classList.remove("has-search-results", "has-hero-search");
     homeSample = pickRandom(SONGS, 10);
     renderDiscover();
     renderList();
     updateSearchState();
     $("#q").focus();
   });
+
+  // HeroCard search kaldırıldı - artık welcome text var
+  
+  // HeroCard search için ayrı render fonksiyonu
+  // HeroCard search kaldırıldı - artık welcome text var
+  function renderHeroSearch() {
+    // Boş fonksiyon - artık kullanılmıyor
+  }
+
+  // Responsive search - icon'a tıklayınca açılması
+  function initResponsiveSearch() {
+    // Sadece topbar search'ü dahil et (heroCard search her zaman tam input)
+    const searchHeaders = document.querySelectorAll(".search--header");
+    searchHeaders.forEach(searchEl => {
+      const input = searchEl.querySelector(".search__input");
+      const icon = searchEl.querySelector(".search__icon");
+      if(!input || !icon) return;
+      
+      // Küçük ekranlarda icon-only modunu aktif et (sadece topbar için)
+      function checkScreenSize() {
+        if(window.innerWidth <= 639) {
+          searchEl.classList.add("search--icon-only");
+        } else {
+          searchEl.classList.remove("search--icon-only", "search--open");
+          document.body.classList.remove("search-open");
+        }
+      }
+      
+      checkScreenSize();
+      window.addEventListener("resize", checkScreenSize);
+      
+      icon.addEventListener("click", (e) => {
+        if(window.innerWidth <= 639) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          const isOpen = searchEl.classList.contains("search--open");
+          if(isOpen) {
+            searchEl.classList.remove("search--open");
+            input.blur();
+            document.body.classList.remove("search-open");
+          } else {
+            // Önce aç, sonra focus et
+            searchEl.classList.add("search--open");
+            document.body.classList.add("search-open");
+            // Focus'u biraz geciktir ki DOM güncellensin
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                input.focus();
+              });
+            });
+          }
+        }
+      });
+      
+      // Input'a tıklanınca açık kalmasını sağla
+      input.addEventListener("click", (e) => {
+        if(window.innerWidth <= 639) {
+          e.stopPropagation();
+          if(!searchEl.classList.contains("search--open")) {
+            searchEl.classList.add("search--open");
+            document.body.classList.add("search-open");
+          }
+        }
+      });
+      
+      // Input'tan çıkınca kapat (sadece küçük ekranlarda ve değer yoksa)
+      input.addEventListener("blur", (e) => {
+        if(window.innerWidth <= 639 && !input.value) {
+          // Related target kontrolü - eğer clear butonuna tıklanmışsa kapatma
+          const relatedTarget = e.relatedTarget;
+          if(relatedTarget && relatedTarget.closest(".search")) {
+            return;
+          }
+          setTimeout(() => {
+            if(document.activeElement !== input && !input.value) {
+              searchEl.classList.remove("search--open");
+              document.body.classList.remove("search-open");
+            }
+          }, 300);
+        }
+      });
+      
+      // Sayfa kaydırılınca search input'u kapat (sadece arama yapılmamışsa)
+      let scrollTimeout;
+      function handleScroll() {
+        if(window.innerWidth <= 639 && searchEl.classList.contains("search--open") && !input.value) {
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            if(!input.value) {
+              searchEl.classList.remove("search--open");
+              document.body.classList.remove("search-open");
+              input.blur();
+            }
+          }, 150);
+        }
+      }
+      
+      window.addEventListener("scroll", handleScroll, { passive: true });
+    });
+  }
+  
+  initResponsiveSearch();
 
   $("#shuffleDiscover")?.addEventListener("click", () => renderDiscover());
 
@@ -531,7 +709,7 @@ async function init(){
   // sağdaki küçük rastgele kutusu
   
 
-  $("#scrollTop")?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  // scrollTop butonu artık "Hemû" linki olarak all.html'e gidiyor, event listener'a gerek yok
 
   initAddSongPanel?.(async () => {
     SONGS = await loadSongs();
@@ -540,6 +718,37 @@ async function init(){
     renderDiscover();
     renderList();
   });
+
+  // Topbar'daki "Zêdeke" butonuna event listener ekle
+  const addSongMenuBtn = document.getElementById("addSongMenuBtn");
+  if(addSongMenuBtn){
+    // Mevcut event listener'ları temizlemek için butonu clone et
+    const newBtn = addSongMenuBtn.cloneNode(true);
+    addSongMenuBtn.parentNode.replaceChild(newBtn, addSongMenuBtn);
+    
+    newBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // openAddSongPanel fonksiyonu zaten giriş kontrolü yapıyor
+      if(typeof window.openAddSongPanel === "function"){
+        window.openAddSongPanel();
+      } else {
+        // Fallback: requireAuthAction kullan
+        if(typeof window.requireAuthAction === "function"){
+          window.requireAuthAction(() => {
+            const panel = document.getElementById("addSongPanel");
+            if(panel){
+              panel.classList.remove("is-hidden");
+              panel.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }, "Ji bo stran zêde kirinê divê tu têkevî.");
+        } else {
+          window.location.href = "index.html#add-song";
+        }
+      }
+    });
+  }
 
   initContactForm();
 }
