@@ -5,7 +5,7 @@ function makeId(s){
   if(typeof songId === "function") return songId(s);
   return `${s.pdf}|${s.page_original}`;
 }
-function openLink(s){ return `song.html?id=${encodeURIComponent(makeId(s))}`; }
+function openLink(s){ return `/song.html?id=${encodeURIComponent(makeId(s))}`; }
 
 function artistArr(a){
   const fmt = window.formatArtistName;
@@ -29,7 +29,7 @@ function artistLinks(a){
   const arr = artistArr(a);
   if(!arr.length) return "—";
   return arr.map(name => {
-    const href = `artist.html?name=${encodeURIComponent(name)}`;
+    const href = `/artist.html?name=${encodeURIComponent(name)}`;
     return `<a class="artistLink" href="${href}" title="Ji bo dîtina stranên hunermendê bikeve">${escapeHtml(name)}</a>`;
   }).join(" · ");
 }
@@ -241,7 +241,7 @@ function getIdParam(){
 }
 
 async function loadSongText(slug){
-  const res = await fetch(`assets/text/${slug}.txt`, { cache: "no-store" });
+  const res = await fetch(`/assets/text/${slug}.txt`, { cache: "no-store" });
   if(!res.ok) throw new Error(`Metin yok: ${slug}`);
   return res.text();
 }
@@ -678,7 +678,7 @@ async function init(){
         window.openAddSongPanel();
       } else {
         // Fallback: index.html'e yönlendir
-        location.href = "index.html#add-song";
+        location.href = "/index.html#add-song";
       }
     });
   }

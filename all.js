@@ -8,7 +8,7 @@ function makeId(s){
   if(typeof songId === "function") return songId(s);
   return `${s.pdf}|${s.page_original}`;
 }
-function openLink(s){ return `song.html?id=${encodeURIComponent(makeId(s))}`; }
+function openLink(s){ return `/song.html?id=${encodeURIComponent(makeId(s))}`; }
 
 function artistArr(a){
   if(Array.isArray(a)) return a.filter(Boolean).map(String);
@@ -24,7 +24,7 @@ function artistLinks(a){
   const arr = artistArr(a).map(name => fmt ? fmt(name) : name);
   if(!arr.length) return "—";
   return arr.map(name => {
-    const href = `artist.html?name=${encodeURIComponent(name)}`;
+    const href = `/artist.html?name=${encodeURIComponent(name)}`;
     return `<a class="artistLink" href="${href}">${escapeHtml(name)}</a>`;
   }).join(" · ");
 }

@@ -446,7 +446,7 @@ async function loadSongs(options = {}){
   let base = [];
   try{
     console.log("Fetching songs.json...");
-    const res = await fetch("assets/songs.json", { cache: "no-store" });
+    const res = await fetch("/assets/songs.json", { cache: "no-store" });
     console.log("songs.json response status:", res.status);
     if(res.ok) {
       base = await res.json();
@@ -1367,7 +1367,7 @@ window.initAddSongPanel = initAddSongPanel;
         window.openAddSongPanel();
         return;
       }
-      window.location.href = "index.html#add-song";
+      window.location.href = "/index.html#add-song";
     });
   });
 })();
@@ -1839,7 +1839,7 @@ window.initAddSongPanel = initAddSongPanel;
       await auth.signOut();
       setStatus("Derketin.");
       closePanel();
-      window.location.href = "index.html";
+      window.location.href = "/index.html";
     }catch(err){
       setStatus(translateError(err) || "Derketin bi ser neket.", true);
     }

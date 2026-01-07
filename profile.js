@@ -19,7 +19,7 @@ function escapeHtml(str){
 }
 
 function openSong(id){
-  return `song.html?id=${encodeURIComponent(id)}`;
+  return `/song.html?id=${encodeURIComponent(id)}`;
 }
 
 function toMs(ts){
@@ -117,7 +117,7 @@ function renderArtistFavorites(list, items){
   list.innerHTML = items.map(a => {
     const artistName = a.artist || "";
     const artistKeyValue = artistKey(artistName);
-    const artistLink = `artist.html?name=${encodeURIComponent(artistName)}`;
+    const artistLink = `/artist.html?name=${encodeURIComponent(artistName)}`;
     return `
     <div class="item" data-artist-key="${escapeHtml(artistKeyValue)}">
       <div class="item__left">
@@ -284,7 +284,7 @@ function init(){
     if(!ok) return;
     try{
       await auth.signOut();
-      window.location.href = "index.html";
+      window.location.href = "/index.html";
     }catch(err){
       if(profilePhotoStatus){
         profilePhotoStatus.textContent = err?.message || "Derketin bi ser neket.";
