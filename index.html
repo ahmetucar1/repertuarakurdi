@@ -340,7 +340,7 @@
           }
         };
         
-        // Timeout kontrolü - 30 saniye
+        // Timeout kontrolü - Mobil veri için 60 saniye (yavaş bağlantılar için)
         const timeoutId = setTimeout(() => {
           if(!resolved) {
             resolved = true;
@@ -349,7 +349,7 @@
             if(onError) onError();
             reject(new Error('Script load timeout: ' + src));
           }
-        }, 30000);
+        }, 60000); // 60 saniye - mobil veri için daha uzun
         
         // Timeout'u temizle
         script.onload = () => {
@@ -365,8 +365,8 @@
     
     // Firebase script'lerini sırayla yükle - Mobil veri uyumluluğu için retry mekanizması
     (async function() {
-      const maxRetries = 3;
-      const retryDelay = 2000; // 2 saniye
+      const maxRetries = 5; // 3'ten 5'e çıkarıldı - mobil veri için daha fazla deneme
+      const baseRetryDelay = 2000; // 2 saniye
       
       async function loadWithRetry(src, retries = maxRetries) {
         for(let i = 0; i < retries; i++) {
@@ -376,10 +376,12 @@
           } catch(err) {
             if(i < retries - 1) {
               // Production'da retry log'ları sessizce atla
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.search.includes('debug=true')) {
-          console.warn(`⚠️ Retry ${i + 1}/${retries} for:`, src);
-        }
-              await new Promise(resolve => setTimeout(resolve, retryDelay * (i + 1)));
+              if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.search.includes('debug=true')) {
+                console.warn(`⚠️ Retry ${i + 1}/${retries} for:`, src);
+              }
+              // Exponential backoff - her retry'da bekleme süresi artar
+              const delay = baseRetryDelay * Math.pow(2, i); // 2s, 4s, 8s, 16s, 32s
+              await new Promise(resolve => setTimeout(resolve, delay));
             } else {
               throw err;
             }

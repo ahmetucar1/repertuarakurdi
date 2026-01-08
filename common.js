@@ -429,9 +429,9 @@ function waitForFirebaseInit() {
   }
   
   __firebaseInitPromise = (async () => {
-    // Firebase SDK yüklenene kadar bekle
+    // Firebase SDK yüklenene kadar bekle - Mobil veri için daha uzun bekleme
     let retryCount = 0;
-    const maxRetries = 20; // 10 saniye
+    const maxRetries = 40; // 20 saniye (500ms * 40) - mobil veri için artırıldı
     while (retryCount < maxRetries && (!window.firebase || !window.fbAuth || !window.fbDb)) {
       await new Promise(resolve => setTimeout(resolve, 500));
       retryCount++;
@@ -448,7 +448,7 @@ function waitForFirebaseInit() {
         const timeout = setTimeout(() => {
           window.__authStateReady = true;
           resolve();
-        }, 2000); // Max 2 saniye bekle
+        }, 5000); // Max 5 saniye bekle - mobil veri için artırıldı
         const unsubscribe = window.fbAuth.onAuthStateChanged((user) => {
           clearTimeout(timeout);
           window.__authStateReady = true;
@@ -465,7 +465,7 @@ function waitForFirebaseInit() {
         await new Promise((resolve, reject) => {
           const timeout = setTimeout(() => {
             resolve(); // Timeout'ta devam et
-          }, 2000);
+          }, 5000); // 5 saniye - mobil veri için artırıldı
           
           // Firestore'un hazır olduğunu kontrol et
           if (window.fbDb._delegate && window.fbDb._delegate._databaseId) {
@@ -528,23 +528,35 @@ async function loadSongs(options = {}){
 
       let base = [];
       let jsonRetryCount = 0;
-      const jsonMaxRetries = 3;
+      const jsonMaxRetries = 5; // 3'ten 5'e çıkarıldı - mobil veri için daha fazla deneme
       
       while(jsonRetryCount < jsonMaxRetries && base.length === 0) {
         try{
+          // Mobil veri için daha uzun timeout
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 saniye timeout
+          
           const res = await fetch(`/assets/songs.json?v=${Date.now()}`, { 
             cache: "no-store",
+            signal: controller.signal,
             headers: {
               'Cache-Control': 'no-cache, no-store, must-revalidate',
               'Pragma': 'no-cache'
             }
           });
+          clearTimeout(timeoutId);
           if(res.ok) {
             base = await res.json();
             break;
           } else {
             // Retry without cache-busting
-            const retryRes = await fetch("/assets/songs.json", { cache: "no-store" });
+            const retryController = new AbortController();
+            const retryTimeoutId = setTimeout(() => retryController.abort(), 30000);
+            const retryRes = await fetch("/assets/songs.json", { 
+              cache: "no-store",
+              signal: retryController.signal
+            });
+            clearTimeout(retryTimeoutId);
             if(retryRes.ok) {
               base = await retryRes.json();
               break;
@@ -553,7 +565,9 @@ async function loadSongs(options = {}){
         }catch(err){
           jsonRetryCount++;
           if(jsonRetryCount < jsonMaxRetries) {
-            await new Promise(resolve => setTimeout(resolve, 1000 * jsonRetryCount));
+            // Exponential backoff - her retry'da bekleme süresi artar
+            const delay = 2000 * Math.pow(2, jsonRetryCount - 1); // 2s, 4s, 8s, 16s
+            await new Promise(resolve => setTimeout(resolve, delay));
           }
         }
       }
@@ -595,7 +609,7 @@ async function loadSongs(options = {}){
             const timeoutPromise = new Promise((resolve) => {
               setTimeout(() => {
                 resolve({ docs: [] });
-              }, 8000);
+              }, 20000); // 8 saniyeden 20 saniyeye çıkarıldı - mobil veri için
             });
             
             const snap = await Promise.race([firebasePromise, timeoutPromise]);

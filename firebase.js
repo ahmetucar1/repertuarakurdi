@@ -32,17 +32,36 @@
       if(!fb || !fb.initializeApp){
         warn("⚠️ Firebase SDK not loaded yet, will retry...");
         isInitializing = false;
-        setTimeout(initFirebase, 1000);
+        // Exponential backoff - her retry'da bekleme süresi artar
+        const retryCount = window.__firebaseRetryCount || 0;
+        window.__firebaseRetryCount = retryCount + 1;
+        const delay = Math.min(1000 * Math.pow(2, retryCount), 10000); // Max 10 saniye
+        setTimeout(() => {
+          window.__firebaseRetryCount = 0; // Reset after retry
+          initFirebase();
+        }, delay);
         return;
       }
+      
+      // Reset retry count on success
+      window.__firebaseRetryCount = 0;
       
       // Auth modülünün yüklenmesini kontrol et
       if(typeof fb.auth !== "function"){
         warn("⚠️ Firebase Auth module not loaded yet, will retry...");
         isInitializing = false;
-        setTimeout(initFirebase, 1000);
+        const retryCount = window.__firebaseAuthRetryCount || 0;
+        window.__firebaseAuthRetryCount = retryCount + 1;
+        const delay = Math.min(1000 * Math.pow(2, retryCount), 10000); // Max 10 saniye
+        setTimeout(() => {
+          window.__firebaseAuthRetryCount = 0;
+          initFirebase();
+        }, delay);
         return;
       }
+      
+      // Reset auth retry count on success
+      window.__firebaseAuthRetryCount = 0;
 
       const firebaseConfig = {
         apiKey: "AIzaSyDD9zwgpdM-nzJCL9XwYCGoopvZvEVpfmM",
