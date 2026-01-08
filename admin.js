@@ -49,12 +49,18 @@ function dedupeEdits(items){
 }
 
 function renderList(listEl, items, typeLabel){
-  if(!listEl) return;
-  if(!items.length){
+  console.log(`🔍 renderList called: typeLabel=${typeLabel}, items.length=${items?.length || 0}, listEl=${!!listEl}`);
+  if(!listEl) {
+    console.warn("❌ renderList: listEl is null");
+    return;
+  }
+  if(!items || !items.length){
+    console.log(`📭 renderList: No items for ${typeLabel}`);
     listEl.innerHTML = `<div class="empty">Bekleyen gönderi yok.</div>`;
     return;
   }
 
+  console.log(`✅ renderList: Rendering ${items.length} items for ${typeLabel}`);
   listEl.innerHTML = items.map(s => {
     const preview = (s.text || "").toString().split("\n").slice(0,4).join("\n");
     const title = window.formatSongTitle ? window.formatSongTitle(s.song) : (s.song || "—");
@@ -79,12 +85,18 @@ function renderList(listEl, items, typeLabel){
 }
 
 function renderContactList(listEl, items){
-  if(!listEl) return;
-  if(!items.length){
+  console.log(`🔍 renderContactList called: items.length=${items?.length || 0}, listEl=${!!listEl}`);
+  if(!listEl) {
+    console.warn("❌ renderContactList: listEl is null");
+    return;
+  }
+  if(!items || !items.length){
+    console.log("📭 renderContactList: No items");
     listEl.innerHTML = `<div class="empty">Henüz mesaj yok.</div>`;
     return;
   }
 
+  console.log(`✅ renderContactList: Rendering ${items.length} messages`);
   listEl.innerHTML = items.map((m) => {
     const name = m.name || "Adsız";
     const contact = m.contact || "—";
@@ -105,12 +117,18 @@ function renderContactList(listEl, items){
 
     return `
       <div class="item adminItem contactItem">
+        <label class="adminSelectWrap">
+          <input class="adminSelect contactSelect" type="checkbox" data-id="${m._id}" />
+        </label>
         <div class="item__left">
           <div class="item__title">${escapeHtml(name)}</div>
           <div class="item__sub">${escapeHtml(contact)}</div>
           <div class="muted" style="margin-top:6px; font-size:12px;">${escapeHtml(createdAt)}</div>
           <pre class="adminPreview contactPreview">${escapeHtml(message)}</pre>
           ${filesHtml}
+        </div>
+        <div class="badges adminActions">
+          <button class="btn btn--danger" data-action="delete" data-id="${m._id}">Jê bibe</button>
         </div>
       </div>
     `;
@@ -125,6 +143,7 @@ function collectSelected(listEl){
 }
 
 function init(){
+  console.log("🚀 Admin init() called");
   const statusEl = $("#adminStatus");
   const pendingCountEl = $("#pendingCount");
 
@@ -134,6 +153,13 @@ function init(){
   const editCountEl = $("#pendingEditCount");
   const contactListEl = $("#adminContactList");
   const contactCountEl = $("#contactCount");
+
+  console.log("🔍 Admin elements:", {
+    statusEl: !!statusEl,
+    newListEl: !!newListEl,
+    editListEl: !!editListEl,
+    contactListEl: !!contactListEl
+  });
 
   const approveAllNew = $("#approveAllNew");
   const approveSelectedNew = $("#approveSelectedNew");
@@ -147,7 +173,14 @@ function init(){
   const auth = window.fbAuth;
   const db = window.fbDb;
 
+  console.log("🔍 Admin Firebase:", {
+    auth: !!auth,
+    db: !!db,
+    isAdminUser: typeof window.isAdminUser
+  });
+
   if(!auth || !db){
+    console.error("❌ Admin: Firebase not ready");
     if(statusEl) statusEl.textContent = "Firebase hazır değil.";
     return;
   }
@@ -200,12 +233,36 @@ function init(){
         }
       });
       await batch.commit();
+      
+      // Cache'i temizle ve sayfayı yenile
       window.clearSongsCache?.();
+      
+      // Başarı mesajı göster
       if(statusEl) statusEl.textContent = action === "approve" 
-        ? `${ids.length} şandî pejirandî.` 
+        ? `${ids.length} şandî pejirandî. Cache tê paqijkirin…` 
         : `${ids.length} şandî redkirî.`;
+      
+      // Onaylanan şarkılar için cache'i temizle ve kısa bir süre sonra sayfayı yenile
+      if(action === "approve") {
+        // Tüm sayfalarda cache'i temizle
+        if(typeof window.loadSongs === "function") {
+          setTimeout(async () => {
+            try {
+              await window.loadSongs();
+              console.log("✅ Cache yenilendi");
+            } catch(err) {
+              console.error("❌ Cache yenileme hatası:", err);
+            }
+          }, 500);
+        }
+      }
+      
       setTimeout(() => {
         if(statusEl) statusEl.textContent = "Şandiyên li bendê";
+        // Listeleri yeniden yükle
+        if(unsub) {
+          // Listener'lar otomatik güncellenecek
+        }
       }, 2000);
     } catch(err) {
       console.error("Admin işlemi başarısız:", err);
@@ -216,10 +273,54 @@ function init(){
     }
   };
 
+  const deleteContactMessages = async (ids) => {
+    const user = auth.currentUser;
+    if(!user || !window.isAdminUser?.(user)) {
+      if(statusEl) statusEl.textContent = "Yetkin yok.";
+      return;
+    }
+    if(!ids.length) {
+      if(statusEl) statusEl.textContent = "Tiştek nehate hilbijartin.";
+      return;
+    }
+    
+    if(!confirm(`${ids.length} mesaj silinecek. Emin misiniz?`)) {
+      return;
+    }
+    
+    try {
+      if(statusEl) statusEl.textContent = "Jêbirin…";
+      const batch = db.batch();
+      ids.forEach((id) => {
+        const ref = db.collection("contact_messages").doc(id);
+        batch.delete(ref);
+      });
+      await batch.commit();
+      
+      // Başarı mesajı göster
+      if(statusEl) statusEl.textContent = `${ids.length} mesaj jêbirî.`;
+      
+      // Listeleri otomatik güncellenecek (listener'lar sayesinde)
+      
+      setTimeout(() => {
+        if(statusEl) statusEl.textContent = "Şandiyên li bendê";
+      }, 2000);
+    } catch(err) {
+      console.error("Mesaj silme başarısız:", err);
+      if(statusEl) statusEl.textContent = `Çewtiyek çêbû: ${err?.message || "Nenas"}`;
+      setTimeout(() => {
+        if(statusEl) statusEl.textContent = "Şandiyên li bendê";
+      }, 3000);
+    }
+  };
+
+  console.log("🔍 Admin: Setting up auth state listener...");
   auth.onAuthStateChanged((user) => {
+    console.log("🔍 Admin: Auth state changed, user:", user ? user.uid : "null");
     if(unsub){ unsub(); unsub = null; }
     if(contactUnsub){ contactUnsub(); contactUnsub = null; }
     if(!user){
+      console.log("❌ Admin: No user");
       if(statusEl) statusEl.textContent = "Têketin pêwîst e.";
       currentNew = [];
       currentEdits = [];
@@ -230,7 +331,16 @@ function init(){
       setCounts();
       return;
     }
-    if(!window.isAdminUser?.(user)){
+    
+    const isAdmin = window.isAdminUser?.(user);
+    console.log("🔍 Admin: isAdminUser check:", {
+      userEmail: user.email,
+      isAdmin: isAdmin,
+      adminEmails: window.ADMIN_EMAILS || []
+    });
+    
+    if(!isAdmin){
+      console.warn("❌ Admin: User is not admin");
       if(statusEl) statusEl.textContent = "Yetkin yok.";
       currentNew = [];
       currentEdits = [];
@@ -241,37 +351,187 @@ function init(){
       setCounts();
       return;
     }
+    
+    console.log("✅ Admin: User is admin, setting up listeners...");
 
     if(statusEl) statusEl.textContent = "Şandiyên li bendê";
-    unsub = db.collection("song_submissions")
-      .where("status", "==", "pending")
-      .onSnapshot((snap) => {
-        const items = snap.docs.map(d => ({ _id: d.id, ...d.data() }))
-          .sort((a,b) => toMs(b.createdAt) - toMs(a.createdAt));
+    
+    // Önce get() ile tek seferlik veri çek (onSnapshot çalışmazsa yedek)
+    const loadPendingSubmissions = async () => {
+      try {
+        console.log("🔍 Admin: Loading pending submissions with get()...");
+        console.log("🔍 Admin: db object:", db);
+        console.log("🔍 Admin: db.collection:", typeof db.collection);
+        
+        if (!db || typeof db.collection !== 'function') {
+          throw new Error("Firestore db is not available");
+        }
+        
+        const snap = await db.collection("song_submissions")
+          .where("status", "==", "pending")
+          .get();
+        
+        console.log("✅ Admin: get() returned, docs:", snap.docs.length);
+        console.log("✅ Admin: snap.empty:", snap.empty);
+        
+        if (snap.empty) {
+          console.log("📭 Admin: No pending submissions found");
+          currentNew = [];
+          currentEdits = [];
+          setCounts();
+          renderList(newListEl, [], "Yeni şarkı");
+          renderList(editListEl, [], "Düzenleme");
+          if(statusEl) statusEl.textContent = "Ti şandiyên li bendê tune.";
+          return;
+        }
+        
+        const items = snap.docs.map(d => {
+          const data = d.data();
+          console.log("📄 Admin: Doc:", d.id, "data:", { type: data.type, status: data.status, song: data.song });
+          return { _id: d.id, ...data };
+        }).sort((a,b) => toMs(b.createdAt) - toMs(a.createdAt));
+        
         const newItems = items.filter(s => (s.type || "") === "new");
         const editItems = items.filter(s => (s.type || "") !== "new");
+
+        console.log("📊 Admin: Total items:", items.length, "New items:", newItems.length, "Edit items:", editItems.length);
 
         currentNew = newItems;
         currentEdits = dedupeEdits(editItems);
         setCounts();
         renderList(newListEl, currentNew, "Yeni şarkı");
         renderList(editListEl, currentEdits, "Düzenleme");
-      }, (err) => {
-        console.error(err);
-        if(statusEl) statusEl.textContent = "Lîste nehat barkirin.";
-      });
+        
+        if(statusEl) statusEl.textContent = "Şandiyên li bendê";
+      } catch(err) {
+        console.error("❌ Admin: get() error:", err);
+        console.error("❌ Admin: Error details:", {
+          message: err.message,
+          code: err.code,
+          stack: err.stack
+        });
+        if(statusEl) statusEl.textContent = `Lîste nehat barkirin: ${err?.message || "Nenas"}`;
+        currentNew = [];
+        currentEdits = [];
+        renderList(newListEl, [], "Yeni şarkı");
+        renderList(editListEl, [], "Düzenleme");
+        setCounts();
+      }
+    };
 
-    contactUnsub = db.collection("contact_messages")
-      .orderBy("createdAt", "desc")
-      .limit(50)
-      .onSnapshot((snap) => {
-        currentContacts = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+    // Önce get() ile yükle
+    loadPendingSubmissions();
+
+    // Sonra onSnapshot ile dinle (güncellemeler için)
+    console.log("🔍 Admin: Setting up song_submissions listener...");
+    try {
+      unsub = db.collection("song_submissions")
+        .where("status", "==", "pending")
+        .onSnapshot((snap) => {
+          console.log("✅ Admin: song_submissions snapshot received, docs:", snap.docs.length);
+          try {
+            const items = snap.docs.map(d => ({ _id: d.id, ...d.data() }))
+              .sort((a,b) => toMs(b.createdAt) - toMs(a.createdAt));
+            const newItems = items.filter(s => (s.type || "") === "new");
+            const editItems = items.filter(s => (s.type || "") !== "new");
+
+            console.log("📊 Admin: New items:", newItems.length, "Edit items:", editItems.length);
+
+            currentNew = newItems;
+            currentEdits = dedupeEdits(editItems);
+            setCounts();
+            renderList(newListEl, currentNew, "Yeni şarkı");
+            renderList(editListEl, currentEdits, "Düzenleme");
+            
+            if(statusEl) statusEl.textContent = "Şandiyên li bendê";
+          } catch(renderErr) {
+            console.error("❌ Admin: Render error:", renderErr);
+            if(statusEl) statusEl.textContent = `Render çewtiyek: ${renderErr?.message || "Nenas"}`;
+          }
+        }, (err) => {
+          console.error("❌ Admin: song_submissions listener error:", err);
+          // Listener hata verirse get() ile tekrar dene
+          console.log("🔄 Admin: Retrying with get()...");
+          loadPendingSubmissions();
+        });
+    } catch(setupErr) {
+      console.error("❌ Admin: Failed to setup song_submissions listener:", setupErr);
+      // Setup başarısız olursa get() ile yükle
+      loadPendingSubmissions();
+    }
+
+    // Önce get() ile tek seferlik veri çek (onSnapshot çalışmazsa yedek)
+    const loadContactMessages = async () => {
+      try {
+        console.log("🔍 Admin: Loading contact messages with get()...");
+        const snap = await db.collection("contact_messages")
+          .orderBy("createdAt", "desc")
+          .limit(50)
+          .get();
+        
+        console.log("✅ Admin: contact_messages get() returned, docs:", snap.docs.length);
+        console.log("✅ Admin: snap.empty:", snap.empty);
+        
+        if (snap.empty) {
+          console.log("📭 Admin: No contact messages found");
+          currentContacts = [];
+          setCounts();
+          renderContactList(contactListEl, []);
+          return;
+        }
+        
+        currentContacts = snap.docs.map(d => {
+          const data = d.data();
+          console.log("📄 Admin: Contact message:", d.id, "name:", data.name);
+          return { _id: d.id, ...data };
+        });
+        console.log("📊 Admin: Contact messages:", currentContacts.length);
         setCounts();
         renderContactList(contactListEl, currentContacts);
-      }, (err) => {
-        console.error(err);
-        if(contactListEl) contactListEl.innerHTML = `<div class="empty">Mesajlar yüklenemedi.</div>`;
-      });
+      } catch(err) {
+        console.error("❌ Admin: contact_messages get() error:", err);
+        console.error("❌ Admin: Error details:", {
+          message: err.message,
+          code: err.code,
+          stack: err.stack
+        });
+        if(contactListEl) contactListEl.innerHTML = `<div class="empty">Mesajlar yüklenemedi: ${err?.message || "Nenas"}</div>`;
+        currentContacts = [];
+        setCounts();
+      }
+    };
+
+    // Önce get() ile yükle
+    loadContactMessages();
+
+    // Sonra onSnapshot ile dinle (güncellemeler için)
+    console.log("🔍 Admin: Setting up contact_messages listener...");
+    try {
+      contactUnsub = db.collection("contact_messages")
+        .orderBy("createdAt", "desc")
+        .limit(50)
+        .onSnapshot((snap) => {
+          console.log("✅ Admin: contact_messages snapshot received, docs:", snap.docs.length);
+          try {
+            currentContacts = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+            console.log("📊 Admin: Contact messages:", currentContacts.length);
+            setCounts();
+            renderContactList(contactListEl, currentContacts);
+          } catch(renderErr) {
+            console.error("❌ Admin: Contact render error:", renderErr);
+            if(contactListEl) contactListEl.innerHTML = `<div class="empty">Render çewtiyek: ${renderErr?.message || "Nenas"}</div>`;
+          }
+        }, (err) => {
+          console.error("❌ Admin: contact_messages listener error:", err);
+          // Listener hata verirse get() ile tekrar dene
+          console.log("🔄 Admin: Retrying contact messages with get()...");
+          loadContactMessages();
+        });
+    } catch(setupErr) {
+      console.error("❌ Admin: Failed to setup contact_messages listener:", setupErr);
+      // Setup başarısız olursa get() ile yükle
+      loadContactMessages();
+    }
   });
 
   const handleListClick = async (ev) => {
@@ -280,11 +540,20 @@ function init(){
     const action = btn.dataset.action;
     const id = btn.dataset.id;
     if(!action || !id) return;
+    
+    // Mesaj silme işlemi
+    if(action === "delete" && btn.closest(".contactItem")) {
+      await deleteContactMessages([id]);
+      return;
+    }
+    
+    // Diğer işlemler (approve/reject)
     await updateStatusBulk([id], action);
   };
 
   newListEl?.addEventListener("click", handleListClick);
   editListEl?.addEventListener("click", handleListClick);
+  contactListEl?.addEventListener("click", handleListClick);
 
   const toggleAll = (listEl) => {
     if(!listEl) return;
@@ -306,6 +575,15 @@ function init(){
   approveSelectedEdit?.addEventListener("click", () => updateStatusBulk(collectSelected(editListEl), "approve"));
   rejectSelectedEdit?.addEventListener("click", () => updateStatusBulk(collectSelected(editListEl), "reject"));
   
+  // Mesajlar için butonlar
+  const selectAllContact = $("#selectAllContact");
+  const deleteAllContact = $("#deleteAllContact");
+  const deleteSelectedContact = $("#deleteSelectedContact");
+  
+  selectAllContact?.addEventListener("click", () => toggleAll(contactListEl));
+  deleteAllContact?.addEventListener("click", () => deleteContactMessages(currentContacts.map(m => m._id)));
+  deleteSelectedContact?.addEventListener("click", () => deleteContactMessages(collectSelected(contactListEl)));
+  
   // Responsive search - icon'a tıklayınca açılması
   function initResponsiveSearch() {
     const searchHeaders = document.querySelectorAll(".search--header");
@@ -314,75 +592,61 @@ function init(){
       const icon = searchEl.querySelector(".search__icon");
       if(!input || !icon) return;
       
+      // Sadece tablet ve desktop için (mobil common.js'de handle ediliyor)
+      if(window.innerWidth <= 639) {
+        return;
+      }
+      
+      // Küçük ekranlarda icon-only modunu aktif et (tablet için)
       function checkScreenSize() {
-        if(window.innerWidth <= 639) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639) {
           searchEl.classList.add("search--icon-only");
         } else {
           searchEl.classList.remove("search--icon-only", "search--open");
-          document.body.classList.remove("search-open");
         }
       }
       
       checkScreenSize();
       window.addEventListener("resize", checkScreenSize);
       
+      // Icon'a tıklayınca aç/kapat (sadece tablet için)
       icon.addEventListener("click", (e) => {
-        if(window.innerWidth <= 639) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639) {
           e.preventDefault();
           e.stopPropagation();
-          e.stopImmediatePropagation();
-          const isOpen = searchEl.classList.contains("search--open");
-          if(isOpen) {
+          if(searchEl.classList.contains("search--open")) {
             searchEl.classList.remove("search--open");
             input.blur();
             document.body.classList.remove("search-open");
           } else {
             searchEl.classList.add("search--open");
             document.body.classList.add("search-open");
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                input.focus();
-              });
-            });
+            setTimeout(() => input.focus(), 100);
           }
         }
       });
       
-      input.addEventListener("click", (e) => {
-        if(window.innerWidth <= 639) {
-          e.stopPropagation();
-          if(!searchEl.classList.contains("search--open")) {
-            searchEl.classList.add("search--open");
-            document.body.classList.add("search-open");
-          }
-        }
-      });
-      
-      input.addEventListener("blur", (e) => {
-        if(window.innerWidth <= 639 && !input.value) {
-          const relatedTarget = e.relatedTarget;
-          if(relatedTarget && relatedTarget.closest(".search")) {
-            return;
-          }
+      // Input'tan çıkınca kapat (sadece tablet için)
+      input.addEventListener("blur", () => {
+        if(window.innerWidth <= 768 && window.innerWidth > 639 && !input.value) {
           setTimeout(() => {
-            if(document.activeElement !== input && !input.value) {
+            if(document.activeElement !== input) {
               searchEl.classList.remove("search--open");
               document.body.classList.remove("search-open");
             }
-          }, 300);
+          }, 200);
         }
       });
       
+      // Sayfa kaydırılınca search input'u kapat (sadece tablet için)
       let scrollTimeout;
       function handleScroll() {
-        if(window.innerWidth <= 639 && searchEl.classList.contains("search--open") && !input.value) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639 && searchEl.classList.contains("search--open")) {
           clearTimeout(scrollTimeout);
           scrollTimeout = setTimeout(() => {
-            if(!input.value) {
-              searchEl.classList.remove("search--open");
-              document.body.classList.remove("search-open");
-              input.blur();
-            }
+            searchEl.classList.remove("search--open");
+            document.body.classList.remove("search-open");
+            input.blur();
           }, 150);
         }
       }
@@ -394,4 +658,44 @@ function init(){
   initResponsiveSearch();
 }
 
-init();
+// Firebase ve DOM hazır olana kadar bekle
+function waitForFirebase() {
+  return new Promise((resolve) => {
+    if (window.fbAuth && window.fbDb && document.readyState === 'complete') {
+      console.log("✅ Admin: Firebase ready, initializing...");
+      resolve();
+      return;
+    }
+    
+    let checkCount = 0;
+    const maxChecks = 50; // 5 saniye
+    
+    const checkInterval = setInterval(() => {
+      checkCount++;
+      if (window.fbAuth && window.fbDb && document.readyState === 'complete') {
+        console.log("✅ Admin: Firebase ready after", checkCount * 100, "ms, initializing...");
+        clearInterval(checkInterval);
+        resolve();
+      } else if (checkCount >= maxChecks) {
+        console.warn("⚠️ Admin: Firebase not ready after", maxChecks * 100, "ms, initializing anyway...");
+        clearInterval(checkInterval);
+        resolve();
+      }
+    }, 100);
+  });
+}
+
+// DOM ve Firebase hazır olunca başlat
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    waitForFirebase().then(() => {
+      console.log("🚀 Admin: Starting init()...");
+      init();
+    });
+  });
+} else {
+  waitForFirebase().then(() => {
+    console.log("🚀 Admin: Starting init()...");
+    init();
+  });
+}

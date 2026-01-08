@@ -32,7 +32,14 @@ service cloud.firestore {
         && request.resource.data.status == "pending"
         && request.resource.data.createdBy == request.auth.uid;
 
-      allow update, delete: if isAdmin();
+      // Update: Sadece admin
+      allow update: if isAdmin();
+      
+      // Delete: Admin veya kendi submission'ını silen kullanıcı (sadece pending veya rejected)
+      allow delete: if isAdmin() 
+        || (isSignedIn() 
+            && resource.data.createdBy == request.auth.uid 
+            && resource.data.status in ["pending", "rejected"]);
     }
 
     // Kullanıcı profilleri

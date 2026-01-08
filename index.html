@@ -29,34 +29,11 @@
           </svg>
         </a>
         <a class="btn btn--ghost btn--lg" href="/all.html">Hemû</a>
-        <button id="addSongMenuBtn" class="btn btn--ghost btn--lg" type="button">Zêdeke</button>
+        <a id="addSongMenuBtn" class="btn btn--ghost btn--lg" href="/login.html?return=/index.html">Zêdeke</a>
         <a class="btn btn--ghost btn--lg" href="#sources">Çavkani</a>
         <a class="btn btn--ghost btn--lg" href="#contact">Peywendî</a>
         <a id="adminLink" class="btn btn--ghost btn--lg" href="/admin.html" style="display:none;">Rêveber</a>
-        <div class="authWrap">
-          <button id="authOpen" class="btn btn--ghost btn--lg" type="button">Têkeve</button>
-          <div id="authPanel" class="authPanel" role="dialog" aria-label="Kirinên bikarhêner">
-            <div class="authTitle">Hesab</div>
-            <div class="authField">
-              <label class="authLabel" for="authEmail">E-name</label>
-              <input id="authEmail" class="authInput" type="email" autocomplete="email" placeholder="mînak@mail.com" />
-            </div>
-            <div class="authField">
-              <label class="authLabel" for="authPass">Şîfre</label>
-              <input id="authPass" class="authInput" type="password" autocomplete="current-password" placeholder="••••••••" />
-            </div>
-            <div class="authActions">
-              <button id="authSignIn" class="btn btn--ghost" type="button">Têkeve</button>
-              <button id="authSignUp" class="btn btn--ghost" type="button">Qeyd bibe</button>
-              <button id="authSignOut" class="btn btn--ghost" type="button" style="display:none;">Derkeve</button>
-            </div>
-            <div class="authAltActions">
-              <button id="authGoogle" class="btn btn--ghost" type="button">Bi Google re têkeve</button>
-              <button id="authReset" class="btn btn--ghost" type="button">Şîfreya te jibîr bû?</button>
-            </div>
-            <div id="authStatus" class="authStatus muted">Ji bo têketinê e-name û şîfre binivîse.</div>
-          </div>
-        </div>
+        <a id="authOpen" class="btn btn--ghost btn--lg" href="/login.html?return=/index.html">Têkev</a>
         <div class="search search--header" aria-label="Lêgerîn">
           <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
@@ -66,6 +43,7 @@
           <button id="clear" class="search__clear" type="button" aria-label="Paqij bike">✕</button>
         </div>
         <a id="profileLink" class="btn btn--ghost btn--lg" href="/profile.html" style="display:none;">Profîl</a>
+        <button id="authSignOut" class="btn btn--ghost btn--lg" type="button" style="display:none;">Derketin</button>
         
       </div>
     </div>
@@ -112,6 +90,7 @@
     <section id="addSongPanel" class="editPanel editPanel--paper is-hidden">
       <div class="editPanel__top">
         <div class="editPanel__title">Stran Nû Zêde Bike</div>
+        <button id="addSongClose" class="editPanel__close" type="button" aria-label="Betal bike">✕</button>
         <div class="editPanel__fields">
           <div class="authField">
             <label class="authLabel required" for="addSongName">Navê stranê</label>
@@ -198,7 +177,6 @@
         </div>
         <div class="editActionsRight">
           <button id="addSongSave" class="btn" type="button">Tomar bike</button>
-          <button id="addSongClose" class="btn btn--ghost" type="button">Betal bike</button>
         </div>
       </div>
       <div id="addSongNotice" class="editNotice muted"></div>
@@ -344,21 +322,43 @@
         script.src = src;
         script.async = true;
         script.crossOrigin = 'anonymous';
-        script.onload = () => resolve();
-        script.onerror = () => {
-          console.warn('⚠️ Firebase script yüklenemedi:', src);
-          if(onError) onError();
-          reject(new Error('Script load failed: ' + src));
+        let resolved = false;
+        
+        script.onload = () => {
+          if(!resolved) {
+            resolved = true;
+            resolve();
+          }
         };
-        // Timeout - 15 saniye içinde yüklenmezse hata
-        setTimeout(() => {
-          if(!script.complete) {
+        
+        script.onerror = () => {
+          if(!resolved) {
+            resolved = true;
+            console.warn('⚠️ Firebase script yüklenemedi:', src);
+            if(onError) onError();
+            reject(new Error('Script load failed: ' + src));
+          }
+        };
+        
+        // Timeout kontrolü - 30 saniye
+        const timeoutId = setTimeout(() => {
+          if(!resolved) {
+            resolved = true;
             console.warn('⏱️ Firebase script timeout:', src);
             script.remove();
             if(onError) onError();
             reject(new Error('Script load timeout: ' + src));
           }
-        }, 15000);
+        }, 30000);
+        
+        // Timeout'u temizle
+        script.onload = () => {
+          clearTimeout(timeoutId);
+          if(!resolved) {
+            resolved = true;
+            resolve();
+          }
+        };
         document.head.appendChild(script);
       });
     }
@@ -375,7 +375,10 @@
             return;
           } catch(err) {
             if(i < retries - 1) {
-              console.warn(`⚠️ Retry ${i + 1}/${retries} for:`, src);
+              // Production'da retry log'ları sessizce atla
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.search.includes('debug=true')) {
+          console.warn(`⚠️ Retry ${i + 1}/${retries} for:`, src);
+        }
               await new Promise(resolve => setTimeout(resolve, retryDelay * (i + 1)));
             } else {
               throw err;
@@ -389,9 +392,26 @@
         await loadWithRetry('https://www.gstatic.com/firebasejs/10.7.2/firebase-auth-compat.js');
         await loadWithRetry('https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore-compat.js');
         await loadWithRetry('https://www.gstatic.com/firebasejs/10.7.2/firebase-storage-compat.js');
-        console.log('✅ Firebase scripts loaded successfully');
+        // Production'da log'ları sessizce atla
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.search.includes('debug=true')) {
+          console.log('✅ Firebase scripts loaded successfully');
+        }
+        
+        // Script'ler yüklendikten sonra firebase.js'in çalışması için biraz bekle
+        setTimeout(() => {
+          if(typeof window.firebase === "undefined" || !window.firebase) {
+            // Production'da sessizce devam et
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.search.includes('debug=true')) {
+              console.warn("⚠️ Firebase object not found after script load");
+            }
+          }
+        }, 500);
       } catch(err) {
-        console.error('❌ Firebase scripts failed to load after retries:', err);
+        // Production'da sessizce devam et, offline mode'a geç
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.search.includes('debug=true')) {
+          console.warn('⚠️ Firebase scripts failed to load after retries:', err);
+          console.log('ℹ️ Site offline mode ile çalışacak');
+        }
         // Firebase olmadan da site çalışabilir - offline mode
         window.firebase = null;
         window.fbAuth = null;
@@ -400,35 +420,52 @@
       }
     })();
   </script>
-  <script src="/firebase.js?v=2.0"></script>
-  <script src="/common.js?v=2.0"></script>
-  <script src="/app.js?v=2.0"></script>
+  <script src="/firebase.js?v=2.1"></script>
+  <script src="/common.js?v=2.1"></script>
+  <script src="/app.js?v=2.1"></script>
   <script>
-    // Test script - eğer bu görünüyorsa JavaScript çalışıyor
-    console.log("=== HTML SCRIPT LOADED ===");
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log("=== DOMContentLoaded ===");
-      const listEl = document.getElementById('list');
-      const listWrap = document.querySelector('.homeListWrap');
-      console.log("Test - listEl:", listEl);
-      console.log("Test - listWrap:", listWrap);
+    // Zêdeke butonunu giriş durumuna göre yönlendir
+    (function initZedekeButton() {
+      const updateZedekeButton = () => {
+        const auth = window.fbAuth;
+        if(!auth) {
+          setTimeout(updateZedekeButton, 500);
+          return;
+        }
+        
+        const addSongBtn = document.getElementById("addSongMenuBtn");
+        if(!addSongBtn) return;
+        
+        auth.onAuthStateChanged((user) => {
+          if(user) {
+            // Giriş yapmış - şarkı ekleme paneline yönlendir
+            addSongBtn.href = "#add-song";
+            addSongBtn.onclick = (e) => {
+              e.preventDefault();
+              if(typeof window.openAddSongPanel === "function") {
+                window.openAddSongPanel();
+              } else {
+                const panel = document.getElementById("addSongPanel");
+                if(panel) {
+                  panel.classList.remove("is-hidden");
+                  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }
+            };
+          } else {
+            // Giriş yapmamış - login sayfasına yönlendir
+            addSongBtn.href = "/login.html?return=/index.html";
+            addSongBtn.onclick = null;
+          }
+        });
+      };
       
-      // Zorla görünür yap
-      if(listWrap) {
-        listWrap.style.display = "block";
-        listWrap.style.visibility = "visible";
-        listWrap.style.opacity = "1";
-        listWrap.style.height = "auto";
-        listWrap.style.overflow = "visible";
+      if(document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", updateZedekeButton);
+      } else {
+        updateZedekeButton();
       }
-      if(listEl) {
-        listEl.style.display = "grid";
-        listEl.style.visibility = "visible";
-        listEl.style.opacity = "1";
-        listEl.style.height = "auto";
-        listEl.style.overflow = "visible";
-      }
-    });
+    })();
   </script>
 </body>
 </html>

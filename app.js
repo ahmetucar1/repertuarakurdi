@@ -1,4 +1,18 @@
 // app.js — serrûpel
+// Production mode - console.log'ları minimize et
+const IS_PRODUCTION = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+const DEBUG = !IS_PRODUCTION || (window.location.search.includes('debug=true'));
+
+const log = (...args) => {
+  if (DEBUG) console.log(...args);
+};
+const warn = (...args) => {
+  if (DEBUG) console.warn(...args);
+};
+const error = (...args) => {
+  console.error(...args);
+};
+
 let SONGS = [];
 let homeSample = [];
 let lastQuery = "";
@@ -39,12 +53,26 @@ function renderStats(){
 }
 
 function renderList(){
+  // Mobil search overlay açıkken sayfadaki listeleri güncelleme
+  if (window.__mobileSearchOverlayOpen) {
+    log("🚫 renderList() skipped - mobile search overlay is open");
+    return;
+  }
+  
+  log("renderList() called");
+  log("SONGS length:", SONGS ? SONGS.length : 0);
   const listEl = $("#list");
   const countEl = $("#count");
   const titleEl = $("#resultsTitle");
   const listWrap = document.querySelector(".homeListWrap");
   
-  if(!listEl) return;
+  log("listEl:", listEl);
+  log("listWrap:", listWrap);
+  
+  if(!listEl) {
+    console.error("List element not found!");
+    return;
+  }
 
   const qTopbar = norm($("#q")?.value || "");
   const q = qTopbar; // Sadece topbar search'ü kullan
@@ -81,21 +109,21 @@ function renderList(){
 
   if(!q){
     // Ger lêgerîn tune be homeSample bikar bîne
-    console.log("No search query, using homeSample");
-    console.log("homeSample:", homeSample);
-    console.log("SONGS length:", SONGS.length);
+    log("No search query, using homeSample");
+    log("homeSample:", homeSample);
+    log("SONGS length:", SONGS.length);
     
     if(homeSample && homeSample.length > 0){
       items = homeSample;
-      console.log("Using existing homeSample, items count:", items.length);
+      log("Using existing homeSample, items count:", items.length);
     } else if(SONGS && SONGS.length > 0){
       // homeSample boşsa ama SONGS varsa, yeni sample oluştur
-      console.log("homeSample is empty, creating new sample from SONGS");
+      log("homeSample is empty, creating new sample from SONGS");
       homeSample = pickRandom(SONGS, 7);
       items = homeSample;
-      console.log("New homeSample created, items count:", items.length);
+      log("New homeSample created, items count:", items.length);
     } else {
-      console.warn("Both homeSample and SONGS are empty!");
+      warn("Both homeSample and SONGS are empty!");
       items = [];
     }
   }else{
@@ -117,7 +145,7 @@ function renderList(){
     return;
   }
 
-  console.log("Rendering list with", items.length, "items");
+  log("Rendering list with", items.length, "items");
   const sId = window.songId || ((s) => s._id || "");
   const html = items.map(s => {
     const pendingBadge = s.pending ? `<span class="badge badge--pending">Li benda pejirandina edîtorê ye</span>` : "";
@@ -144,9 +172,9 @@ function renderList(){
   }).join("");
   
   listEl.innerHTML = html;
-  console.log("List rendered, HTML length:", html.length);
-  console.log("List element after render:", listEl);
-  console.log("List innerHTML length:", listEl.innerHTML.length);
+  log("List rendered, HTML length:", html.length);
+  log("List element after render:", listEl);
+  log("List innerHTML length:", listEl.innerHTML.length);
   
   // Favorileme butonlarına event listener ekle
   const favoriteBtns = listEl.querySelectorAll(".favoriteBtn");
@@ -162,7 +190,7 @@ function renderList(){
       
       const songId = newBtn.getAttribute("data-song-id");
       if(!songId) {
-        console.warn("No song ID found for favorite button");
+        warn("No song ID found for favorite button");
         return;
       }
       
@@ -172,24 +200,24 @@ function renderList(){
         return sId === songId;
       });
       if(!song) {
-        console.warn("Song not found for ID:", songId);
+        warn("Song not found for ID:", songId);
         return;
       }
       
-      console.log("Toggling favorite for song:", songId);
+      log("Toggling favorite for song:", songId);
       const result = await window.toggleFavoriteSong?.(song);
-      console.log("Toggle result:", result);
+      log("Toggle result:", result);
       
       if(result === true){
         // Favorilere eklendi - hemen UI'ı güncelle
         newBtn.classList.add("is-favorite");
-        console.log("Added is-favorite class to button");
+        log("Added is-favorite class to button");
         
         // Favorileri yeniden yükle ve tüm butonları güncelle
         const auth = window.fbAuth;
         if(auth?.currentUser) {
           userFavorites = await window.loadUserFavorites?.(auth.currentUser.uid) || [];
-          console.log("Reloaded favorites:", userFavorites.length);
+          log("Reloaded favorites:", userFavorites.length);
           
           // Tüm favori butonlarını güncelle
           const allFavBtns = listEl.querySelectorAll(".favoriteBtn");
@@ -211,7 +239,7 @@ function renderList(){
         const auth = window.fbAuth;
         if(auth?.currentUser) {
           userFavorites = await window.loadUserFavorites?.(auth.currentUser.uid) || [];
-          console.log("Reloaded favorites:", userFavorites.length);
+          log("Reloaded favorites:", userFavorites.length);
           
           // Tüm favori butonlarını güncelle
           const allFavBtns = listEl.querySelectorAll(".favoriteBtn");
@@ -225,7 +253,7 @@ function renderList(){
           });
         }
       } else {
-        console.warn("Toggle favorite returned null, user may need to login");
+        warn("Toggle favorite returned null, user may need to login");
       }
     });
   });
@@ -239,7 +267,7 @@ function renderList(){
     listWrap.style.overflow = "visible";
     listWrap.style.position = "relative";
     listWrap.style.zIndex = "1";
-    console.log("listWrap styles applied");
+    log("listWrap styles applied");
   }
   if(listEl){
     listEl.style.display = "grid";
@@ -247,16 +275,16 @@ function renderList(){
     listEl.style.opacity = "1";
     listEl.style.height = "auto";
     listEl.style.overflow = "visible";
-    console.log("listEl styles applied");
+    log("listEl styles applied");
   }
   
   // Son kontrol
   setTimeout(() => {
     const finalCheck = $("#list");
     if(finalCheck && finalCheck.innerHTML.trim().length > 0){
-      console.log("✓ List is rendered and visible");
+      log("✓ List is rendered and visible");
     } else {
-      console.error("✗ List is still empty after render!");
+      error("✗ List is still empty after render!");
     }
   }, 50);
 }
@@ -388,19 +416,29 @@ function initContactForm(){
 }
 
 async function init(){
-  console.log("=== INIT STARTED ===");
+  log("=== INIT STARTED ===");
   try {
-    console.log("Loading songs...");
+    log("Loading songs...");
+    // Cache'i temizle
+    window.clearSongsCache?.();
     SONGS = await loadSongs();
-    console.log("SONGS loaded:", SONGS.length);
-    if(SONGS.length > 0) {
-      console.log("First 3 songs:", SONGS.slice(0, 3));
+    // window objesine de ata - mobil search overlay için
+    window.SONGS = SONGS;
+    log("SONGS loaded:", SONGS ? SONGS.length : 0);
+    if(SONGS && SONGS.length > 0) {
+      log("First 3 songs:", SONGS.slice(0, 3));
     } else {
-      console.warn("SONGS array is empty!");
+      warn("SONGS array is empty or null!");
+      // Retry once
+      log("Retrying loadSongs...");
+      window.clearSongsCache?.();
+      SONGS = await loadSongs();
+      window.SONGS = SONGS;
+      log("SONGS after retry:", SONGS ? SONGS.length : 0);
     }
 
     if(!SONGS || SONGS.length === 0){
-      console.error("SONGS is empty!");
+      error("SONGS is still empty after retry!");
       const listEl = $("#list");
       const listWrap = document.querySelector(".homeListWrap");
       if(listEl) {
@@ -420,13 +458,16 @@ async function init(){
     // her têketinê de 7 stranên cuda
     if(SONGS && SONGS.length > 0) {
       homeSample = pickRandom(SONGS, 7);
+      // window objesine de ata - mobil search overlay için
+      window.homeSample = homeSample;
     } else {
       homeSample = [];
-      console.warn("SONGS is empty, homeSample will be empty");
+      window.homeSample = [];
+      warn("SONGS is empty, homeSample will be empty");
     }
-    console.log("homeSample created:", homeSample.length);
+    log("homeSample created:", homeSample.length);
     if(homeSample.length > 0) {
-      console.log("homeSample items:", homeSample);
+      log("homeSample items:", homeSample);
     }
     
     renderDiscover();
@@ -434,11 +475,11 @@ async function init(){
     // Liste render etmeden önce görünürlüğü zorla
     const listEl = $("#list");
     const listWrap = document.querySelector(".homeListWrap");
-    console.log("listEl:", listEl);
-    console.log("listWrap:", listWrap);
+    log("listEl:", listEl);
+    log("listWrap:", listWrap);
     
     if(!listEl) {
-      console.error("List element not found!");
+      error("List element not found!");
       return;
     }
     
@@ -465,7 +506,7 @@ async function init(){
       const loadFavorites = async (user) => {
         if(user){
           userFavorites = await window.loadUserFavorites?.(user.uid) || [];
-          console.log("User favorites loaded:", userFavorites.length);
+          log("User favorites loaded:", userFavorites.length);
         } else {
           userFavorites = [];
         }
@@ -480,27 +521,31 @@ async function init(){
         renderList();
       }
       
-      // Auth state değişikliklerini dinle
-      auth.onAuthStateChanged(async (user) => {
-        await loadFavorites(user);
-        // Hero login butonunu güncelle
-        const heroLoginBtn = document.getElementById("heroLoginBtn");
-        if(heroLoginBtn){
-          heroLoginBtn.style.display = user ? "none" : "inline-flex";
-        }
-      });
+      // Auth state değişikliklerini dinle - sadece favorileri güncelle
+      if(!window.__appAuthListenerSetup){
+        window.__appAuthListenerSetup = true;
+        auth.onAuthStateChanged(async (user) => {
+          // Sadece favorileri güncelle, loadSongs çağırma
+          await loadFavorites(user);
+          // Hero login butonunu güncelle
+          const heroLoginBtn = document.getElementById("heroLoginBtn");
+          if(heroLoginBtn){
+            heroLoginBtn.style.display = user ? "none" : "inline-flex";
+          }
+        });
+      }
     } else {
-      console.log("Calling renderList() and renderHeroSearch()...");
+      log("Calling renderList() and renderHeroSearch()...");
       renderList();
       renderHeroSearch();
-      console.log("renderList() and renderHeroSearch() completed");
+      log("renderList() and renderHeroSearch() completed");
     }
     
     // Son kontrol - eğer liste hala boşsa zorla render et
     setTimeout(() => {
       const finalListEl = $("#list");
       if(finalListEl && finalListEl.innerHTML.trim().length === 0 && homeSample.length > 0) {
-        console.warn("List is still empty after renderList! Forcing render...");
+        warn("List is still empty after renderList! Forcing render...");
         finalListEl.innerHTML = homeSample.map(s => {
           const title = s.song || "Stran";
           const artist = artistText(s.artist) || "Hunermend";
@@ -519,7 +564,7 @@ async function init(){
         finalListEl.style.display = "grid";
         finalListEl.style.visibility = "visible";
         finalListEl.style.opacity = "1";
-        console.log("Forced render completed");
+        log("Forced render completed");
       }
     }, 500);
     
@@ -530,7 +575,7 @@ async function init(){
       const checkListEl = $("#list");
       const checkWrap = document.querySelector(".homeListWrap");
       if(checkListEl && checkListEl.innerHTML.trim().length === 0){
-        console.error("List is still empty after renderList! Forcing render...");
+        error("List is still empty after renderList! Forcing render...");
         if(homeSample && homeSample.length > 0){
           checkListEl.innerHTML = homeSample.map(s => `
             <div class="item">
@@ -555,7 +600,7 @@ async function init(){
       }
     }, 100);
   } catch(err) {
-    console.error("Init error:", err);
+    error("Init error:", err);
     const listEl = $("#list");
     const listWrap = document.querySelector(".homeListWrap");
     if(listEl) {
@@ -587,6 +632,12 @@ async function init(){
   });
 
   $("#clear")?.addEventListener("click", () => {
+    // Mobil search overlay açıkken sayfadaki listeleri güncelleme
+    if (window.__mobileSearchOverlayOpen) {
+      console.log("🚫 Clear button event skipped - mobile search overlay is open");
+      return;
+    }
+    
     $("#q").value = "";
     // Arama temizlendiğinde class'ları kaldır
     document.body.classList.remove("has-search-results", "has-hero-search");
@@ -605,7 +656,7 @@ async function init(){
     // Boş fonksiyon - artık kullanılmıyor
   }
 
-  // Responsive search - icon'a tıklayınca açılması
+  // Responsive search - sadece tablet ve desktop için (mobil common.js'de handle ediliyor)
   function initResponsiveSearch() {
     // Sadece topbar search'ü dahil et (heroCard search her zaman tam input)
     const searchHeaders = document.querySelectorAll(".search--header");
@@ -614,82 +665,62 @@ async function init(){
       const icon = searchEl.querySelector(".search__icon");
       if(!input || !icon) return;
       
-      // Küçük ekranlarda icon-only modunu aktif et (sadece topbar için)
+      // Sadece tablet ve desktop için (mobil common.js'de handle ediliyor)
+      if(window.innerWidth <= 639) {
+        // Mobilde common.js'deki overlay kullanılacak, burada bir şey yapma
+        return;
+      }
+      
+      // Küçük ekranlarda icon-only modunu aktif et (tablet için)
       function checkScreenSize() {
-        if(window.innerWidth <= 639) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639) {
           searchEl.classList.add("search--icon-only");
         } else {
           searchEl.classList.remove("search--icon-only", "search--open");
-          document.body.classList.remove("search-open");
         }
       }
       
       checkScreenSize();
       window.addEventListener("resize", checkScreenSize);
       
+      // Icon'a tıklayınca aç/kapat (sadece tablet için)
       icon.addEventListener("click", (e) => {
-        if(window.innerWidth <= 639) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639) {
           e.preventDefault();
           e.stopPropagation();
-          e.stopImmediatePropagation();
-          const isOpen = searchEl.classList.contains("search--open");
-          if(isOpen) {
+          if(searchEl.classList.contains("search--open")) {
             searchEl.classList.remove("search--open");
             input.blur();
             document.body.classList.remove("search-open");
           } else {
-            // Önce aç, sonra focus et
             searchEl.classList.add("search--open");
             document.body.classList.add("search-open");
-            // Focus'u biraz geciktir ki DOM güncellensin
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                input.focus();
-              });
-            });
+            setTimeout(() => input.focus(), 100);
           }
         }
       });
       
-      // Input'a tıklanınca açık kalmasını sağla
-      input.addEventListener("click", (e) => {
-        if(window.innerWidth <= 639) {
-          e.stopPropagation();
-          if(!searchEl.classList.contains("search--open")) {
-            searchEl.classList.add("search--open");
-            document.body.classList.add("search-open");
-          }
-        }
-      });
-      
-      // Input'tan çıkınca kapat (sadece küçük ekranlarda ve değer yoksa)
-      input.addEventListener("blur", (e) => {
-        if(window.innerWidth <= 639 && !input.value) {
-          // Related target kontrolü - eğer clear butonuna tıklanmışsa kapatma
-          const relatedTarget = e.relatedTarget;
-          if(relatedTarget && relatedTarget.closest(".search")) {
-            return;
-          }
+      // Input'tan çıkınca kapat (sadece tablet için)
+      input.addEventListener("blur", () => {
+        if(window.innerWidth <= 768 && window.innerWidth > 639 && !input.value) {
           setTimeout(() => {
-            if(document.activeElement !== input && !input.value) {
+            if(document.activeElement !== input) {
               searchEl.classList.remove("search--open");
               document.body.classList.remove("search-open");
             }
-          }, 300);
+          }, 200);
         }
       });
       
-      // Sayfa kaydırılınca search input'u kapat (sadece arama yapılmamışsa)
+      // Sayfa kaydırılınca search input'u kapat (sadece tablet için)
       let scrollTimeout;
       function handleScroll() {
-        if(window.innerWidth <= 639 && searchEl.classList.contains("search--open") && !input.value) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639 && searchEl.classList.contains("search--open")) {
           clearTimeout(scrollTimeout);
           scrollTimeout = setTimeout(() => {
-            if(!input.value) {
-              searchEl.classList.remove("search--open");
-              document.body.classList.remove("search-open");
-              input.blur();
-            }
+            searchEl.classList.remove("search--open");
+            document.body.classList.remove("search-open");
+            input.blur();
           }, 150);
         }
       }
@@ -718,16 +749,124 @@ async function init(){
     renderList();
   });
 
-  // Zêdeke butonu event listener'ı common.js'deki initAddSongMenu tarafından yönetiliyor
+  // Zêdeke butonu - kesin çalışacak şekilde event listener ekle
+  const setupZedekeButton = () => {
+    const btn = document.getElementById("addSongMenuBtn");
+    if(!btn) {
+      setTimeout(setupZedekeButton, 100);
+      return;
+    }
+    
+    // Tüm mevcut event listener'ları temizlemek için butonu clone et
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    // Kesin çalışacak event listener
+    newBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      
+      // Giriş kontrolü
+      const user = window.fbAuth?.currentUser;
+      
+      if(!user){
+        // Giriş yapmamış - auth panelini aç
+        if(typeof window.requireAuthAction === "function"){
+          window.requireAuthAction(() => {
+            setTimeout(() => {
+              if(typeof window.openAddSongPanel === "function"){
+                window.openAddSongPanel();
+              } else {
+                const panel = document.getElementById("addSongPanel");
+                if(panel){
+                  panel.classList.remove("is-hidden");
+                  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }
+            }, 500);
+          }, "Ji bo stran zêde kirinê divê tu têkevî.");
+        } else {
+          const authOpen = document.getElementById("authOpen");
+          if(authOpen) authOpen.click();
+        }
+        return;
+      }
+      
+      // Giriş yapmış - paneli aç
+      if(typeof window.openAddSongPanel === "function"){
+        window.openAddSongPanel();
+      } else {
+        const panel = document.getElementById("addSongPanel");
+        if(panel){
+          panel.classList.remove("is-hidden");
+          panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+          window.location.href = "/index.html#add-song";
+        }
+      }
+    };
+    
+    // Ayrıca addEventListener da ekle (çifte güvence)
+    newBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      
+      const user = window.fbAuth?.currentUser;
+      
+      if(!user){
+        if(typeof window.requireAuthAction === "function"){
+          window.requireAuthAction(() => {
+            setTimeout(() => {
+              if(typeof window.openAddSongPanel === "function"){
+                window.openAddSongPanel();
+              } else {
+                const panel = document.getElementById("addSongPanel");
+                if(panel){
+                  panel.classList.remove("is-hidden");
+                  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }
+            }, 500);
+          }, "Ji bo stran zêde kirinê divê tu têkevî.");
+        } else {
+          const authOpen = document.getElementById("authOpen");
+          if(authOpen) authOpen.click();
+        }
+        return;
+      }
+      
+      if(typeof window.openAddSongPanel === "function"){
+        window.openAddSongPanel();
+      } else {
+        const panel = document.getElementById("addSongPanel");
+        if(panel){
+          panel.classList.remove("is-hidden");
+          panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+          window.location.href = "/index.html#add-song";
+        }
+      }
+    }, true); // capture phase'de de dinle
+  };
+  
+  // DOM hazır olduğunda ve initAddSongPanel tamamlandıktan sonra çalıştır
+  setTimeout(() => {
+    setupZedekeButton();
+    // Çifte güvence için tekrar dene
+    setTimeout(setupZedekeButton, 500);
+    setTimeout(setupZedekeButton, 1000);
+  }, 1000);
 
   initContactForm();
 }
 
-console.log("=== APP.JS LOADED ===");
-console.log("Calling init()...");
+log("=== APP.JS LOADED ===");
+log("Calling init()...");
 
 init().catch(err => {
-  console.error("=== INIT ERROR ===", err);
+  error("=== INIT ERROR ===", err);
   const list = $("#list");
   const listWrap = document.querySelector(".homeListWrap");
   if(list) {

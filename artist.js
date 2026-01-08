@@ -78,6 +78,12 @@ function normalSort(a, b){
 }
 
 function render(){
+  // Mobil search overlay açıkken sayfadaki listeleri güncelleme
+  if (window.__mobileSearchOverlayOpen) {
+    console.log("🚫 artist.js render() skipped - mobile search overlay is open");
+    return;
+  }
+  
   const q = norm($("#q")?.value || "");
   const mode = $("#sort")?.value || "normal";
   const list = $("#list");
@@ -210,18 +216,37 @@ async function init(){
   });
 
   $("#q")?.addEventListener("input", () => {
+    // Mobil search overlay açıkken sayfadaki listeleri güncelleme
+    if (window.__mobileSearchOverlayOpen) {
+      console.log("🚫 artist.js search input event skipped - mobile search overlay is open");
+      return;
+    }
+    
     updateSearchState();
     render();
   });
-  $("#sort")?.addEventListener("change", render);
+  $("#sort")?.addEventListener("change", () => {
+    // Mobil search overlay açıkken sayfadaki listeleri güncelleme
+    if (window.__mobileSearchOverlayOpen) {
+      console.log("🚫 artist.js sort change event skipped - mobile search overlay is open");
+      return;
+    }
+    render();
+  });
   $("#clear")?.addEventListener("click", () => {
+    // Mobil search overlay açıkken sayfadaki listeleri güncelleme
+    if (window.__mobileSearchOverlayOpen) {
+      console.log("🚫 artist.js clear button event skipped - mobile search overlay is open");
+      return;
+    }
+    
     $("#q").value = "";
     $("#q").focus();
     updateSearchState();
     render();
   });
 
-  // Responsive search - icon'a tıklayınca açılması
+  // Responsive search - sadece tablet ve desktop için (mobil common.js'de handle ediliyor)
   function initResponsiveSearch() {
     const searchHeaders = document.querySelectorAll(".search--header");
     searchHeaders.forEach(searchEl => {
@@ -229,9 +254,14 @@ async function init(){
       const icon = searchEl.querySelector(".search__icon");
       if(!input || !icon) return;
       
-      // Küçük ekranlarda icon-only modunu aktif et
+      // Sadece tablet ve desktop için (mobil common.js'de handle ediliyor)
+      if(window.innerWidth <= 639) {
+        return;
+      }
+      
+      // Küçük ekranlarda icon-only modunu aktif et (tablet için)
       function checkScreenSize() {
-        if(window.innerWidth <= 768) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639) {
           searchEl.classList.add("search--icon-only");
         } else {
           searchEl.classList.remove("search--icon-only", "search--open");
@@ -241,9 +271,9 @@ async function init(){
       checkScreenSize();
       window.addEventListener("resize", checkScreenSize);
       
-      // Icon'a tıklayınca aç/kapat
+      // Icon'a tıklayınca aç/kapat (sadece tablet için)
       icon.addEventListener("click", (e) => {
-        if(window.innerWidth <= 768) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639) {
           e.preventDefault();
           e.stopPropagation();
           if(searchEl.classList.contains("search--open")) {
@@ -258,9 +288,9 @@ async function init(){
         }
       });
       
-      // Input'tan çıkınca kapat (sadece küçük ekranlarda)
+      // Input'tan çıkınca kapat (sadece tablet için)
       input.addEventListener("blur", () => {
-        if(window.innerWidth <= 768 && !input.value) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639 && !input.value) {
           setTimeout(() => {
             if(document.activeElement !== input) {
               searchEl.classList.remove("search--open");
@@ -270,10 +300,10 @@ async function init(){
         }
       });
       
-      // Sayfa kaydırılınca search input'u kapat
+      // Sayfa kaydırılınca search input'u kapat (sadece tablet için)
       let scrollTimeout;
       function handleScroll() {
-        if(window.innerWidth <= 768 && searchEl.classList.contains("search--open")) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639 && searchEl.classList.contains("search--open")) {
           clearTimeout(scrollTimeout);
           scrollTimeout = setTimeout(() => {
             searchEl.classList.remove("search--open");

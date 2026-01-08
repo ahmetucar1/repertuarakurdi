@@ -77,7 +77,7 @@ function renderFavorites(list, items){
   if(count) count.textContent = items.length.toString();
   if(!list) return;
   if(!items.length){
-    list.innerHTML = `<div class="empty">Henûz favori yok.</div>`;
+    list.innerHTML = `<div class="empty">Hêj favorî tune.</div>`;
     return;
   }
   list.innerHTML = items.map(f => `
@@ -98,7 +98,7 @@ function renderArtistFavorites(list, items){
   if(count) count.textContent = items.length.toString();
   if(!list) return;
   if(!items.length){
-    list.innerHTML = `<div class="empty">Henûz favori sanatçı yok.</div>`;
+    list.innerHTML = `<div class="empty">Hêj hunermendê favorî tune.</div>`;
     return;
   }
   
@@ -124,7 +124,7 @@ function renderArtistFavorites(list, items){
         <div class="item__title">${escapeHtml(window.formatArtistName ? window.formatArtistName(artistName) : artistName || "—")}</div>
       </div>
       <div class="badges">
-        <button class="favoriteBtn is-favorite" type="button" aria-label="Favoriden çıkar" data-artist-key="${escapeHtml(artistKeyValue)}" data-artist-name="${escapeHtml(artistName)}">
+        <button class="favoriteBtn is-favorite" type="button" aria-label="Ji favoriyan derxe" data-artist-key="${escapeHtml(artistKeyValue)}" data-artist-name="${escapeHtml(artistName)}">
           <svg class="favoriteIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
@@ -179,13 +179,13 @@ function renderArtistFavorites(list, items){
           }
         }
       }catch(err){
-        console.error("Favori çıkarılamadı:", err);
+        console.error("Favorî nehat derxistin:", err);
       }
     });
   });
 }
 
-function renderSubmissions(list, items, emptyLabel){
+function renderSubmissions(list, items, emptyLabel, onDelete){
   if(!list) return;
   if(!items.length){
     list.innerHTML = `<div class="empty">${emptyLabel}</div>`;
@@ -193,8 +193,10 @@ function renderSubmissions(list, items, emptyLabel){
   }
   list.innerHTML = items.map(s => {
     const id = s.type === "new" ? `new:${s._id}` : (s.sourceId || "");
+    // Sadece pending veya rejected olanları silebilir (approved olanlar silinemez)
+    const canDelete = s.status === "pending" || s.status === "rejected";
     return `
-      <div class="item">
+      <div class="item" data-submission-id="${s._id}">
         <div class="item__left">
           <div class="item__title">${escapeHtml(window.formatSongTitle ? window.formatSongTitle(s.song) : (s.song || "—"))}</div>
           <div class="item__sub">${escapeHtml(artistText(s.artist) || "—")}</div>
@@ -202,10 +204,115 @@ function renderSubmissions(list, items, emptyLabel){
         <div class="badges">
           ${statusBadge(s.status)}
           <a class="open" href="${openSong(id)}">Veke</a>
+          ${canDelete ? `<button class="btn btn--danger btn--small" data-action="delete" data-id="${s._id}" type="button">Jê bibe</button>` : ""}
         </div>
       </div>
     `;
   }).join("");
+  
+  // Silme butonlarına event listener ekle
+  const deleteButtons = list.querySelectorAll('button[data-action="delete"]');
+  deleteButtons.forEach(btn => {
+    // Eski event listener'ı kaldır (eğer varsa)
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    newBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const submissionId = newBtn.dataset.id;
+      if(!submissionId) return;
+      
+      // items array'inden submission'ı bul
+      const submission = items.find(s => s._id === submissionId);
+      if(!submission) {
+        console.warn("Şandî nehate dîtin:", submissionId);
+        return;
+      }
+      
+      const submissionType = submission.type === "new" ? "stran" : "guhartin";
+      const confirmMessage = `Tu dixwazî vê ${submissionType} jê bibî? Ev kar bêpaş nabe.`;
+      
+      if(!confirm(confirmMessage)) return;
+      
+      const db = window.fbDb;
+      const auth = window.fbAuth;
+      const user = auth?.currentUser;
+      
+      if(!db) {
+        alert("Firestore nehate barkirin.");
+        return;
+      }
+      
+      if(!user) {
+        alert("Divê tu têkevî.");
+        return;
+      }
+      
+      if(submission.createdBy !== user.uid) {
+        alert("Yetkîn tune an jî ev naverok ji te re nîne.");
+        return;
+      }
+      
+      try {
+        newBtn.disabled = true;
+        newBtn.textContent = "Jêbirin…";
+        
+        console.log("🗑️ Submission siliniyor:", submissionId);
+        await db.collection("song_submissions").doc(submissionId).delete();
+        console.log("✅ Submission silindi:", submissionId);
+        
+        // Cache'i temizle
+        window.clearSongsCache?.();
+        
+        // UI'dan kaldır
+        const item = newBtn.closest(".item");
+        if(item) {
+          item.style.opacity = "0.5";
+          item.style.transition = "opacity 0.3s";
+          setTimeout(() => {
+            item.remove();
+            // Listeleri yeniden yükle
+            if(typeof renderFiltered === "function") {
+              renderFiltered();
+            }
+          }, 300);
+        }
+        
+        // Sayacı güncelle
+        const isNew = submission.type === "new";
+        const countEl = isNew ? $("#newCount") : $("#editCount");
+        if(countEl) {
+          const currentCount = parseInt(countEl.textContent) || 0;
+          countEl.textContent = Math.max(0, currentCount - 1).toString();
+        }
+        
+        // Listeleri güncelle - closure'dan erişmek yerine yeniden yükle
+        // currentNew ve currentEdit'e erişim için renderFiltered kullanılacak
+        
+      } catch(err) {
+        console.error("❌ Şandî jêbirin çewtiyek:", err);
+        console.error("❌ Hata detayları:", {
+          code: err.code,
+          message: err.message,
+          stack: err.stack
+        });
+        
+        let errorMessage = "Çewtiyek çêbû.";
+        if(err.code === "permission-denied") {
+          errorMessage = "Yetkîn tune. Tenê guhartinên te yên li benda pejirandinê an jî redkirî dikarî jê bibî.";
+        } else if(err.code === "unavailable") {
+          errorMessage = "Firestore nehate gihîştin. Ji kerema xwe dîsa biceribîne.";
+        } else if(err.message) {
+          errorMessage = `Çewtiyek çêbû: ${err.message}`;
+        }
+        
+        alert(errorMessage);
+        newBtn.disabled = false;
+        newBtn.textContent = "Jê bibe";
+      }
+    });
+  });
 }
 
 function updateProfileLink(photoUrl){
@@ -250,7 +357,21 @@ function init(){
   const editCount = $("#editCount");
 
   if(!auth){
-    if(profileStatus) profileStatus.textContent = "Sîstema têketinê nehate dîtin.";
+    // Firebase henüz yüklenmemiş, bekle
+    let retryCount = 0;
+    const maxRetries = 20;
+    const waitForAuth = setInterval(() => {
+      retryCount++;
+      const checkAuth = window.fbAuth;
+      if(checkAuth){
+        clearInterval(waitForAuth);
+        // Auth hazır, fonksiyonu tekrar çağır
+        setTimeout(() => init(), 100);
+      } else if(retryCount >= maxRetries){
+        clearInterval(waitForAuth);
+        if(profileStatus) profileStatus.textContent = "Sîstema têketinê nehate dîtin.";
+      }
+    }, 500);
     return;
   }
 
@@ -272,26 +393,46 @@ function init(){
     const ef = editFilter?.value || "all";
     const filteredNew = filterByStatus(currentNew, nf);
     const filteredEdit = filterByStatus(currentEdit, ef);
-    renderSubmissions(newList, filteredNew, "Hêj stran nehat zêdekirin.");
-    renderSubmissions(editList, filteredEdit, "Hêj guhartin tune.");
+    
+    // Silme callback'i
+    const onDelete = (submissionId, isNew) => {
+      if(isNew) {
+        currentNew = currentNew.filter(s => s._id !== submissionId);
+      } else {
+        currentEdit = currentEdit.filter(s => s._id !== submissionId);
+      }
+      renderFiltered();
+    };
+    
+    renderSubmissions(newList, filteredNew, "Hêj stran nehat zêdekirin.", onDelete);
+    renderSubmissions(editList, filteredEdit, "Hêj guhartin tune.", onDelete);
   };
 
   newFilter?.addEventListener("change", renderFiltered);
   editFilter?.addEventListener("change", renderFiltered);
 
-  profileSignOut?.addEventListener("click", async () => {
-    const ok = window.confirm("Tu dixwazî derkevî?");
-    if(!ok) return;
-    try{
-      await auth.signOut();
-      window.location.href = "/index.html";
-    }catch(err){
-      if(profilePhotoStatus){
-        profilePhotoStatus.textContent = err?.message || "Derketin bi ser neket.";
-        profilePhotoStatus.style.color = "#ef4444";
+  if(profileSignOut){
+    profileSignOut.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const ok = window.confirm("Tu dixwazî derkevî?");
+      if(!ok) return;
+      try{
+        if(!auth){
+          console.error("Auth not available");
+          return;
+        }
+        await auth.signOut();
+        window.location.href = "/index.html";
+      }catch(err){
+        console.error("Derketin çewtiyek:", err);
+        if(profilePhotoStatus){
+          profilePhotoStatus.textContent = err?.message || "Derketin bi ser neket.";
+          profilePhotoStatus.style.color = "#ef4444";
+        }
       }
-    }
-  });
+    });
+  }
 
   profilePhotoSave?.addEventListener("click", async () => {
     const user = auth.currentUser;
@@ -338,7 +479,7 @@ function init(){
       return;
     }
 
-    if(profileName) profileName.textContent = user.displayName || "Kullanıcı";
+    if(profileName) profileName.textContent = user.displayName || "Bikarhêner";
     if(profileEmail) profileEmail.textContent = user.email || "—";
     if(profileStatus) profileStatus.textContent = "";
     if(profileSubtitle) profileSubtitle.textContent = "Hesabın ve içeriklerin";
@@ -361,7 +502,7 @@ function init(){
     renderFiltered();
   });
   
-  // Responsive search - icon'a tıklayınca açılması
+  // Responsive search - sadece tablet ve desktop için (mobil common.js'de handle ediliyor)
   function initResponsiveSearch() {
     const searchHeaders = document.querySelectorAll(".search--header");
     searchHeaders.forEach(searchEl => {
@@ -369,75 +510,61 @@ function init(){
       const icon = searchEl.querySelector(".search__icon");
       if(!input || !icon) return;
       
+      // Sadece tablet ve desktop için (mobil common.js'de handle ediliyor)
+      if(window.innerWidth <= 639) {
+        return;
+      }
+      
+      // Küçük ekranlarda icon-only modunu aktif et (tablet için)
       function checkScreenSize() {
-        if(window.innerWidth <= 639) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639) {
           searchEl.classList.add("search--icon-only");
         } else {
           searchEl.classList.remove("search--icon-only", "search--open");
-          document.body.classList.remove("search-open");
         }
       }
       
       checkScreenSize();
       window.addEventListener("resize", checkScreenSize);
       
+      // Icon'a tıklayınca aç/kapat (sadece tablet için)
       icon.addEventListener("click", (e) => {
-        if(window.innerWidth <= 639) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639) {
           e.preventDefault();
           e.stopPropagation();
-          e.stopImmediatePropagation();
-          const isOpen = searchEl.classList.contains("search--open");
-          if(isOpen) {
+          if(searchEl.classList.contains("search--open")) {
             searchEl.classList.remove("search--open");
             input.blur();
             document.body.classList.remove("search-open");
           } else {
             searchEl.classList.add("search--open");
             document.body.classList.add("search-open");
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                input.focus();
-              });
-            });
+            setTimeout(() => input.focus(), 100);
           }
         }
       });
       
-      input.addEventListener("click", (e) => {
-        if(window.innerWidth <= 639) {
-          e.stopPropagation();
-          if(!searchEl.classList.contains("search--open")) {
-            searchEl.classList.add("search--open");
-            document.body.classList.add("search-open");
-          }
-        }
-      });
-      
-      input.addEventListener("blur", (e) => {
-        if(window.innerWidth <= 639 && !input.value) {
-          const relatedTarget = e.relatedTarget;
-          if(relatedTarget && relatedTarget.closest(".search")) {
-            return;
-          }
+      // Input'tan çıkınca kapat (sadece tablet için)
+      input.addEventListener("blur", () => {
+        if(window.innerWidth <= 768 && window.innerWidth > 639 && !input.value) {
           setTimeout(() => {
-            if(document.activeElement !== input && !input.value) {
+            if(document.activeElement !== input) {
               searchEl.classList.remove("search--open");
               document.body.classList.remove("search-open");
             }
-          }, 300);
+          }, 200);
         }
       });
       
+      // Sayfa kaydırılınca search input'u kapat (sadece tablet için)
       let scrollTimeout;
       function handleScroll() {
-        if(window.innerWidth <= 639 && searchEl.classList.contains("search--open") && !input.value) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639 && searchEl.classList.contains("search--open")) {
           clearTimeout(scrollTimeout);
           scrollTimeout = setTimeout(() => {
-            if(!input.value) {
-              searchEl.classList.remove("search--open");
-              document.body.classList.remove("search-open");
-              input.blur();
-            }
+            searchEl.classList.remove("search--open");
+            document.body.classList.remove("search-open");
+            input.blur();
           }, 150);
         }
       }

@@ -1,4 +1,19 @@
 // common.js — alîkarên piçûk + tema
+// Production mode - console.log'ları minimize et
+const IS_PRODUCTION = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+const DEBUG = !IS_PRODUCTION || (window.location.search.includes('debug=true'));
+
+const log = (...args) => {
+  if (DEBUG) console.log(...args);
+};
+const warn = (...args) => {
+  if (DEBUG) console.warn(...args);
+};
+const error = (...args) => {
+  // Error'ları her zaman göster
+  console.error(...args);
+};
+
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 
@@ -349,10 +364,10 @@ function mergeSongs(baseSongs, submissions, options = {}){
     if(status === "pending" && !includePending){
       // Eğer kullanıcı kendi yaptığı değişikliği görüyorsa, onu da dahil et
       if(currentUserId && sub.createdBy === currentUserId){
-        console.log("✅ Kullanıcının kendi pending değişikliği dahil ediliyor:", sub._id, sub.sourceId);
+        log("✅ Kullanıcının kendi pending değişikliği dahil ediliyor:", sub._id, sub.sourceId);
         // Kullanıcının kendi değişikliği, dahil et - devam et
       } else {
-        console.log("⏭️ Başkasının pending değişikliği atlanıyor:", sub._id);
+        log("⏭️ Başkasının pending değişikliği atlanıyor:", sub._id);
         return; // Başkasının pending değişikliği, atla
       }
     }
@@ -377,16 +392,16 @@ function mergeSongs(baseSongs, submissions, options = {}){
     const prevMs = prev ? toMs(prev.updatedAt || prev.createdAt) : -1;
     if(!prev || subMs >= prevMs){
       editsBySource.set(sourceId, sub);
-      console.log("📌 Edit kaydedildi:", sourceId, "status:", sub.status, "createdBy:", sub.createdBy, "type:", sub.type);
+      log("📌 Edit kaydedildi:", sourceId, "status:", sub.status, "createdBy:", sub.createdBy, "type:", sub.type);
     }
   });
 
-  console.log("🗺️ editsBySource map size:", editsBySource.size, "entries:", Array.from(editsBySource.entries()).map(([k, v]) => ({ sourceId: k, status: v.status, createdBy: v.createdBy })));
+  log("🗺️ editsBySource map size:", editsBySource.size, "entries:", Array.from(editsBySource.entries()).map(([k, v]) => ({ sourceId: k, status: v.status, createdBy: v.createdBy })));
 
   const merged = base.map(song => {
     const sub = editsBySource.get(song.sourceId);
     if(!sub) return song;
-    console.log("🔄 Şarkı merge ediliyor:", song.sourceId, "submission:", sub._id, "status:", sub.status);
+    log("🔄 Şarkı merge ediliyor:", song.sourceId, "submission:", sub._id, "status:", sub.status);
 
     const overlay = {};
     ["song","artist","key","pdf","volume","page_original","text"].forEach(key => {
@@ -405,137 +420,249 @@ function mergeSongs(baseSongs, submissions, options = {}){
   return merged.concat(newItems);
 }
 
-async function loadSongs(options = {}){
-  console.log("loadSongs() called");
+// Global Firebase initialization promise - tüm çağrılar aynı promise'i bekler
+let __firebaseInitPromise = null;
+function waitForFirebaseInit() {
+  if (__firebaseInitPromise) {
+    return __firebaseInitPromise;
+  }
   
-  // Firebase auth state'in hazır olmasını bekle (eğer varsa)
-  if(window.fbAuth && !window.fbAuth.currentUser){
-    await new Promise((resolve) => {
-      const timeout = setTimeout(() => resolve(), 2000); // Max 2 saniye bekle
-      const unsubscribe = window.fbAuth.onAuthStateChanged((user) => {
-        clearTimeout(timeout);
-        unsubscribe();
-        resolve();
+  __firebaseInitPromise = (async () => {
+    // Firebase SDK yüklenene kadar bekle
+    let retryCount = 0;
+    const maxRetries = 20; // 10 saniye
+    while (retryCount < maxRetries && (!window.firebase || !window.fbAuth || !window.fbDb)) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      retryCount++;
+    }
+    
+    if (!window.firebase) {
+      warn("⚠️ Firebase SDK not loaded after waiting");
+      return false;
+    }
+    
+    // Auth state hazır olana kadar bekle (sadece ilk kez)
+    if (window.fbAuth && !window.__authStateReady) {
+      await new Promise((resolve) => {
+        const timeout = setTimeout(() => {
+          window.__authStateReady = true;
+          resolve();
+        }, 2000); // Max 2 saniye bekle
+        const unsubscribe = window.fbAuth.onAuthStateChanged((user) => {
+          clearTimeout(timeout);
+          window.__authStateReady = true;
+          unsubscribe();
+          resolve();
+        });
       });
-    });
-  }
-  
-  const currentUser = window.fbAuth?.currentUser;
-  const includePending = typeof options.includePending === "boolean"
-    ? options.includePending
-    : !!window.isAdminUser?.(currentUser);
-  const currentUserId = currentUser?.uid || null;
-  
-  console.log("🔐 Auth state - currentUserId:", currentUserId, "includePending:", includePending);
-  
-  // Cache key'e currentUserId de ekle, böylece kullanıcı değişiklik yaptığında cache yenilensin
-  const cacheKey = `${includePending}_${currentUserId || 'anonymous'}`;
-  
-  // Eğer cache varsa ama kullanıcı değişmişse cache'i temizle
-  if(window.__songsCache && window.__songsCacheKey !== cacheKey){
-    console.log("🔄 Cache key değişti, cache temizleniyor:", window.__songsCacheKey, "->", cacheKey);
-    window.__songsCache = null;
-    window.__songsCacheKey = null;
-  }
-  
-  if(window.__songsCache && window.__songsCacheKey === cacheKey){
-    console.log("✅ Using cached songs:", window.__songsCache.length);
-    return window.__songsCache;
-  }
-
-  let base = [];
-  try{
-    console.log("Fetching songs.json...");
-    const res = await fetch("/assets/songs.json", { cache: "no-store" });
-    console.log("songs.json response status:", res.status);
-    if(res.ok) {
-      base = await res.json();
-      console.log("songs.json loaded, count:", base.length);
-    } else {
-      console.warn("songs.json response not ok:", res.status);
     }
-  }catch(err){
-    console.warn("songs.json okunamadı:", err);
-  }
-
-  let subs = [];
-  const db = window.fbDb;
-  if(db){
-    try{
-      console.log("🔗 Fetching from Firebase...");
-      
-      // Firestore bağlantısını kontrol et
-      if(!db._delegate){
-        console.warn("⚠️ Firestore not properly initialized");
+    
+    // Firestore'un tamamen hazır olmasını bekle
+    if (window.fbDb) {
+      try {
+        // Firestore'un hazır olduğunu test et - basit bir işlem yap
+        await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            resolve(); // Timeout'ta devam et
+          }, 2000);
+          
+          // Firestore'un hazır olduğunu kontrol et
+          if (window.fbDb._delegate && window.fbDb._delegate._databaseId) {
+            clearTimeout(timeout);
+            resolve();
+          } else {
+            // Biraz bekle ve tekrar dene
+            setTimeout(() => {
+              clearTimeout(timeout);
+              resolve();
+            }, 500);
+          }
+        });
+      } catch (err) {
+        warn("⚠️ Firestore readiness check failed:", err);
       }
-      
-      // Firebase timeout - 10 saniye içinde tamamlanmazsa devam et
-      const firebasePromise = db
-        .collection("song_submissions")
-        .where("status", "in", ["pending","approved"])
-        .get();
-      
-      const timeoutPromise = new Promise((resolve) => {
-        setTimeout(() => {
-          console.warn("⏱️ Firebase timeout - continuing without submissions");
-          resolve({ docs: [] });
-        }, 10000);
-      });
-      
-      const snap = await Promise.race([firebasePromise, timeoutPromise]);
-      subs = snap.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
-      console.log("✅ Firebase submissions loaded, count:", subs.length);
-      if(subs.length > 0){
-        console.log("📋 Submissions:", subs.map(s => ({ 
-          id: s._id, 
-          type: s.type, 
-          status: s.status, 
-          sourceId: s.sourceId,
-          createdBy: s.createdBy 
-        })));
-      }
-    }catch(err){
-      console.error("❌ song_submissions okunamadı:", err);
-      console.error("Error details:", err.message, err.code);
     }
-  } else {
-    console.warn("⚠️ Firebase db not available - check firebase.js initialization");
-    console.warn("window.fbDb:", window.fbDb);
-    console.warn("window.fbAuth:", window.fbAuth);
-  }
-
-  console.log("Merging songs... base:", base.length, "subs:", subs.length, "currentUserId:", currentUserId, "includePending:", includePending);
-  try {
-    window.__songsCache = mergeSongs(base, subs, { includePending, currentUserId });
-    console.log("✅ mergeSongs() completed, cache length:", window.__songsCache.length);
-    // Kullanıcının kendi değişikliklerini kontrol et
-    if(currentUserId){
-      const userEdits = subs.filter(s => s.createdBy === currentUserId && s.status === "pending");
-      console.log("👤 Kullanıcının pending değişiklikleri:", userEdits.length, userEdits.map(e => ({ id: e._id, sourceId: e.sourceId })));
-    }
-  } catch(err) {
-    console.error("❌ mergeSongs() error:", err);
-    window.__songsCache = base; // Fallback to just base songs
-  }
+    
+    return true;
+  })();
   
-  window.__songsCacheIncludePending = includePending;
-  window.__songsCacheKey = cacheKey;
-  
-  try {
-    updateGlobalStats(window.__songsCache);
-    console.log("updateGlobalStats() completed");
-  } catch(err) {
-    console.warn("updateGlobalStats() error:", err);
-  }
-  
-  console.log("loadSongs() completed, total songs:", window.__songsCache.length);
-  return window.__songsCache;
+  return __firebaseInitPromise;
 }
+
+// Global loadSongs lock - eşzamanlı çağrıları engelle
+let __loadSongsInProgress = null;
+
+async function loadSongs(options = {}){
+  // Eğer zaten bir loadSongs çağrısı devam ediyorsa, onu bekle
+  if (__loadSongsInProgress) {
+    return __loadSongsInProgress;
+  }
+  
+  // Yeni bir promise oluştur
+  __loadSongsInProgress = (async () => {
+    try {
+      // Firebase'in hazır olmasını bekle (tüm çağrılar aynı promise'i bekler)
+      await waitForFirebaseInit();
+      
+      const currentUser = window.fbAuth?.currentUser;
+      const includePending = typeof options.includePending === "boolean"
+        ? options.includePending
+        : !!window.isAdminUser?.(currentUser);
+      const currentUserId = currentUser?.uid || null;
+      
+      // Cache key'e currentUserId de ekle
+      const cacheKey = `${includePending}_${currentUserId || 'anonymous'}`;
+      
+      // Eğer cache varsa ve key eşleşiyorsa, cache'i kullan
+      if (window.__songsCache && window.__songsCacheKey === cacheKey && window.__songsCache.length > 0) {
+        window.SONGS = window.__songsCache;
+        return window.__songsCache;
+      }
+      
+      // Cache key değişmişse temizle
+      if (window.__songsCache && window.__songsCacheKey !== cacheKey) {
+        window.__songsCache = null;
+        window.__songsCacheKey = null;
+      }
+
+      let base = [];
+      let jsonRetryCount = 0;
+      const jsonMaxRetries = 3;
+      
+      while(jsonRetryCount < jsonMaxRetries && base.length === 0) {
+        try{
+          const res = await fetch(`/assets/songs.json?v=${Date.now()}`, { 
+            cache: "no-store",
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache'
+            }
+          });
+          if(res.ok) {
+            base = await res.json();
+            break;
+          } else {
+            // Retry without cache-busting
+            const retryRes = await fetch("/assets/songs.json", { cache: "no-store" });
+            if(retryRes.ok) {
+              base = await retryRes.json();
+              break;
+            }
+          }
+        }catch(err){
+          jsonRetryCount++;
+          if(jsonRetryCount < jsonMaxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * jsonRetryCount));
+          }
+        }
+      }
+      
+      if(base.length === 0) {
+        // Son çare: cache'den dene
+        if(window.__songsCache && window.__songsCache.length > 0) {
+          window.SONGS = window.__songsCache;
+          return window.__songsCache;
+        }
+        return [];
+      }
+
+      let subs = [];
+      const db = window.fbDb;
+      if(db){
+        try{
+          // Firestore'un hazır olduğundan emin ol - daha uzun bekleme
+          if (!db._delegate || !db._delegate._databaseId) {
+            // Firestore henüz hazır değil, daha uzun bekle
+            let retries = 0;
+            const maxRetries = 10;
+            while (retries < maxRetries && (!db._delegate || !db._delegate._databaseId)) {
+              await new Promise(resolve => setTimeout(resolve, 500));
+              retries++;
+            }
+          }
+          
+          // Eğer hala hazır değilse, Firestore sorgusunu atla
+          if (!db._delegate || !db._delegate._databaseId) {
+            warn("⚠️ Firestore not ready, skipping submissions query");
+          } else {
+            // Firebase timeout - 8 saniye içinde tamamlanmazsa devam et
+            const firebasePromise = db
+              .collection("song_submissions")
+              .where("status", "in", ["pending","approved"])
+              .get();
+            
+            const timeoutPromise = new Promise((resolve) => {
+              setTimeout(() => {
+                resolve({ docs: [] });
+              }, 8000);
+            });
+            
+            const snap = await Promise.race([firebasePromise, timeoutPromise]);
+            subs = snap.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+          }
+        }catch(err){
+          // Firestore hatası - sessizce devam et, sadece base songs kullan
+          // "INTERNAL ASSERTION FAILED" hatasını özel olarak yakala
+          if (err.message && err.message.includes("INTERNAL ASSERTION FAILED")) {
+            warn("⚠️ Firestore internal error, using base songs only");
+          } else {
+            warn("⚠️ Firestore query failed, using base songs only:", err.message);
+          }
+        }
+      }
+
+      try {
+        window.__songsCache = mergeSongs(base, subs, { includePending, currentUserId });
+        window.__songsCacheIncludePending = includePending;
+        window.__songsCacheKey = cacheKey;
+        window.SONGS = window.__songsCache;
+        
+        updateGlobalStats(window.__songsCache);
+        return window.__songsCache;
+      } catch(err) {
+        error("❌ mergeSongs() error:", err);
+        window.__songsCache = base;
+        window.__songsCacheKey = cacheKey;
+        window.SONGS = window.__songsCache;
+        return window.__songsCache;
+      }
+    } finally {
+      // Lock'u temizle
+      __loadSongsInProgress = null;
+    }
+  })();
+  
+  return __loadSongsInProgress;
+}
+
+// loadSongs'u window objesine de ata - mobil search overlay için
+window.loadSongs = loadSongs;
+// waitForFirebaseInit'i de export et - diğer dosyalar kullanabilsin
+window.waitForFirebaseInit = waitForFirebaseInit;
 
 function clearSongsCache(){
   window.__songsCache = null;
   window.__songsCacheIncludePending = null;
   window.__songsCacheKey = null;
+  window.SONGS = null;
+  // Firebase init promise'i de sıfırla (yeniden başlatmak için)
+  __firebaseInitPromise = null;
+  // Tüm cache'leri temizle
+  if('caches' in window) {
+    caches.keys().then(names => {
+      names.forEach(name => {
+        caches.delete(name);
+      });
+    });
+  }
+  // Service Worker cache'ini de temizle
+  if('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      registrations.forEach(registration => {
+        registration.unregister();
+      });
+    });
+  }
 }
 
 // Favorileme fonksiyonları
@@ -556,7 +683,7 @@ async function loadUserFavorites(uid){
     userFavoritesCacheUid = uid;
     return favorites;
   }catch(err){
-    console.warn("Favoriler yüklenemedi:", err);
+    warn("Favoriler yüklenemedi:", err);
     return [];
   }
 }
@@ -606,7 +733,7 @@ async function toggleFavoriteSong(song){
       return true; // Favorilere eklendi
     }
   }catch(err){
-    console.error("Favori kaydedilemedi:", err);
+    error("Favori kaydedilemedi:", err);
     return null;
   }
 }
@@ -637,24 +764,45 @@ window.isAdminUser = (user) => {
 })();
 
 async function ensureProfile(user){
+  // Firebase'in hazır olmasını bekle
+  if (typeof window.waitForFirebaseInit === "function") {
+    await window.waitForFirebaseInit();
+  } else {
+    // Fallback: Firebase'in hazır olmasını bekle
+    let retries = 0;
+    const maxRetries = 10;
+    while (retries < maxRetries && (!window.fbDb || !window.fbDb._delegate)) {
+      await new Promise(resolve => setTimeout(resolve, 300));
+      retries++;
+    }
+  }
+  
   const db = window.fbDb;
   if(!db || !user) return;
-  const ref = db.collection("profiles").doc(user.uid);
-  const snap = await ref.get().catch(() => null);
-  const stamp = window.firebase?.firestore?.FieldValue?.serverTimestamp?.() || null;
-  const payload = {
-    email: user.email || "",
-    displayName: user.displayName || "",
-    photoURL: user.photoURL || "",
-    lastLoginAt: stamp
-  };
-  if(!snap || !snap.exists){
-    payload.createdAt = stamp;
+  
+  // Firestore'un hazır olduğundan emin ol
+  if (!db._delegate || !db._delegate._databaseId) {
+    // Biraz bekle ve tekrar dene
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
-  try{
+  
+  try {
+    const ref = db.collection("profiles").doc(user.uid);
+    const snap = await ref.get().catch(() => null);
+    const stamp = window.firebase?.firestore?.FieldValue?.serverTimestamp?.() || null;
+    const payload = {
+      email: user.email || "",
+      displayName: user.displayName || "",
+      photoURL: user.photoURL || "",
+      lastLoginAt: stamp
+    };
+    if(!snap || !snap.exists){
+      payload.createdAt = stamp;
+    }
     await ref.set(payload, { merge: true });
   }catch(err){
-    console.warn("Profil kaydı oluşturulamadı:", err);
+    // Sessizce devam et - profil kaydı kritik değil
+    warn("Profil kaydı oluşturulamadı:", err.message);
   }
 }
 
@@ -1421,106 +1569,101 @@ window.initAddSongPanel = initAddSongPanel;
     setTimeout(setupHeroLoginBtn, 100);
   }
   
-  // Topbar'daki Zêdeke butonunu yönet
-  const setupButtons = () => {
+  // Topbar'daki Zêdeke butonunu yönet - AGRESIF YÖNTEM
+  const setupTopbarButton = () => {
     const btn = document.getElementById("addSongMenuBtn");
-    const buttons = [btn].filter(Boolean);
-    
-    if(!buttons.length) {
-      // Butonlar henüz yüklenmemiş, tekrar dene
-      setTimeout(setupButtons, 200);
+    if(!btn) {
+      setTimeout(setupTopbarButton, 100);
       return;
     }
     
-    buttons.forEach(b => {
-      // Mevcut event listener'ları temizlemek için clone et
-      const newBtn = b.cloneNode(true);
-      b.parentNode.replaceChild(newBtn, b);
-      
-      newBtn.addEventListener("click", (e) => {
+    // Tüm event listener'ları temizlemek için clone et
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    // Çoklu event listener ekle - kesin çalışsın
+    const handleClick = (e) => {
+      if(e) {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        
-        // Giriş kontrolü
-        const handleClick = () => {
-          const auth = window.fbAuth;
-          const user = auth?.currentUser;
-          
-          if(!user){
-            // Giriş yapmamış kullanıcı için auth panelini aç
-            if(typeof window.requireAuthAction === "function"){
-              window.requireAuthAction(() => {
-                // Giriş yapıldıktan sonra paneli aç
-                setTimeout(() => {
-                  if(typeof window.openAddSongPanel === "function"){
-                    window.openAddSongPanel();
-                  } else {
-                    const panel = document.getElementById("addSongPanel");
-                    if(panel){
-                      panel.classList.remove("is-hidden");
-                      panel.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }
-                  }
-                }, 500);
-              }, "Ji bo stran zêde kirinê divê tu têkevî.");
-            } else {
-              // requireAuthAction yoksa auth panelini manuel aç
-              const authOpen = document.getElementById("authOpen");
-              if(authOpen) {
-                authOpen.click();
+      }
+      
+      // Giriş kontrolü - Firebase beklemeden direkt kontrol et
+      const user = window.fbAuth?.currentUser;
+      
+      if(!user){
+        // Giriş yapmamış - auth panelini aç
+        if(typeof window.requireAuthAction === "function"){
+          window.requireAuthAction(() => {
+            setTimeout(() => {
+              if(typeof window.openAddSongPanel === "function"){
+                window.openAddSongPanel();
+              } else {
+                const panel = document.getElementById("addSongPanel");
+                if(panel){
+                  panel.classList.remove("is-hidden");
+                  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
               }
-            }
-            return;
-          }
-          
-          // Giriş yapmış kullanıcı için paneli aç
-          if(typeof window.openAddSongPanel === "function"){
-            window.openAddSongPanel();
-          } else {
-            // Fallback: paneli direkt aç
-            const panel = document.getElementById("addSongPanel");
-            if(panel){
-              panel.classList.remove("is-hidden");
-              panel.scrollIntoView({ behavior: "smooth", block: "start" });
-            } else {
-              // Panel yoksa hash ile aç
-              window.location.href = "/index.html#add-song";
-            }
-          }
-        };
-        
-        // Firebase auth'un yüklenmesini bekle (maksimum 2 saniye)
-        if(!window.fbAuth){
-          let attempts = 0;
-          const maxAttempts = 20;
-          const waitForAuth = setInterval(() => {
-            attempts++;
-            if(window.fbAuth || attempts >= maxAttempts){
-              clearInterval(waitForAuth);
-              handleClick();
-            }
-          }, 100);
+            }, 500);
+          }, "Ji bo stran zêde kirinê divê tu têkevî.");
         } else {
-          handleClick();
+          const authOpen = document.getElementById("authOpen");
+          if(authOpen) authOpen.click();
         }
-      });
-    });
+        return;
+      }
+      
+      // Giriş yapmış - paneli aç
+      if(typeof window.openAddSongPanel === "function"){
+        window.openAddSongPanel();
+      } else {
+        const panel = document.getElementById("addSongPanel");
+        if(panel){
+          panel.classList.remove("is-hidden");
+          panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+          window.location.href = "/index.html#add-song";
+        }
+      }
+    };
+    
+    // Hem onclick hem addEventListener ekle
+    newBtn.onclick = handleClick;
+    newBtn.addEventListener("click", handleClick, true); // capture phase
+    newBtn.addEventListener("click", handleClick, false); // bubble phase
+    newBtn.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      handleClick(e);
+    }, true);
   };
   
-  // DOM hazır olduğunda çalıştır
-  const init = () => {
+  // Çoklu deneme - kesin çalışsın
+  const initTopbarButton = () => {
+    setupTopbarButton();
+    setTimeout(setupTopbarButton, 200);
+    setTimeout(setupTopbarButton, 500);
+    setTimeout(setupTopbarButton, 1000);
+    setTimeout(setupTopbarButton, 2000);
+    
     if(document.readyState === "loading"){
       document.addEventListener("DOMContentLoaded", () => {
-        setTimeout(setupButtons, 500);
+        setTimeout(setupTopbarButton, 100);
+        setTimeout(setupTopbarButton, 500);
+        setTimeout(setupTopbarButton, 1000);
       });
-    } else {
-      // DOM zaten hazır, initAddSongPanel'in tamamlanması için bekle
-      setTimeout(setupButtons, 800);
     }
   };
   
-  init();
+  // Hemen başlat ve tekrar tekrar dene
+  initTopbarButton();
+  
+  // Window load'ta da dene
+  window.addEventListener("load", () => {
+    setTimeout(setupTopbarButton, 100);
+    setTimeout(setupTopbarButton, 500);
+  });
 })();
 
 (function initLiveBackground(){
@@ -1768,54 +1911,53 @@ window.initAddSongPanel = initAddSongPanel;
 })();
 
 (function initAuthUI(){
+  // Modal sistemi kaldırıldı - artık login.html sayfası kullanılıyor
+  // Bu fonksiyon sadece butonları güncellemek için kullanılıyor
   const openBtn = document.getElementById("authOpen");
-  const panel = document.getElementById("authPanel");
-  if(!openBtn || !panel) return;
-
-  const fb = window.firebase;
-  const auth = window.fbAuth || (fb?.auth ? fb.auth() : null);
-  if(!auth){
-    openBtn.style.display = "none";
+  const profileLink = document.getElementById("profileLink");
+  const signOutBtn = document.getElementById("authSignOut");
+  const adminLink = document.getElementById("adminLink");
+  
+  // Eğer hiçbir auth butonu yoksa, bu sayfada auth UI yok
+  if(!openBtn && !profileLink && !signOutBtn && !adminLink) {
     return;
   }
 
-  const emailEl = document.getElementById("authEmail");
-  const passEl = document.getElementById("authPass");
-  const signInBtn = document.getElementById("authSignIn");
-  const signUpBtn = document.getElementById("authSignUp");
-  const signOutBtn = document.getElementById("authSignOut");
-  const googleBtn = document.getElementById("authGoogle");
-  const resetBtn = document.getElementById("authReset");
-  const statusEl = document.getElementById("authStatus");
-  const profileLink = document.getElementById("profileLink");
-  const adminLink = document.getElementById("adminLink");
-
-  let overlay = document.getElementById("authOverlay");
-  if(!overlay){
-    overlay = document.createElement("div");
-    overlay.id = "authOverlay";
-    overlay.className = "authOverlay";
-    document.body.appendChild(overlay);
+  const fb = window.firebase;
+  let auth = window.fbAuth;
+  
+  // Firebase henüz yüklenmemişse bekle
+  if(!auth && fb && fb.apps && fb.apps.length > 0){
+    auth = fb.auth ? fb.auth(fb.apps[0]) : null;
   }
-  if(panel.parentElement !== document.body){
-    document.body.appendChild(panel);
+  
+  if(!auth){
+    // Firebase yüklenmemiş, bekle
+    let retryCount = 0;
+    const maxRetries = 20; // 10 saniye max bekleme
+    const waitForAuth = setInterval(() => {
+      retryCount++;
+      const checkFb = window.firebase;
+      if(checkFb && checkFb.apps && checkFb.apps.length > 0){
+        const checkAuth = window.fbAuth || (checkFb.auth ? checkFb.auth(checkFb.apps[0]) : null);
+        if(checkAuth){
+          clearInterval(waitForAuth);
+          // Auth hazır, fonksiyonu tekrar çağır
+          setTimeout(() => initAuthUI(), 100);
+        }
+      }
+      if(retryCount >= maxRetries){
+        clearInterval(waitForAuth);
+        warn("⚠️ Firebase Auth not available after waiting");
+      }
+    }, 500);
+    return;
   }
 
-  const openPanel = () => {
-    panel.classList.add("is-open");
-    overlay.classList.add("is-open");
-    panel.setAttribute("aria-hidden", "false");
-    document.body.classList.add("auth-open");
-  };
-  const closePanel = () => {
-    panel.classList.remove("is-open");
-    overlay.classList.remove("is-open");
-    panel.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("auth-open");
-  };
-
-  // Güvenli başlangıç: kapalı başlat
-  closePanel();
+  // profileLink, adminLink, signOutBtn zaten yukarıda tanımlandı
+  
+  // Mevcut sayfanın URL'ini al (returnUrl için)
+  const currentUrl = window.location.pathname + window.location.search + window.location.hash;
 
   const setProfileButton = (user) => {
     if(!profileLink) return;
@@ -1896,9 +2038,7 @@ window.initAddSongPanel = initAddSongPanel;
     statusEl.style.color = isError ? "#ef4444" : "";
   };
 
-  if(googleBtn){
-    googleBtn.innerHTML = `<span class="googleIcon">G</span> Bi Google re têkeve`;
-  }
+  // googleBtn artık login.html'de, burada gerek yok
 
   // Hero login butonunu güncelle
   const updateHeroLoginBtn = (user) => {
@@ -1908,164 +2048,126 @@ window.initAddSongPanel = initAddSongPanel;
     }
   };
   
+  // Têkev butonunu login sayfasına yönlendir (eğer link ise)
+  if(openBtn && openBtn.tagName === "A") {
+    // Mevcut href'i koru, eğer yoksa ekle
+    if(!openBtn.href || openBtn.href.includes("#") || openBtn.href === window.location.origin + "/login.html") {
+      openBtn.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
+    }
+  }
+  
+  // Zêdeke butonunu login sayfasına yönlendir (giriş yapmamışsa)
+  const addSongBtn = document.getElementById("addSongMenuBtn");
+  if(addSongBtn && addSongBtn.tagName === "A") {
+    // Mevcut href'i kontrol et, eğer login sayfasına yönlendirmiyorsa güncelle
+    if(!addSongBtn.href || addSongBtn.href.includes("#") || !addSongBtn.href.includes("/login.html")) {
+      addSongBtn.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
+    }
+  }
+  
   const setLoggedOut = () => {
-    openBtn.textContent = "Têkev";
-    openBtn.style.display = "inline-flex";
-    if(emailEl){ emailEl.value = ""; emailEl.disabled = false; }
-    if(passEl){ passEl.value = ""; passEl.disabled = false; }
-    if(signInBtn) signInBtn.style.display = "inline-flex";
-    if(signUpBtn) signUpBtn.style.display = "inline-flex";
-    if(signOutBtn) signOutBtn.style.display = "none";
-    if(profileLink) profileLink.style.display = "none";
+    log("setLoggedOut called");
+    // Giriş yapmamış - Têkev butonunu göster
+    if(openBtn) {
+      openBtn.style.display = "inline-flex";
+      log("Shown authOpen button");
+    }
+    if(profileLink) {
+      profileLink.style.display = "none";
+      log("Hidden profileLink");
+    }
+    if(signOutBtn) {
+      signOutBtn.style.display = "none";
+      log("Hidden signOutBtn");
+    }
     if(adminLink) adminLink.style.display = "none";
-    updateHeroLoginBtn(null); // Giriş yapmamış kullanıcı için butonu göster
-    setStatus("Ji bo têketinê e-name û şîfre binivîse.");
+    // Zêdeke butonunu login sayfasına yönlendir
+    if(addSongBtn && addSongBtn.tagName === "A") {
+      addSongBtn.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
+      addSongBtn.onclick = null;
+    }
+    updateHeroLoginBtn(null);
   };
 
   const setLoggedIn = (user) => {
-    openBtn.style.display = "none";
-    if(emailEl){ emailEl.value = user?.email || ""; emailEl.disabled = true; }
-    if(passEl){ passEl.value = "••••••••"; passEl.disabled = true; }
-    if(signInBtn) signInBtn.style.display = "none";
-    if(signUpBtn) signUpBtn.style.display = "none";
-    if(signOutBtn) signOutBtn.style.display = "inline-flex";
+    // Giriş yapmış - Têkev butonunu gizle, Profil'i göster, Derketin'i gizle
+    if(openBtn) openBtn.style.display = "none";
+    if(profileLink) profileLink.style.display = "inline-flex";
+    if(signOutBtn) signOutBtn.style.display = "none"; // Derketin butonu topbarda görünmesin
     setProfileButton(user);
     if(adminLink){
       adminLink.style.display = window.isAdminUser?.(user) ? "inline-flex" : "none";
     }
-    updateHeroLoginBtn(user); // Giriş yapmış kullanıcı için butonu gizle
-    setStatus(`${user?.email || "Bikarhêner"} têket.`);
-    closePanel();
-    if(typeof window.__authContinue === "function"){
-      const fn = window.__authContinue;
-      window.__authContinue = null;
-      try{ fn(); }catch(e){}
-    }
-  };
-
-  openBtn.addEventListener("click", (ev) => {
-    ev.preventDefault();
-    if(panel.classList.contains("is-open")){
-      closePanel();
-    }else{
-      openPanel();
-    }
-  });
-
-  document.addEventListener("keydown", (ev) => {
-    if(ev.key === "Escape") closePanel();
-  });
-  document.addEventListener("click", (ev) => {
-    if(!panel.classList.contains("is-open")) return;
-    if(panel.contains(ev.target) || openBtn.contains(ev.target)) return;
-    closePanel();
-  });
-
-  signInBtn?.addEventListener("click", async () => {
-    const email = (emailEl?.value || "").trim();
-    const pass = passEl?.value || "";
-    if(!email || !pass){
-      setStatus("E-name û şîfre pêwîst in.", true);
-      return;
-    }
-    try{
-      await auth.signInWithEmailAndPassword(email, pass);
-      setStatus("Têketin serkeftî.");
-      closePanel();
-    }catch(err){
-      setStatus(translateError(err) || "Têketin bi ser neket.", true);
-    }
-  });
-
-  signUpBtn?.addEventListener("click", async () => {
-    const email = (emailEl?.value || "").trim();
-    const pass = passEl?.value || "";
-    if(!email || !pass){
-      setStatus("E-name û şîfre pêwîst in.", true);
-      return;
-    }
-    try{
-      await auth.createUserWithEmailAndPassword(email, pass);
-      setStatus("Qeyd serkeftî.");
-      closePanel();
-    }catch(err){
-      setStatus(translateError(err) || "Qeyd bi ser neket.", true);
-    }
-  });
-
-  signOutBtn?.addEventListener("click", async () => {
-    const ok = window.confirm("Tu dixwazî derkevî?");
-    if(!ok) return;
-    try{
-      await auth.signOut();
-      setStatus("Derketin.");
-      closePanel();
-      window.location.href = "/index.html";
-    }catch(err){
-      setStatus(translateError(err) || "Derketin bi ser neket.", true);
-    }
-  });
-
-  googleBtn?.addEventListener("click", async () => {
-    try{
-      const provider = fb?.auth ? new fb.auth.GoogleAuthProvider() : null;
-      if(!provider){
-        setStatus("Têketina bi Google re nayê bikar anîn.", true);
-        return;
-      }
-      await auth.signInWithPopup(provider);
-      setStatus("Bi Google re têketin serkeftî.");
-      closePanel();
-    }catch(err){
-      if(err?.code === "auth/popup-blocked" || err?.code === "auth/popup-closed-by-user"){
-        try{
-          const redirectProvider = fb?.auth ? new fb.auth.GoogleAuthProvider() : null;
-          if(!redirectProvider){
-            setStatus("Têketina bi Google re nayê bikar anîn.", true);
-            return;
+    // Zêdeke butonunu şarkı ekleme paneline yönlendir (sadece index.html'de)
+    if(addSongBtn && window.location.pathname === "/index.html" || window.location.pathname === "/") {
+      if(addSongBtn.tagName === "A") {
+        addSongBtn.href = "#add-song";
+        addSongBtn.onclick = (e) => {
+          e.preventDefault();
+          if(typeof window.openAddSongPanel === "function") {
+            window.openAddSongPanel();
+          } else {
+            const panel = document.getElementById("addSongPanel");
+            if(panel) {
+              panel.classList.remove("is-hidden");
+              panel.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
           }
-          await auth.signInWithRedirect(redirectProvider);
-          return;
-        }catch(e){
-          setStatus(translateError(e) || "Têketina bi Google re bi ser neket.", true);
-          return;
-        }
+        };
       }
-      setStatus(translateError(err) || "Têketina bi Google re bi ser neket.", true);
     }
-  });
+    updateHeroLoginBtn(user);
+  };
+  
+  // Derketin butonu
+  if(signOutBtn) {
+    signOutBtn.addEventListener("click", async () => {
+      const ok = window.confirm("Tu dixwazî derkevî?");
+      if(!ok) return;
+      try{
+        await auth.signOut();
+        window.location.href = "/index.html";
+      }catch(err){
+        error("Çıkış hatası:", err);
+      }
+    });
+  }
 
-  resetBtn?.addEventListener("click", async () => {
-    const email = (emailEl?.value || "").trim();
-    if(!email){
-      setStatus("Ji bo şîfreya nû kirinê e-name binivîse.", true);
-      return;
-    }
-    try{
-      await auth.sendPasswordResetEmail(email);
-      setStatus("E-nameya şîfreya nû kirinê hate şandin.");
-    }catch(err){
-      setStatus(translateError(err) || "Şîfre nû nekir.", true);
-    }
-  });
+  // İlk yüklemede mevcut kullanıcıyı kontrol et
+  const currentUser = auth.currentUser;
+  log("initAuthUI - currentUser:", currentUser ? currentUser.uid : "null");
+  if(currentUser){
+    log("Setting logged in state for:", currentUser.uid);
+    setLoggedIn(currentUser);
+    ensureProfile(currentUser);
+  } else {
+    log("Setting logged out state");
+    setLoggedOut();
+  }
+  
+  // Auth state değişikliklerini dinle - sadece bir kez setup et
+  if(!window.__authUIListenerSetup){
+    window.__authUIListenerSetup = true;
+    auth.onAuthStateChanged((user) => {
+      log("Auth state changed:", user ? user.uid : "logged out");
+      if(user){
+        setLoggedIn(user);
+        ensureProfile(user);
+      }else{
+        setLoggedOut();
+      }
+    });
+  }
 
-  auth.onAuthStateChanged((user) => {
-    if(user){
-      setLoggedIn(user);
-      ensureProfile(user);
-    }else{
-      setLoggedOut();
-    }
-  });
-
+  // requireAuthAction - artık login sayfasına yönlendiriyor
   window.requireAuthAction = (fn, message) => {
     if(auth.currentUser){
       if(typeof fn === "function") fn();
       return true;
     }
-    window.__authContinue = typeof fn === "function" ? fn : null;
-    if(message) setStatus(message, true);
-    openPanel();
+    // Giriş yapmamış - login sayfasına yönlendir
+    const returnUrl = currentUrl;
+    window.location.href = `/login.html?return=${encodeURIComponent(returnUrl)}`;
     return false;
   };
 })();
@@ -2096,3 +2198,495 @@ function updateFilterOptions(user) {
 }
 
 window.updateFilterOptions = updateFilterOptions;
+
+// Mobil Search Overlay - Tüm sayfalarda çalışır
+(function initMobileSearch() {
+  let isInitialized = false;
+  
+  // Overlay açıkken sayfadaki listelerin güncellenmesini engellemek için flag
+  window.__mobileSearchOverlayOpen = false;
+  
+  // Overlay HTML'ini oluştur
+  function createSearchOverlay() {
+    // Zaten varsa oluşturma
+    if (document.getElementById("searchOverlay")) return;
+    
+    const overlay = document.createElement("div");
+    overlay.id = "searchOverlay";
+    overlay.className = "search-overlay";
+    overlay.innerHTML = `
+      <div class="search-overlay__header">
+        <svg class="search-overlay__icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
+          <path d="M16.8 16.8L21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <input 
+          id="searchOverlayInput" 
+          class="search-overlay__input" 
+          type="search" 
+          placeholder="Stran an hunermend bigere…" 
+          autocomplete="off" 
+        />
+        <button id="searchOverlayClear" class="search-overlay__clear" type="button" aria-label="Paqij bike">✕</button>
+        <button class="search-overlay__close" type="button" aria-label="Betal bike">✕</button>
+      </div>
+      <div id="searchOverlayResults" class="search-overlay__results"></div>
+    `;
+    document.body.appendChild(overlay);
+  }
+  
+  // Arama sonuçlarını göster
+  let searchTimeout = null;
+  function renderSearchResults(query) {
+    const resultsContainer = document.getElementById("searchOverlayResults");
+    if (!resultsContainer) return;
+    
+    // Query boşsa önerileri göster
+    if (!query || query.trim().length === 0) {
+      renderSuggestions();
+      return;
+    }
+    
+    // SONGS global değişkeninden şarkıları al
+    // Önce window.SONGS'u kontrol et, yoksa window.__songsCache'i dene
+    let songs = window.SONGS || window.__songsCache || [];
+    
+    if (!songs || songs.length === 0) {
+      warn("⚠️ renderSearchResults: SONGS not found");
+      // Songs yoksa boş bırak, mesaj gösterme
+      resultsContainer.innerHTML = "";
+      return;
+    }
+    
+    log("✅ renderSearchResults: Found", songs.length, "songs, query:", query);
+    
+    // Fuzzy search kullan
+    const results = window.fuzzySearch ? window.fuzzySearch(query, songs) : songs.filter(s => {
+      const searchText = window.norm ? window.norm(`${s.song || ""} ${window.artistText ? window.artistText(s.artist) : ""}`) : "";
+      const q = window.norm ? window.norm(query) : query.toLowerCase();
+      return searchText.includes(q);
+    }).slice(0, 20);
+    
+    if (results.length === 0) {
+      resultsContainer.innerHTML = `
+        <div class="search-overlay__empty">
+          Encam nehate dîtin
+        </div>
+      `;
+      return;
+    }
+    
+    // Sonuçları render et
+    const artistText = window.artistText || ((artist) => {
+      if (!artist) return "";
+      if (Array.isArray(artist)) return artist.join(", ");
+      return artist.toString();
+    });
+    
+    const songId = window.songId || ((s) => s._id || s.sourceId || "");
+    
+    resultsContainer.innerHTML = `
+      <div class="search-overlay__section-title">Encamên lêgerînê (${results.length})</div>
+      ${results.map(song => {
+      const id = songId(song);
+      const title = song.song || "Bê nav";
+      const artist = artistText(song.artist) || "Bê hunermend";
+      const url = id ? `/song.html?id=${encodeURIComponent(id)}` : "#";
+      
+        return `
+          <a href="${url}" class="search-overlay__result-item">
+            <div style="flex: 1;">
+              <div class="search-overlay__result-title">${escapeHtml(title)}</div>
+              <div class="search-overlay__result-artist">${escapeHtml(artist)}</div>
+            </div>
+          </a>
+        `;
+      }).join("")}
+    `;
+  }
+  
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+  
+  // Overlay'i aç/kapat
+  function toggleSearchOverlay(open) {
+    const overlay = document.getElementById("searchOverlay");
+    const input = document.getElementById("searchOverlayInput");
+    const originalInput = document.querySelector(".search--header .search__input");
+    
+    if (!overlay || !input) {
+      warn("❌ toggleSearchOverlay: overlay or input not found");
+      return;
+    }
+    
+    if (open) {
+      log("🔍 Opening search overlay...");
+      overlay.classList.add("active");
+      document.body.classList.add("search-overlay-open");
+      // FLAG: Overlay açık - sayfadaki listeler güncellenmesin
+      window.__mobileSearchOverlayOpen = true;
+      
+      // SONGS ve homeSample'ı güncelle (eğer yoksa)
+      if (!window.SONGS || window.SONGS.length === 0) {
+        // window.__songsCache'i kontrol et
+        if (window.__songsCache && window.__songsCache.length > 0) {
+          window.SONGS = window.__songsCache;
+          log("✅ Using __songsCache, found", window.SONGS.length, "songs");
+        }
+      }
+      
+      // homeSample'ı kontrol et ve güncelle
+      if ((!window.homeSample || window.homeSample.length === 0) && window.SONGS && window.SONGS.length > 0) {
+        const pickRandom = window.pickRandom || ((arr, n) => {
+          const shuffled = [...arr].sort(() => 0.5 - Math.random());
+          return shuffled.slice(0, n);
+        });
+        window.homeSample = pickRandom(window.SONGS, 7);
+        log("✅ Created homeSample, found", window.homeSample.length, "suggestions");
+      }
+      
+      log("🔍 Current state - SONGS:", window.SONGS?.length || 0, "homeSample:", window.homeSample?.length || 0);
+      
+      // Orijinal input'un değerini kopyala (sadece görüntü için)
+      if (originalInput && originalInput.value) {
+        input.value = originalInput.value;
+        updateClearButton(input);
+        renderSearchResults(input.value);
+      } else {
+        // Boş açıldığında önerileri göster
+        log("🔍 Showing suggestions...");
+        renderSuggestions();
+      }
+      // Focus
+      setTimeout(() => {
+        input.focus();
+      }, 100);
+    } else {
+      overlay.classList.remove("active");
+      document.body.classList.remove("search-overlay-open");
+      // FLAG: Overlay kapalı - sayfadaki listeler normal çalışsın
+      window.__mobileSearchOverlayOpen = false;
+      
+      // Overlay kapatıldığında orijinal input'u TEMİZLE
+      // Böylece sayfadaki listeler eski haline döner (örneğin "Yên Berçav")
+      if (originalInput) {
+        originalInput.value = "";
+        // Input event'ini tetikle - sayfadaki listeleri eski haline getir
+        originalInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      input.value = "";
+      updateClearButton(input);
+      input.blur();
+      // Sonuçları temizle
+      const resultsContainer = document.getElementById("searchOverlayResults");
+      if (resultsContainer) {
+        resultsContainer.innerHTML = "";
+      }
+    }
+  }
+  
+  // Clear butonunu güncelle
+  function updateClearButton(input) {
+    const clearBtn = document.getElementById("searchOverlayClear");
+    const header = input?.closest(".search-overlay__header");
+    if (!clearBtn || !header) return;
+    
+    if (input.value.trim()) {
+      header.classList.add("has-value");
+    } else {
+      header.classList.remove("has-value");
+    }
+  }
+  
+  // Önerileri göster (yazmaya başlamadan önce)
+  function renderSuggestions() {
+    const resultsContainer = document.getElementById("searchOverlayResults");
+    if (!resultsContainer) {
+      warn("❌ searchOverlayResults container not found");
+      return;
+    }
+    
+    // SONGS global değişkeninden şarkıları al
+    // Önce window.SONGS'u kontrol et, yoksa window.__songsCache'i dene
+    let songs = window.SONGS || window.__songsCache || [];
+    
+    // Eğer hala boşsa, loadSongs fonksiyonunu çağır
+    if (!songs || songs.length === 0) {
+      warn("⚠️ SONGS not found, trying to load...");
+      // loadSongs fonksiyonu varsa çağır
+      if (window.loadSongs && typeof window.loadSongs === "function") {
+        window.loadSongs().then(loadedSongs => {
+          if (loadedSongs && loadedSongs.length > 0) {
+            window.SONGS = loadedSongs;
+            log("✅ Songs loaded, re-rendering suggestions...");
+            renderSuggestions(); // Tekrar dene
+          } else {
+            warn("⚠️ No songs loaded");
+            resultsContainer.innerHTML = "";
+          }
+        }).catch(err => {
+          error("❌ Error loading songs:", err);
+          resultsContainer.innerHTML = "";
+        });
+        return;
+      }
+      warn("⚠️ loadSongs function not available");
+      resultsContainer.innerHTML = "";
+      return;
+    }
+    
+    log("✅ renderSuggestions: Found", songs.length, "songs");
+    
+    // homeSample varsa onu kullan, yoksa random seç
+    let suggestions = [];
+    if (window.homeSample && window.homeSample.length > 0) {
+      suggestions = window.homeSample;
+    } else {
+      // Random 7 şarkı seç
+      const pickRandom = window.pickRandom || ((arr, n) => {
+        const shuffled = [...arr].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, n);
+      });
+      suggestions = pickRandom(songs, 7);
+    }
+    
+    if (suggestions.length === 0) {
+      resultsContainer.innerHTML = "";
+      return;
+    }
+    
+    // Önerileri render et
+    const artistText = window.artistText || ((artist) => {
+      if (!artist) return "";
+      if (Array.isArray(artist)) return artist.join(", ");
+      return artist.toString();
+    });
+    
+    const songId = window.songId || ((s) => s._id || s.sourceId || "");
+    
+    resultsContainer.innerHTML = `
+      <div class="search-overlay__section-title">Yên Berçav</div>
+      ${suggestions.map(song => {
+        const id = songId(song);
+        const title = song.song || "Bê nav";
+        const artist = artistText(song.artist) || "Bê hunermend";
+        const url = id ? `/song.html?id=${encodeURIComponent(id)}` : "#";
+        
+        return `
+          <a href="${url}" class="search-overlay__result-item">
+            <div style="flex: 1;">
+              <div class="search-overlay__result-title">${escapeHtml(title)}</div>
+              <div class="search-overlay__result-artist">${escapeHtml(artist)}</div>
+            </div>
+          </a>
+        `;
+      }).join("")}
+    `;
+  }
+  
+  // Overlay'i başlat
+  function setupSearchOverlay() {
+    log("🔍 setupSearchOverlay called");
+    createSearchOverlay();
+    
+    const overlay = document.getElementById("searchOverlay");
+    const input = document.getElementById("searchOverlayInput");
+    const closeBtn = overlay?.querySelector(".search-overlay__close");
+    const clearBtn = document.getElementById("searchOverlayClear");
+    const searchIcon = document.querySelector(".search--header .search__icon");
+    
+    log("🔍 Overlay:", overlay);
+    log("🔍 Input:", input);
+    log("🔍 Search Icon:", searchIcon);
+    
+    if (!overlay || !input) {
+      warn("❌ Search overlay elements not found");
+      return;
+    }
+    
+    if (!searchIcon) {
+      warn("❌ Search icon not found, retrying...");
+      // Biraz bekleyip tekrar dene
+      setTimeout(() => {
+        const retryIcon = document.querySelector(".search--header .search__icon");
+        const retryHeader = document.querySelector(".topbar__actions .search--header");
+        
+        if (retryIcon) {
+          log("✅ Search icon found on retry");
+          retryIcon.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            log("🔍 Search icon clicked, opening overlay");
+            toggleSearchOverlay(true);
+          });
+        }
+        
+        // Search header'a da event ekle
+        if (retryHeader && !retryHeader.dataset.searchListenerAdded) {
+          retryHeader.addEventListener("click", (e) => {
+            if (e.target.classList.contains("search__input") || 
+                e.target.classList.contains("search__clear") ||
+                e.target.closest(".search__clear")) {
+              return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            log("🔍 Search header clicked, opening overlay");
+            toggleSearchOverlay(true);
+          });
+          retryHeader.dataset.searchListenerAdded = "true";
+        }
+        
+        if (!retryIcon && !retryHeader) {
+          error("❌ Search icon and header still not found after retry");
+        }
+      }, 500);
+      // return kaldırıldı - search header'a da event ekleyebilmek için devam et
+    }
+    
+    // Search icon'a tıklayınca overlay'i aç
+    if (searchIcon) {
+      searchIcon.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        log("🔍 Search icon clicked, opening overlay");
+        toggleSearchOverlay(true);
+      });
+    }
+    
+    // Search header container'a da click event ekle (mobilde buton gibi davranıyor)
+    const searchHeader = document.querySelector(".topbar__actions .search--header");
+    if (searchHeader) {
+      // Eğer zaten event listener varsa tekrar ekleme
+      if (!searchHeader.dataset.searchListenerAdded) {
+        searchHeader.addEventListener("click", (e) => {
+          // Eğer input veya clear butonuna tıklandıysa işleme
+          if (e.target.classList.contains("search__input") || 
+              e.target.classList.contains("search__clear") ||
+              e.target.closest(".search__clear")) {
+            return;
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          console.log("🔍 Search header clicked, opening overlay");
+          toggleSearchOverlay(true);
+        });
+        searchHeader.dataset.searchListenerAdded = "true";
+      }
+    }
+    
+    log("✅ Search overlay setup complete");
+    
+    // Close butonuna tıklayınca kapat
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => {
+        toggleSearchOverlay(false);
+      });
+    }
+    
+    // Clear butonuna tıklayınca temizle
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        input.value = "";
+        updateClearButton(input);
+        renderSuggestions(); // Önerileri göster
+        input.focus();
+        // Orijinal input'u temizle ama event tetikleme - sayfadaki listeleri güncellemesin
+        const originalInput = document.querySelector(".search--header .search__input");
+        if (originalInput) {
+          originalInput.value = "";
+          // Event tetikleme - overlay açıkken sayfadaki listeler değişmesin
+        }
+      });
+    }
+    
+    // Input değişikliklerini dinle - anlık arama
+    input.addEventListener("input", (e) => {
+      const query = e.target.value;
+      updateClearButton(input);
+      
+      // Debounce ile arama yap
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        renderSearchResults(query);
+      }, 150);
+      
+      // ÖNEMLİ: Mobil search overlay'de arama yapıldığında 
+      // orijinal input'a değer KOPYALAMA - sayfadaki listeleri güncellemesin
+      // Overlay açıkken sayfadaki listeler değişmesin, sadece overlay içinde sonuçlar görünsün
+      // Orijinal input'a değer kopyalamayı tamamen kaldırdık
+    });
+    
+    // ESC tuşu ile kapat
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        toggleSearchOverlay(false);
+      }
+    });
+    
+    // Overlay'e tıklayınca kapat (input wrapper ve results'a değil)
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        toggleSearchOverlay(false);
+      }
+    });
+  }
+  
+  function setupMobileSearch() {
+    // Sadece mobilde çalışsın
+    if (window.innerWidth > 639) {
+      // Desktop'a geçildiyse overlay'i kapat ve temizle
+      const overlay = document.getElementById("searchOverlay");
+      if (overlay) {
+        overlay.classList.remove("active");
+        document.body.classList.remove("search-overlay-open");
+      }
+      isInitialized = false;
+      return;
+    }
+    
+    // Zaten initialize edilmişse tekrar etme
+    if (isInitialized) return;
+    isInitialized = true;
+    
+    // DOM hazır olana kadar bekle
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(setupSearchOverlay, 300);
+      });
+    } else {
+      setTimeout(setupSearchOverlay, 300);
+    }
+  }
+  
+  // Resize'da kontrol et (mobilden desktop'a geçiş)
+  let resizeTimeout;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      if (window.innerWidth > 639) {
+        const overlay = document.getElementById("searchOverlay");
+        if (overlay && overlay.classList.contains("active")) {
+          toggleSearchOverlay(false);
+        }
+        isInitialized = false; // Desktop'a geçildiğinde tekrar initialize edilebilir
+      } else if (window.innerWidth <= 639 && !isInitialized) {
+        // Mobil'e geri dönüldüğünde initialize et
+        setupMobileSearch();
+      }
+    }, 100);
+  });
+  
+  // İlk setup - DOM hazır olduğunda
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      setTimeout(setupMobileSearch, 200);
+    });
+  } else {
+    // DOM zaten hazırsa hemen çalıştır
+    setTimeout(setupMobileSearch, 200);
+  }
+})();

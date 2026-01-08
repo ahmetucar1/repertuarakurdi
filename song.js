@@ -431,16 +431,36 @@ async function init(){
     }
   };
   const updateFavUI = (animate = false) => {
-    // favoriteBtn güncelle
+    // favoriteBtn güncelle - classList.add/remove kullanarak daha güvenilir
     if(favoriteBtn){
-      favoriteBtn.classList.toggle("is-favorite", favActive);
+      if(favActive){
+        favoriteBtn.classList.add("is-favorite");
+      } else {
+        favoriteBtn.classList.remove("is-favorite");
+      }
       favoriteBtn.setAttribute("aria-pressed", favActive ? "true" : "false");
     }
     // favoriteBtn2 güncelle (transposeBar içindeki)
     if(favoriteBtn2){
-      favoriteBtn2.classList.toggle("is-favorite", favActive);
+      if(favActive){
+        favoriteBtn2.classList.add("is-favorite");
+      } else {
+        favoriteBtn2.classList.remove("is-favorite");
+      }
       favoriteBtn2.setAttribute("aria-pressed", favActive ? "true" : "false");
     }
+    // Tüm favori butonlarını güncelle (eğer sayfada başka favori butonları varsa)
+    const allFavBtns = document.querySelectorAll(".favoriteBtn");
+    allFavBtns.forEach(btn => {
+      if(btn !== favoriteBtn && btn !== favoriteBtn2){
+        if(favActive){
+          btn.classList.add("is-favorite");
+        } else {
+          btn.classList.remove("is-favorite");
+        }
+        btn.setAttribute("aria-pressed", favActive ? "true" : "false");
+      }
+    });
   };
   updateFavUI();
 
@@ -450,79 +470,76 @@ async function init(){
       e.stopPropagation();
     }
     
-    const user = window.fbAuth?.currentUser;
+    // Giriş kontrolü
+    const currentUser = window.fbAuth?.currentUser;
     const db = window.fbDb;
     
-    if(!user || !db){
-      // Giriş yapmamış kullanıcılar için requireAuthAction kullan
-      if(typeof window.requireAuthAction === "function"){
-        window.requireAuthAction(() => {
-          toggleFavorite(e);
-        }, "Ji bo favorîkirinê divê tu têkevî.");
-      } else {
-        // Fallback: Manuel olarak auth panelini aç
-      const authPanel = document.getElementById("authPanel");
-      let authOverlay = document.getElementById("authOverlay");
-      
-      if(!authOverlay){
-        authOverlay = document.createElement("div");
-        authOverlay.id = "authOverlay";
-        authOverlay.className = "authOverlay";
-        document.body.appendChild(authOverlay);
-      }
-      
-      if(authPanel){
-        authPanel.classList.add("is-open");
-        authPanel.setAttribute("aria-hidden", "false");
-        document.body.classList.add("auth-open");
-      }
-      if(authOverlay){
-        authOverlay.classList.add("is-open");
-      }
-      const authStatus = document.getElementById("authStatus");
-      if(authStatus){
-        authStatus.textContent = "Ji bo favorîkirinê divê tu têkevî.";
-        authStatus.style.color = "#ef4444";
-      }
-      }
+    if(!currentUser || !db){
+      // Giriş yapmamış - login sayfasına yönlendir
+      const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+      window.location.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
       return;
     }
     if(!favRef){
-      const favId = `${user.uid}_${currentId}`;
+      const favId = `${currentUser.uid}_${currentId}`;
       favRef = db.collection("favorites").doc(favId);
     }
     try{
       if(favActive){
         await favRef.delete();
         favActive = false;
+        // Cache'i temizle
+        if(window.clearFavoritesCache){
+          window.clearFavoritesCache();
+        }
         updateFavUI(true);
-        setFavStatus("Ji favoriyan hate derxistin.", false);
+        // Mesaj gösterme - sadece renk değişimi yeterli
+        setFavStatus("", false);
       }else{
         const stamp = window.firebase?.firestore?.FieldValue?.serverTimestamp?.() || null;
         await favRef.set({
-          uid: user.uid,
+          uid: currentUser.uid,
           songId: currentId,
           song: current?.song || "",
           artist: current?.artist || "",
           createdAt: stamp
         });
         favActive = true;
+        // Cache'i temizle
+        if(window.clearFavoritesCache){
+          window.clearFavoritesCache();
+        }
         updateFavUI(true);
-        setFavStatus("Favoriya Te", false);
+        // Mesaj gösterme - sadece renk değişimi yeterli
+        setFavStatus("", false);
       }
     }catch(err){
       setFavStatus(err?.message || "Favorî nehat tomarkirin.", true);
     }
   };
 
-  // Tüm favori butonlarına event listener ekle
+  // Tüm favori butonlarına event listener ekle - önceki listener'ları temizle
   const favButtons = document.querySelectorAll(".favoriteBtn");
   if(favButtons.length > 0){
     favButtons.forEach(btn => {
-      btn.addEventListener("click", toggleFavorite);
+      // Önceki listener'ları temizle
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode?.replaceChild(newBtn, btn);
+      newBtn.addEventListener("click", toggleFavorite);
     });
-  } else if(favoriteBtn){
-    favoriteBtn.addEventListener("click", toggleFavorite);
+  }
+  if(favoriteBtn){
+    // Önceki listener'ları temizle
+    const newFavoriteBtn = favoriteBtn.cloneNode(true);
+    favoriteBtn.parentNode?.replaceChild(newFavoriteBtn, favoriteBtn);
+    newFavoriteBtn.addEventListener("click", toggleFavorite);
+  }
+  // favoriteBtn2'yi de güncelle
+  const favoriteBtn2Updated = document.getElementById("favoriteBtn2");
+  if(favoriteBtn2Updated) {
+    const newFavoriteBtn2 = favoriteBtn2Updated.cloneNode(true);
+    favoriteBtn2Updated.parentNode?.replaceChild(newFavoriteBtn2, favoriteBtn2Updated);
+    newFavoriteBtn2.addEventListener("click", toggleFavorite);
   }
 
   const auth = window.fbAuth;
@@ -531,32 +548,63 @@ async function init(){
     editToggleRow.style.display = "flex";
   }
   
+  // Favori durumunu kontrol et
+  const checkFavoriteStatus = async (user) => {
+    if(!user || !window.fbDb || !currentId) {
+      favActive = false;
+      updateFavUI();
+      setFavStatus("");
+      favRef = null;
+      return;
+    }
+    
+    try {
+      // Önce cache'den kontrol et (daha hızlı)
+      if(window.loadUserFavorites && typeof window.loadUserFavorites === "function") {
+        const favorites = await window.loadUserFavorites(user.uid);
+        const isFav = favorites && favorites.includes(currentId);
+        if(isFav !== favActive) {
+          favActive = isFav;
+          updateFavUI();
+          setFavStatus("");
+          // favRef'i de ayarla
+          const favId = `${user.uid}_${currentId}`;
+          favRef = window.fbDb.collection("favorites").doc(favId);
+          return;
+        }
+      }
+      
+      // Cache'de yoksa veya cache'den farklıysa Firestore'dan kontrol et
+      const favId = `${user.uid}_${currentId}`;
+      favRef = window.fbDb.collection("favorites").doc(favId);
+      const snap = await favRef.get();
+      const newFavActive = !!snap?.exists;
+      if(newFavActive !== favActive) {
+        favActive = newFavActive;
+        updateFavUI();
+        setFavStatus("");
+      }
+    } catch(err) {
+      console.warn("Favori durumu kontrol edilemedi:", err);
+      favActive = false;
+      updateFavUI();
+    }
+  };
+  
   if(auth){
     const currentUser = auth.currentUser;
+    
+    // İlk yüklemede favori durumunu kontrol et (eğer kullanıcı giriş yapmışsa)
+    if(currentUser) {
+      checkFavoriteStatus(currentUser);
+    }
     
     auth.onAuthStateChanged((user) => {
       if(!user && editPanel){
         editPanel.classList.add("is-hidden");
       }
-      if(!user){
-        favActive = false;
-        updateFavUI();
-        setFavStatus("");
-        favRef = null;
-        return;
-      }
-      if(window.fbDb){
-        const favId = `${user.uid}_${currentId}`;
-        favRef = window.fbDb.collection("favorites").doc(favId);
-        favRef.get().then(snap => {
-          favActive = !!snap?.exists;
-          updateFavUI();
-          setFavStatus("");
-        }).catch(() => {
-          favActive = false;
-          updateFavUI();
-        });
-      }
+      // Favori durumunu kontrol et
+      checkFavoriteStatus(user);
     });
   }
 
@@ -605,45 +653,9 @@ async function init(){
     const user = window.fbAuth?.currentUser;
     
     if(!user){
-      // Giriş yapmamış kullanıcılar için requireAuthAction kullan
-      if(typeof window.requireAuthAction === "function"){
-        window.requireAuthAction(() => {
-          // Giriş yapıldıktan sonra paneli aç
-          const imgWrap = document.querySelector(".imgWrap");
-          fillEditForm();
-          if(imgWrap) imgWrap.style.display = "none";
-          editPanel.classList.remove("is-hidden");
-          // Panel açıldıktan sonra textarea yüksekliğini ayarla
-          setTimeout(() => {
-            if(editText) adjustTextareaHeight(editText);
-          }, 100);
-        }, "Ji bo guhertinê divê tu têkevî.");
-      } else {
-        // Fallback: Manuel olarak auth panelini aç
-      const authPanel = document.getElementById("authPanel");
-        let authOverlay = document.getElementById("authOverlay");
-        
-        if(!authOverlay){
-          authOverlay = document.createElement("div");
-          authOverlay.id = "authOverlay";
-          authOverlay.className = "authOverlay";
-          document.body.appendChild(authOverlay);
-      }
-      
-      if(authPanel){
-        authPanel.classList.add("is-open");
-        authPanel.setAttribute("aria-hidden", "false");
-        document.body.classList.add("auth-open");
-      }
-        if(authOverlay){
-          authOverlay.classList.add("is-open");
-      }
-        const authStatus = document.getElementById("authStatus");
-      if(authStatus){
-        authStatus.textContent = "Ji bo guhertinê divê tu têkevî.";
-        authStatus.style.color = "#ef4444";
-      }
-      }
+      // Giriş yapmamış - login sayfasına yönlendir
+      const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+      window.location.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
       return;
     }
     
@@ -674,28 +686,107 @@ async function init(){
     addSongBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if(typeof window.openAddSongPanel === "function"){
-        window.openAddSongPanel();
+      
+      const user = window.fbAuth?.currentUser;
+      if(!user){
+        // Giriş yapmamış - login sayfasına yönlendir
+        const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+        window.location.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
+        return;
+      }
+      
+      // Giriş yapmış - şarkı ekleme panelini şarkı sayfasında aç
+      const addPanel = document.getElementById("addSongPanel");
+      if(addPanel){
+        // Panel bu sayfada var, aç
+        addPanel.classList.remove("is-hidden");
+        addPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+        // İlk input'a focus ver
+        const addSongName = document.getElementById("addSongName");
+        if(addSongName){
+          setTimeout(() => {
+            addSongName.focus();
+          }, 300);
+        }
       } else {
-        // Fallback: index.html'e yönlendir
-        location.href = "/index.html#add-song";
+        // Panel bu sayfada yok, song.html'e yönlendir (mobilde de burada açılmalı)
+        if(window.location.pathname !== "/song.html"){
+          // Başka bir sayfadaysak, song.html'e yönlendir
+          window.location.href = "/song.html#add-song";
+        } else if(typeof window.openAddSongPanel === "function"){
+          // Panel yok ama global fonksiyon var, onu kullan
+          window.openAddSongPanel();
+        } else {
+          // Hiçbiri yok, anasayfaya yönlendir
+          location.href = "/index.html#add-song";
+        }
       }
     });
   }
 
+  // Çakışan işlemleri önlemek için flag
+  let isSaving = false;
+
   editSave?.addEventListener("click", async () => {
     if(!editNotice) return;
-    const db = window.fbDb;
+    
+    // Eğer zaten kaydediliyorsa, tekrar tıklamayı engelle
+    if(isSaving){
+      console.log("⏳ Zaten kaydediliyor, bekleniyor...");
+      return;
+    }
+
+    // Firebase'in hazır olmasını bekle (global fonksiyon kullan)
+    // waitForFirebaseInit common.js'de tanımlı - eğer yoksa fallback kullan
+    let db = null;
+    try {
+      // Önce global waitForFirebaseInit'i dene
+      if (typeof window.waitForFirebaseInit === "function") {
+        await window.waitForFirebaseInit();
+      } else {
+        // Fallback: Firebase'in hazır olmasını bekle
+        let retries = 0;
+        const maxRetries = 15;
+        while (retries < maxRetries && (!window.fbDb || !window.fbDb._delegate)) {
+          await new Promise(resolve => setTimeout(resolve, 400));
+          retries++;
+        }
+      }
+      
+      // Firestore'un hazır olduğundan emin ol
+      if (!window.fbDb || !window.fbDb._delegate) {
+        throw new Error("Firestore ne amade ye. Ji kerema xwe rûpelê nû bike û dîsa biceribîne.");
+      }
+      
+      // Biraz daha bekle - Firestore'un tamamen hazır olması için
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      db = window.fbDb;
+    } catch(err) {
+      editNotice.textContent = err.message || "Firestore ne amade ye. Ji kerema xwe rûpelê nû bike û dîsa biceribîne.";
+      editNotice.style.color = "#ef4444";
+      editNotice.style.background = "rgba(239, 68, 68, 0.1)";
+      editNotice.style.border = "1px solid rgba(239, 68, 68, 0.2)";
+      editNotice.style.padding = "12px 16px";
+      editNotice.style.borderRadius = "8px";
+      editNotice.style.marginTop = "16px";
+      isSaving = false;
+      editSave.disabled = false;
+      return;
+    }
+
+    if(!db) return;
+
     const user = window.fbAuth?.currentUser;
-    if(!db || !user){
+    if(!user){
       if(typeof window.requireAuthAction === "function"){
         window.requireAuthAction(() => {
           // Giriş yapıldıktan sonra kaydetmeyi tekrar dene
           editSave?.click();
         }, "Ji bo guhertinê divê tu têkevî.");
       } else {
-      editNotice.textContent = "Ji bo guhertinê divê tu têkevî.";
-      editNotice.style.color = "#ef4444";
+        editNotice.textContent = "Ji bo guhertinê divê tu têkevî.";
+        editNotice.style.color = "#ef4444";
       }
       return;
     }
@@ -711,36 +802,73 @@ async function init(){
       return;
     }
 
+    isSaving = true;
+    editSave.disabled = true;
+    editNotice.textContent = "Tomar tê kirin...";
+    editNotice.style.color = "#3b82f6";
+
     try{
-      const ref = db.collection("song_submissions");
       const stamp = window.firebase?.firestore?.FieldValue?.serverTimestamp?.() || null;
       
-      // Veritabanına kaydet
-      const docRef = await ref.add({
-        type: "edit",
-        status: "pending",
-        sourceId: currentId,
-        song: nextSong,
-        artist: nextArtist,
-        key: nextKey,
-        text: nextText,
-        pdf: current?.pdf || "",
-        volume: current?.volume || "",
-        page_original: current?.page_original || "",
-        createdBy: user.uid,
-        createdByEmail: user.email || "",
-        updatedAt: stamp,
-        createdAt: stamp
-      });
+      // Retry mekanizması ile kaydet
+      let docRef = null;
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while(!docRef && retryCount < maxRetries){
+        try {
+          const ref = db.collection("song_submissions");
+          
+          // Veritabanına kaydet
+          docRef = await ref.add({
+            type: "edit",
+            status: "pending",
+            sourceId: currentId,
+            song: nextSong,
+            artist: nextArtist,
+            key: nextKey,
+            text: nextText,
+            pdf: current?.pdf || "",
+            volume: current?.volume || "",
+            page_original: current?.page_original || "",
+            createdBy: user.uid,
+            createdByEmail: user.email || "",
+            updatedAt: stamp,
+            createdAt: stamp
+          });
+          
+          console.log("✅ Şarkı düzenlemesi veritabanına kaydedildi:", docRef.id);
+          console.log("📝 Kaydedilen veri:", {
+            type: "edit",
+            sourceId: currentId,
+            song: nextSong,
+            artist: nextArtist,
+            createdBy: user.uid
+          });
+          break; // Başarılı, döngüden çık
+        } catch(addErr){
+          retryCount++;
+          console.error(`❌ Kayıt hatası (deneme ${retryCount}/${maxRetries}):`, addErr);
+          
+          // Eğer "INTERNAL ASSERTION FAILED" hatası ise, biraz bekle ve tekrar dene
+          if(addErr?.message?.includes("INTERNAL ASSERTION") || addErr?.code === "internal"){
+            if(retryCount < maxRetries){
+              console.log(`⏳ Firestore internal hatası, ${retryCount * 500}ms bekleniyor...`);
+              await new Promise(resolve => setTimeout(resolve, retryCount * 500));
+              continue;
+            }
+          }
+          
+          // Son deneme de başarısız olduysa hatayı fırlat
+          if(retryCount >= maxRetries){
+            throw addErr;
+          }
+        }
+      }
 
-      console.log("✅ Şarkı düzenlemesi veritabanına kaydedildi:", docRef.id);
-      console.log("📝 Kaydedilen veri:", {
-        type: "edit",
-        sourceId: currentId,
-        song: nextSong,
-        artist: nextArtist,
-        createdBy: user.uid
-      });
+      if(!docRef){
+        throw new Error("Kayıt başarısız oldu. Ji kerema xwe dîsa biceribîne.");
+      }
 
       // Cache'i temizle - sayfa yenilendiğinde yeni veriler yüklensin
       window.clearSongsCache?.();
@@ -775,20 +903,44 @@ async function init(){
       editNotice.style.borderRadius = "8px";
       editNotice.style.marginTop = "16px";
       
-      // Mesajı 2 saniye göster, sonra panel'i kapat ve sayfayı yeniden yükle
+      // Mesajı 2 saniye göster, sonra panel'i kapat
+      // location.reload() yerine daha yumuşak bir yenileme
       setTimeout(() => {
         const imgWrap = document.querySelector(".imgWrap");
         editPanel.classList.add("is-hidden");
         if(imgWrap) imgWrap.style.display = "";
         
-        // Cache'i temizle ve sayfayı yeniden yükle
+        // Cache'i temizle
         window.clearSongsCache?.();
-        // Sayfayı yeniden yükle ki Firebase'den yeni veriler gelsin
-        location.reload();
+        
+        // Sayfayı yeniden yükle (gerekirse)
+        // Ancak önce bir süre bekle ki Firestore listener'ları güncellensin
+        setTimeout(() => {
+          location.reload();
+        }, 500);
       }, 2000);
     }catch(err){
-      editNotice.textContent = err?.message || "Nehat tomarkirin.";
+      console.error("❌ Şarkı düzenleme hatası:", err);
+      let errorMsg = "Nehat tomarkirin.";
+      
+      if(err?.message?.includes("INTERNAL ASSERTION")){
+        errorMsg = "Firestore hatası. Ji kerema xwe rûpelê nû bike û dîsa biceribîne.";
+      } else if(err?.message){
+        errorMsg = err.message;
+      } else if(err?.code){
+        errorMsg = `Firestore hatası: ${err.code}`;
+      }
+      
+      editNotice.textContent = errorMsg;
       editNotice.style.color = "#ef4444";
+      editNotice.style.background = "rgba(239, 68, 68, 0.1)";
+      editNotice.style.border = "1px solid rgba(239, 68, 68, 0.2)";
+      editNotice.style.padding = "12px 16px";
+      editNotice.style.borderRadius = "8px";
+      editNotice.style.marginTop = "16px";
+    } finally {
+      isSaving = false;
+      editSave.disabled = false;
     }
   });
 
@@ -852,7 +1004,7 @@ async function init(){
   const shuffleBtn = document.getElementById("shuffleRec");
   if(shuffleBtn) shuffleBtn.addEventListener("click", renderRecs);
   
-  // Responsive search - icon'a tıklayınca açılması
+  // Responsive search - sadece tablet ve desktop için (mobil common.js'de handle ediliyor)
   function initResponsiveSearch() {
     const searchHeaders = document.querySelectorAll(".search--header");
     searchHeaders.forEach(searchEl => {
@@ -860,76 +1012,61 @@ async function init(){
       const icon = searchEl.querySelector(".search__icon");
       if(!input || !icon) return;
       
-      // Küçük ekranlarda icon-only modunu aktif et
+      // Sadece tablet ve desktop için (mobil common.js'de handle ediliyor)
+      if(window.innerWidth <= 639) {
+        return;
+      }
+      
+      // Küçük ekranlarda icon-only modunu aktif et (tablet için)
       function checkScreenSize() {
-        if(window.innerWidth <= 639) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639) {
           searchEl.classList.add("search--icon-only");
         } else {
           searchEl.classList.remove("search--icon-only", "search--open");
-          document.body.classList.remove("search-open");
         }
       }
       
       checkScreenSize();
       window.addEventListener("resize", checkScreenSize);
       
+      // Icon'a tıklayınca aç/kapat (sadece tablet için)
       icon.addEventListener("click", (e) => {
-        if(window.innerWidth <= 639) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639) {
           e.preventDefault();
           e.stopPropagation();
-          e.stopImmediatePropagation();
-          const isOpen = searchEl.classList.contains("search--open");
-          if(isOpen) {
+          if(searchEl.classList.contains("search--open")) {
             searchEl.classList.remove("search--open");
             input.blur();
             document.body.classList.remove("search-open");
           } else {
             searchEl.classList.add("search--open");
             document.body.classList.add("search-open");
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                input.focus();
-              });
-            });
+            setTimeout(() => input.focus(), 100);
           }
         }
       });
       
-      input.addEventListener("click", (e) => {
-        if(window.innerWidth <= 639) {
-          e.stopPropagation();
-          if(!searchEl.classList.contains("search--open")) {
-            searchEl.classList.add("search--open");
-            document.body.classList.add("search-open");
-          }
-        }
-      });
-      
-      input.addEventListener("blur", (e) => {
-        if(window.innerWidth <= 639 && !input.value) {
-          const relatedTarget = e.relatedTarget;
-          if(relatedTarget && relatedTarget.closest(".search")) {
-            return;
-          }
+      // Input'tan çıkınca kapat (sadece tablet için)
+      input.addEventListener("blur", () => {
+        if(window.innerWidth <= 768 && window.innerWidth > 639 && !input.value) {
           setTimeout(() => {
-            if(document.activeElement !== input && !input.value) {
+            if(document.activeElement !== input) {
               searchEl.classList.remove("search--open");
               document.body.classList.remove("search-open");
             }
-          }, 300);
+          }, 200);
         }
       });
       
+      // Sayfa kaydırılınca search input'u kapat (sadece tablet için)
       let scrollTimeout;
       function handleScroll() {
-        if(window.innerWidth <= 639 && searchEl.classList.contains("search--open") && !input.value) {
+        if(window.innerWidth <= 768 && window.innerWidth > 639 && searchEl.classList.contains("search--open")) {
           clearTimeout(scrollTimeout);
           scrollTimeout = setTimeout(() => {
-            if(!input.value) {
-              searchEl.classList.remove("search--open");
-              document.body.classList.remove("search-open");
-              input.blur();
-            }
+            searchEl.classList.remove("search--open");
+            document.body.classList.remove("search-open");
+            input.blur();
           }, 150);
         }
       }
@@ -939,6 +1076,11 @@ async function init(){
   }
   
   initResponsiveSearch();
+  
+  // Şarkı ekleme panelini başlat
+  if(typeof window.initAddSongPanel === "function"){
+    window.initAddSongPanel();
+  }
 }
 
 init().catch(console.error);

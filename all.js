@@ -44,6 +44,12 @@ function normalizeSort(value){
 }
 
 function render(){
+  // Mobil search overlay açıkken sayfadaki listeleri güncelleme
+  if (window.__mobileSearchOverlayOpen) {
+    console.log("🚫 render() skipped - mobile search overlay is open");
+    return;
+  }
+  
   // currentPage'i window'dan geri yükle (closure sorununu önlemek için)
   if(window.__currentPage !== undefined){
     currentPage = window.__currentPage;
@@ -154,6 +160,15 @@ function render(){
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
+      
+      // Giriş kontrolü
+      const user = window.fbAuth?.currentUser;
+      if(!user){
+        // Giriş yapmamış - login sayfasına yönlendir
+        const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+        window.location.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
+        return;
+      }
       
       const songId = newBtn.getAttribute("data-song-id");
       if(!songId) {
@@ -442,10 +457,32 @@ async function init(){
       
       // Küçük ekranlarda icon-only modunu aktif et
       function checkScreenSize() {
-        if(window.innerWidth <= 768) {
+        // Mobilde (639px ve altı) her zaman icon-only, daha büyük ekranlarda normal
+        if(window.innerWidth <= 639) {
           searchEl.classList.add("search--icon-only");
+          // Mobilde input'u zorla gizle
+          if(input) {
+            input.style.display = "none";
+            input.style.opacity = "0";
+            input.style.width = "0";
+            input.style.pointerEvents = "none";
+          }
+        } else if(window.innerWidth <= 768) {
+          searchEl.classList.add("search--icon-only");
+          if(input) {
+            input.style.display = "";
+            input.style.opacity = "";
+            input.style.width = "";
+            input.style.pointerEvents = "";
+          }
         } else {
           searchEl.classList.remove("search--icon-only", "search--open");
+          if(input) {
+            input.style.display = "";
+            input.style.opacity = "";
+            input.style.width = "";
+            input.style.pointerEvents = "";
+          }
         }
       }
       
@@ -454,7 +491,22 @@ async function init(){
       
       // Icon'a tıklayınca aç/kapat
       icon.addEventListener("click", (e) => {
-        if(window.innerWidth <= 768) {
+        if(window.innerWidth <= 639) {
+          // Mobilde input topbarda görünmesin
+          e.preventDefault();
+          e.stopPropagation();
+          if(searchEl.classList.contains("search--open")) {
+            searchEl.classList.remove("search--open");
+            input.blur();
+            document.body.classList.remove("search-open");
+            input.style.display = "none";
+            input.style.opacity = "0";
+          } else {
+            searchEl.classList.add("search--open");
+            document.body.classList.add("search-open");
+            setTimeout(() => input.focus(), 100);
+          }
+        } else if(window.innerWidth <= 768) {
           e.preventDefault();
           e.stopPropagation();
           if(searchEl.classList.contains("search--open")) {
@@ -471,7 +523,16 @@ async function init(){
       
       // Input'tan çıkınca kapat (sadece küçük ekranlarda)
       input.addEventListener("blur", () => {
-        if(window.innerWidth <= 768 && !input.value) {
+        if(window.innerWidth <= 639 && !input.value) {
+          setTimeout(() => {
+            if(document.activeElement !== input) {
+              searchEl.classList.remove("search--open");
+              document.body.classList.remove("search-open");
+              input.style.display = "none";
+              input.style.opacity = "0";
+            }
+          }, 200);
+        } else if(window.innerWidth <= 768 && !input.value) {
           setTimeout(() => {
             if(document.activeElement !== input) {
               searchEl.classList.remove("search--open");
@@ -577,64 +638,21 @@ async function init(){
       e.stopPropagation();
       
       const user = window.fbAuth?.currentUser;
+      const currentUrl = window.location.pathname + window.location.search + window.location.hash;
       
       if(!user){
-        // Bikarhênerê netêketî - panelê têketinê veke
-        // Piştî têketinê ji bo vekirina panelê callback'ê tomar bike
-        window.__authContinue = () => {
-          const panel = document.getElementById("addSongPanel");
-          if(panel){
-            panel.classList.remove("is-hidden");
-            panel.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-        };
-        
-        // requireAuthAction varsa kullan
-        if(typeof window.requireAuthAction === "function"){
-          window.requireAuthAction(() => {
-            const panel = document.getElementById("addSongPanel");
-            if(panel){
-              panel.classList.remove("is-hidden");
-              panel.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
-          }, "Ji bo stran zêde kirinê divê tu têkevî.");
-          return;
-        }
-        
-        // requireAuthAction yoksa direkt auth panelini aç
-        const authPanel = document.getElementById("authPanel");
-        let authOverlay = document.getElementById("authOverlay");
-        
-        if(!authOverlay){
-          authOverlay = document.createElement("div");
-          authOverlay.id = "authOverlay";
-          authOverlay.className = "authOverlay";
-          document.body.appendChild(authOverlay);
-        }
-        
-        if(authPanel){
-          authPanel.classList.add("is-open");
-          authOverlay.classList.add("is-open");
-          authPanel.setAttribute("aria-hidden", "false");
-          document.body.classList.add("auth-open");
-          
-          const authStatus = document.getElementById("authStatus");
-          if(authStatus){
-            authStatus.textContent = "Ji bo stran zêde kirinê divê tu têkevî.";
-            authStatus.style.color = "#ef4444";
-          }
-        } else {
-          // Panel bulunamazsa authOpen butonunu tıkla
-          const authOpen = document.getElementById("authOpen");
-          if(authOpen) authOpen.click();
-        }
-      } else {
-        // Bikarhênerê têketî - rasterast panelê "Stran zêde bike" veke
-        const panel = document.getElementById("addSongPanel");
-        if(panel){
-          panel.classList.remove("is-hidden");
-          panel.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        // Giriş yapmamış - login sayfasına yönlendir
+        window.location.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
+        return;
+      }
+      
+      // Giriş yapmış - şarkı ekleme paneline yönlendir
+      const panel = document.getElementById("addSongPanel");
+      if(panel){
+        panel.classList.remove("is-hidden");
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else if(typeof window.openAddSongPanel === "function"){
+        window.openAddSongPanel();
       }
     }, true); // capture phase'de çalıştır
   }, 100);
