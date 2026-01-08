@@ -39,18 +39,12 @@ function renderStats(){
 }
 
 function renderList(){
-  console.log("renderList() called");
   const listEl = $("#list");
   const countEl = $("#count");
   const titleEl = $("#resultsTitle");
   const listWrap = document.querySelector(".homeListWrap");
   
-  console.log("listEl in renderList:", listEl);
-  
-  if(!listEl) {
-    console.error("List element not found in renderList!");
-    return;
-  }
+  if(!listEl) return;
 
   const qTopbar = norm($("#q")?.value || "");
   const q = qTopbar; // Sadece topbar search'ü kullan
@@ -719,36 +713,7 @@ async function init(){
     renderList();
   });
 
-  // Topbar'daki "Zêdeke" butonuna event listener ekle
-  const addSongMenuBtn = document.getElementById("addSongMenuBtn");
-  if(addSongMenuBtn){
-    // Mevcut event listener'ları temizlemek için butonu clone et
-    const newBtn = addSongMenuBtn.cloneNode(true);
-    addSongMenuBtn.parentNode.replaceChild(newBtn, addSongMenuBtn);
-    
-    newBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      // openAddSongPanel fonksiyonu zaten giriş kontrolü yapıyor
-      if(typeof window.openAddSongPanel === "function"){
-        window.openAddSongPanel();
-      } else {
-        // Fallback: requireAuthAction kullan
-        if(typeof window.requireAuthAction === "function"){
-          window.requireAuthAction(() => {
-            const panel = document.getElementById("addSongPanel");
-            if(panel){
-              panel.classList.remove("is-hidden");
-              panel.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
-          }, "Ji bo stran zêde kirinê divê tu têkevî.");
-        } else {
-          window.location.href = "/index.html#add-song";
-        }
-      }
-    });
-  }
+  // Zêdeke butonu event listener'ı common.js'deki initAddSongMenu tarafından yönetiliyor
 
   initContactForm();
 }

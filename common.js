@@ -1356,20 +1356,57 @@ window.initAddSongPanel = initAddSongPanel;
 })();
 
 (function initAddSongMenu(){
-  const btn = document.getElementById("addSongMenuBtn");
-  const btn2 = document.getElementById("addSongMenuBtn2");
-  const buttons = [btn, btn2].filter(Boolean);
-  
-  buttons.forEach(b => {
-    b.addEventListener("click", (e) => {
-      e.preventDefault();
-      if(typeof window.openAddSongPanel === "function"){
-        window.openAddSongPanel();
-        return;
-      }
-      window.location.href = "/index.html#add-song";
+  // Butonları bul ve event listener ekle
+  const setupButtons = () => {
+    const btn = document.getElementById("addSongMenuBtn");
+    const btn2 = document.getElementById("addSongMenuBtn2");
+    const buttons = [btn, btn2].filter(Boolean);
+    
+    buttons.forEach(b => {
+      // Mevcut event listener'ları temizlemek için clone et
+      const newBtn = b.cloneNode(true);
+      b.parentNode.replaceChild(newBtn, b);
+      
+      newBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Giriş kontrolü
+        const user = window.fbAuth?.currentUser;
+        if(!user){
+          // Giriş yapmamış kullanıcı için auth panelini aç
+          if(typeof window.requireAuthAction === "function"){
+            window.requireAuthAction(() => {
+              // Giriş yapıldıktan sonra paneli aç
+              if(typeof window.openAddSongPanel === "function"){
+                window.openAddSongPanel();
+              }
+            }, "Ji bo stran zêde kirinê divê tu têkevî.");
+          } else {
+            // requireAuthAction yoksa auth panelini manuel aç
+            const authOpen = document.getElementById("authOpen");
+            if(authOpen) authOpen.click();
+          }
+          return;
+        }
+        
+        // Giriş yapmış kullanıcı için paneli aç
+        if(typeof window.openAddSongPanel === "function"){
+          window.openAddSongPanel();
+        } else {
+          window.location.href = "/index.html#add-song";
+        }
+      });
     });
-  });
+  };
+  
+  // DOM hazır olduğunda çalıştır
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", setupButtons);
+  } else {
+    // DOM zaten hazır, kısa bir gecikme ile çalıştır (initAddSongPanel'in tamamlanması için)
+    setTimeout(setupButtons, 100);
+  }
 })();
 
 (function initLiveBackground(){
@@ -1421,7 +1458,7 @@ window.initAddSongPanel = initAddSongPanel;
     ud.className = "bgInstrument bgInstrument--ud";
     ud.alt = "";
     ud.decoding = "async";
-    ud.src = "ud.png";
+    ud.src = "/assets/images/ud.png";
     ud.onerror = () => ud.remove();
     scene.appendChild(ud);
 
@@ -1429,7 +1466,7 @@ window.initAddSongPanel = initAddSongPanel;
     davul.className = "bgInstrument bgInstrument--davul";
     davul.alt = "";
     davul.decoding = "async";
-    davul.src = "davul.png";
+    davul.src = "/assets/images/davul.png";
     davul.onerror = () => davul.remove();
     scene.appendChild(davul);
 
