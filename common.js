@@ -1362,6 +1362,12 @@ window.initAddSongPanel = initAddSongPanel;
     const btn2 = document.getElementById("addSongMenuBtn2");
     const buttons = [btn, btn2].filter(Boolean);
     
+    if(!buttons.length) {
+      // Butonlar henüz yüklenmemiş, tekrar dene
+      setTimeout(setupButtons, 200);
+      return;
+    }
+    
     buttons.forEach(b => {
       // Mevcut event listener'ları temizlemek için clone et
       const newBtn = b.cloneNode(true);
@@ -1370,43 +1376,87 @@ window.initAddSongPanel = initAddSongPanel;
       newBtn.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         
         // Giriş kontrolü
-        const user = window.fbAuth?.currentUser;
-        if(!user){
-          // Giriş yapmamış kullanıcı için auth panelini aç
-          if(typeof window.requireAuthAction === "function"){
-            window.requireAuthAction(() => {
-              // Giriş yapıldıktan sonra paneli aç
-              if(typeof window.openAddSongPanel === "function"){
-                window.openAddSongPanel();
+        const handleClick = () => {
+          const auth = window.fbAuth;
+          const user = auth?.currentUser;
+          
+          if(!user){
+            // Giriş yapmamış kullanıcı için auth panelini aç
+            if(typeof window.requireAuthAction === "function"){
+              window.requireAuthAction(() => {
+                // Giriş yapıldıktan sonra paneli aç
+                setTimeout(() => {
+                  if(typeof window.openAddSongPanel === "function"){
+                    window.openAddSongPanel();
+                  } else {
+                    const panel = document.getElementById("addSongPanel");
+                    if(panel){
+                      panel.classList.remove("is-hidden");
+                      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                  }
+                }, 500);
+              }, "Ji bo stran zêde kirinê divê tu têkevî.");
+            } else {
+              // requireAuthAction yoksa auth panelini manuel aç
+              const authOpen = document.getElementById("authOpen");
+              if(authOpen) {
+                authOpen.click();
               }
-            }, "Ji bo stran zêde kirinê divê tu têkevî.");
-          } else {
-            // requireAuthAction yoksa auth panelini manuel aç
-            const authOpen = document.getElementById("authOpen");
-            if(authOpen) authOpen.click();
+            }
+            return;
           }
-          return;
-        }
+          
+          // Giriş yapmış kullanıcı için paneli aç
+          if(typeof window.openAddSongPanel === "function"){
+            window.openAddSongPanel();
+          } else {
+            // Fallback: paneli direkt aç
+            const panel = document.getElementById("addSongPanel");
+            if(panel){
+              panel.classList.remove("is-hidden");
+              panel.scrollIntoView({ behavior: "smooth", block: "start" });
+            } else {
+              // Panel yoksa hash ile aç
+              window.location.href = "/index.html#add-song";
+            }
+          }
+        };
         
-        // Giriş yapmış kullanıcı için paneli aç
-        if(typeof window.openAddSongPanel === "function"){
-          window.openAddSongPanel();
+        // Firebase auth'un yüklenmesini bekle (maksimum 2 saniye)
+        if(!window.fbAuth){
+          let attempts = 0;
+          const maxAttempts = 20;
+          const waitForAuth = setInterval(() => {
+            attempts++;
+            if(window.fbAuth || attempts >= maxAttempts){
+              clearInterval(waitForAuth);
+              handleClick();
+            }
+          }, 100);
         } else {
-          window.location.href = "/index.html#add-song";
+          handleClick();
         }
       });
     });
   };
   
   // DOM hazır olduğunda çalıştır
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", setupButtons);
-  } else {
-    // DOM zaten hazır, kısa bir gecikme ile çalıştır (initAddSongPanel'in tamamlanması için)
-    setTimeout(setupButtons, 100);
-  }
+  const init = () => {
+    if(document.readyState === "loading"){
+      document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(setupButtons, 500);
+      });
+    } else {
+      // DOM zaten hazır, initAddSongPanel'in tamamlanması için bekle
+      setTimeout(setupButtons, 800);
+    }
+  };
+  
+  init();
 })();
 
 (function initLiveBackground(){
