@@ -230,6 +230,7 @@ function fuzzySearch(query, songs){
 }
 
 window.fuzzySearch = fuzzySearch;
+window.pickRandom = pickRandom;
 
 function suggestArtists(query, artists){
   const q = norm(query);
@@ -742,6 +743,8 @@ window.songId = songId;
 window.loadSongs = loadSongs;
 window.clearSongsCache = clearSongsCache;
 window.formatSongTitle = formatSongTitle;
+window.norm = norm;
+window.pickRandom = pickRandom;
 window.formatArtistName = formatArtistName;
 window.formatArtistList = formatArtistList;
 window.formatArtistInputValue = formatArtistInputValue;
@@ -2340,11 +2343,13 @@ window.updateFilterOptions = updateFilterOptions;
       
       // homeSample'ı kontrol et ve güncelle
       if ((!window.homeSample || window.homeSample.length === 0) && window.SONGS && window.SONGS.length > 0) {
-        const pickRandom = window.pickRandom || ((arr, n) => {
-          const shuffled = [...arr].sort(() => 0.5 - Math.random());
-          return shuffled.slice(0, n);
-        });
-        window.homeSample = pickRandom(window.SONGS, 7);
+        if (window.pickRandom) {
+          window.homeSample = window.pickRandom(window.SONGS, 7);
+        } else {
+          // Fallback
+          const shuffled = [...window.SONGS].sort(() => 0.5 - Math.random());
+          window.homeSample = shuffled.slice(0, 7);
+        }
         log("✅ Created homeSample, found", window.homeSample.length, "suggestions");
       }
       
@@ -2446,11 +2451,13 @@ window.updateFilterOptions = updateFilterOptions;
       suggestions = window.homeSample;
     } else {
       // Random 7 şarkı seç
-      const pickRandom = window.pickRandom || ((arr, n) => {
-        const shuffled = [...arr].sort(() => 0.5 - Math.random());
-        return shuffled.slice(0, n);
-      });
-      suggestions = pickRandom(songs, 7);
+      if (window.pickRandom) {
+        suggestions = window.pickRandom(songs, 7);
+      } else {
+        // Fallback
+        const shuffled = [...songs].sort(() => 0.5 - Math.random());
+        suggestions = shuffled.slice(0, 7);
+      }
     }
     
     if (suggestions.length === 0) {

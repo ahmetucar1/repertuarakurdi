@@ -862,6 +862,11 @@ async function init(){
   initContactForm();
 }
 
+// Export functions for mobile search overlay
+window.artistText = artistText;
+window.makeId = makeId;
+window.openLink = openLink;
+
 log("=== APP.JS LOADED ===");
 log("Calling init()...");
 
