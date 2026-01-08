@@ -1356,11 +1356,75 @@ window.initAddSongPanel = initAddSongPanel;
 })();
 
 (function initAddSongMenu(){
-  // Butonları bul ve event listener ekle
+  // Hero karttaki giriş butonunu yönet
+  const updateHeroLoginBtn = (user) => {
+    const heroLoginBtn = document.getElementById("heroLoginBtn");
+    if(!heroLoginBtn) return;
+    
+    if(user){
+      // Giriş yapmış kullanıcı için butonu gizle
+      heroLoginBtn.style.display = "none";
+    } else {
+      // Giriş yapmamış kullanıcı için butonu göster
+      heroLoginBtn.style.display = "inline-flex";
+    }
+  };
+  
+  // Auth state değişikliğini dinle
+  if(window.fbAuth){
+    window.fbAuth.onAuthStateChanged((user) => {
+      updateHeroLoginBtn(user);
+    });
+  } else {
+    // Firebase henüz yüklenmemiş, bekle
+    let attempts = 0;
+    const waitForAuth = setInterval(() => {
+      attempts++;
+      if(window.fbAuth){
+        clearInterval(waitForAuth);
+        window.fbAuth.onAuthStateChanged((user) => {
+          updateHeroLoginBtn(user);
+        });
+        // İlk durumu kontrol et
+        updateHeroLoginBtn(window.fbAuth.currentUser);
+      } else if(attempts >= 30){
+        clearInterval(waitForAuth);
+      }
+    }, 100);
+  }
+  
+  // Hero login butonuna event listener ekle
+  const setupHeroLoginBtn = () => {
+    const heroLoginBtn = document.getElementById("heroLoginBtn");
+    if(!heroLoginBtn) {
+      setTimeout(setupHeroLoginBtn, 200);
+      return;
+    }
+    
+    heroLoginBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      
+      // Auth panelini aç
+      const authOpen = document.getElementById("authOpen");
+      if(authOpen) {
+        authOpen.click();
+      }
+    });
+  };
+  
+  // DOM hazır olduğunda hero login butonunu ayarla
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", setupHeroLoginBtn);
+  } else {
+    setTimeout(setupHeroLoginBtn, 100);
+  }
+  
+  // Topbar'daki Zêdeke butonunu yönet
   const setupButtons = () => {
     const btn = document.getElementById("addSongMenuBtn");
-    const btn2 = document.getElementById("addSongMenuBtn2");
-    const buttons = [btn, btn2].filter(Boolean);
+    const buttons = [btn].filter(Boolean);
     
     if(!buttons.length) {
       // Butonlar henüz yüklenmemiş, tekrar dene
@@ -1836,6 +1900,14 @@ window.initAddSongPanel = initAddSongPanel;
     googleBtn.innerHTML = `<span class="googleIcon">G</span> Bi Google re têkeve`;
   }
 
+  // Hero login butonunu güncelle
+  const updateHeroLoginBtn = (user) => {
+    const heroLoginBtn = document.getElementById("heroLoginBtn");
+    if(heroLoginBtn){
+      heroLoginBtn.style.display = user ? "none" : "inline-flex";
+    }
+  };
+  
   const setLoggedOut = () => {
     openBtn.textContent = "Têkev";
     openBtn.style.display = "inline-flex";
@@ -1846,6 +1918,7 @@ window.initAddSongPanel = initAddSongPanel;
     if(signOutBtn) signOutBtn.style.display = "none";
     if(profileLink) profileLink.style.display = "none";
     if(adminLink) adminLink.style.display = "none";
+    updateHeroLoginBtn(null); // Giriş yapmamış kullanıcı için butonu göster
     setStatus("Ji bo têketinê e-name û şîfre binivîse.");
   };
 
@@ -1860,6 +1933,7 @@ window.initAddSongPanel = initAddSongPanel;
     if(adminLink){
       adminLink.style.display = window.isAdminUser?.(user) ? "inline-flex" : "none";
     }
+    updateHeroLoginBtn(user); // Giriş yapmış kullanıcı için butonu gizle
     setStatus(`${user?.email || "Bikarhêner"} têket.`);
     closePanel();
     if(typeof window.__authContinue === "function"){

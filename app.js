@@ -483,6 +483,11 @@ async function init(){
       // Auth state değişikliklerini dinle
       auth.onAuthStateChanged(async (user) => {
         await loadFavorites(user);
+        // Hero login butonunu güncelle
+        const heroLoginBtn = document.getElementById("heroLoginBtn");
+        if(heroLoginBtn){
+          heroLoginBtn.style.display = user ? "none" : "inline-flex";
+        }
       });
     } else {
       console.log("Calling renderList() and renderHeroSearch()...");
