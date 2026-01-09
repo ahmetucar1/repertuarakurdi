@@ -8,13 +8,7 @@
 # Redirect rules - 404 sayfaları için
 [[redirects]]
   from = "https://repertuarakurdi.netlify.app/*"
-  to = "https://www.repertuarakurdi.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "https://repertuarakurdi.com/*"
-  to = "https://www.repertuarakurdi.com/:splat"
+  to = "https://repertuarakurdi.com/:splat"
   status = 301
   force = true
 
