@@ -4,6 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Repertûara Kurdî</title>
+  <script>
+    (function(){
+      try {
+        var lang = (localStorage.getItem("lang") || "ku").toLowerCase();
+        document.documentElement.setAttribute("lang", lang === "tr" ? "tr" : "ku");
+        if (lang === "tr") document.documentElement.classList.add("i18n-pending");
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
   <link rel="stylesheet" href="/styles.css?v=2.0" />
 </head>
 <body>
@@ -11,7 +23,7 @@
 
   <header class="topbar">
     <div class="container topbar__inner">
-      <a class="brand" href="/index.html" aria-label="Serrûpel">
+      <a class="brand" href="/index.html" aria-label="Serrûpel" data-i18n-aria-label="nav_home">
   <div class="logo" aria-hidden="true">
     <img src="/assets/logo_web_assets/logo-256.webp" alt="Repertûara Kurdî logo">
     
@@ -22,27 +34,32 @@
   </div>
 </a>
       <div class="topbar__actions">
-        <a class="btn btn--ghost homeLink" href="/index.html" aria-label="Serrûpel">
+        <a class="btn btn--ghost homeLink" href="/index.html" aria-label="Serrûpel" data-i18n-aria-label="nav_home">
           <svg class="iconHome" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-10.5z" fill="currentColor"/>
           </svg>
         </a>
-        <a class="btn btn--ghost btn--lg" href="/all.html">Hemû</a>
-        <a id="addSongMenuBtn" class="btn btn--ghost btn--lg" href="/login.html?return=/all.html">Zêdeke</a>
-        <a class="btn btn--ghost btn--lg" href="/index.html#sources">Çavkani</a>
-        <a class="btn btn--ghost btn--lg" href="/index.html#contact">Têkilî</a>
-        <a id="adminLink" class="btn btn--ghost btn--lg" href="/admin.html" style="display:none;">Rêveber</a>
-        <a id="authOpen" class="btn btn--ghost btn--lg" href="/login.html?return=/all.html">Têkev</a>
-        <div class="search search--header" aria-label="Lêgerîn">
+        <a class="btn btn--ghost btn--lg" href="/all.html" data-i18n="nav_all">Hemû</a>
+        <a id="addSongMenuBtn" class="btn btn--ghost btn--lg" href="/login.html?return=/all.html" data-i18n="nav_add">Zêdeke</a>
+        <a class="btn btn--ghost btn--lg" href="/index.html#sources" data-i18n="nav_sources">Çavkani</a>
+        <a class="btn btn--ghost btn--lg" href="/index.html#contact" data-i18n="nav_contact">Têkilî</a>
+        <a id="adminLink" class="btn btn--ghost btn--lg" href="/admin.html" style="display:none;" data-i18n="nav_admin">Rêveber</a>
+        <a id="authOpen" class="btn btn--ghost btn--lg" href="/login.html?return=/all.html" data-i18n="nav_login">Têkev</a>
+        <div class="search search--header" aria-label="Lêgerîn" data-i18n-aria-label="search_label">
           <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
             <path d="M16.8 16.8L21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
-          <input id="q" class="search__input" type="search" placeholder="Stran an hunermend bigere…" autocomplete="off" />
-          <button id="clear" class="search__clear" type="button" aria-label="Paqij bike">✕</button>
+          <input id="q" class="search__input" type="search" placeholder="Stran an hunermend bigere…" autocomplete="off" data-i18n-placeholder="search_placeholder" />
+          <button id="clear" class="search__clear" type="button" aria-label="Paqij bike" data-i18n-aria-label="search_overlay_clear">✕</button>
         </div>
-        <a id="profileLink" class="btn btn--ghost btn--lg" href="/profile.html" style="display:none;">Profîl</a>
-        <button id="authSignOut" class="btn btn--ghost btn--lg" type="button" style="display:none;">Derketin</button>
+        <div class="langToggle" role="group" data-i18n-aria-label="lang_switcher_label">
+          <button class="langBtn" type="button" data-lang="ku" data-i18n="lang_ku">Kurdî</button>
+          <span class="langDivider" aria-hidden="true">/</span>
+          <button class="langBtn" type="button" data-lang="tr" data-i18n="lang_tr">Türkçe</button>
+        </div>
+        <a id="profileLink" class="btn btn--ghost btn--lg" href="/profile.html" style="display:none;" data-i18n="nav_profile">Profîl</a>
+        <button id="authSignOut" class="btn btn--ghost btn--lg" type="button" style="display:none;" data-i18n="nav_logout">Derketin</button>
         
       </div>
     </div>
@@ -51,49 +68,49 @@
   <main class="container">
     <section class="resultsHeader" style="margin-top:10px; align-items: flex-start;">
       <div class="resultsHeader__left">
-        <div class="resultsHeader__title">Hemû Stran</div>
+        <div class="resultsHeader__title" data-i18n="all_title">Hemû Stran</div>
         <br>
-        <div class="muted"><span id="count">0</span> Hejmara</div>
+        <div class="muted"><span id="count">0</span> <span data-i18n="label_count">Hejmara</span></div>
       </div>
       <div class="resultsHeader__right" style="align-items: flex-start;">
         <button id="addSongMenuBtnTop" class="btn btn--primary" type="button" style="padding: 8px 16px; font-size: 13px; font-weight: 600; margin-top: 0;">
-          Zêdeke
+          <span data-i18n="nav_add">Zêdeke</span>
         </button>
       </div>
     </section>
     <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:12px;">
       <select id="filterBy" class="authInput" style="flex: 1 1 auto; min-width: 150px;">
-        <option value="all">Hemû</option>
+        <option value="all" data-i18n="filter_all">Hemû</option>
       </select>
       <select id="sortBy" class="authInput" style="flex: 1 1 auto; min-width: 150px;">
-        <option value="title-asc">Stran (A → Z)</option>
-        <option value="title-desc">Stran (Z → A)</option>
-        <option value="artist-asc">Hunermend (A → Z)</option>
+        <option value="title-asc" data-i18n="sort_song_asc">Stran (A → Z)</option>
+        <option value="title-desc" data-i18n="sort_song_desc">Stran (Z → A)</option>
+        <option value="artist-asc" data-i18n="sort_artist_asc">Hunermend (A → Z)</option>
       </select>
     </div>
 
     <section id="addSongPanel" class="editPanel editPanel--paper is-hidden">
       <div class="editPanel__top">
-        <div class="editPanel__title">Stran Nû Zêde Bike</div>
-        <button id="addSongClose" class="editPanel__close" type="button" aria-label="Betal bike">✕</button>
+        <div class="editPanel__title" data-i18n="add_song_title">Stran Nû Zêde Bike</div>
+        <button id="addSongClose" class="editPanel__close" type="button" aria-label="Betal bike" data-i18n-aria-label="action_close">✕</button>
         <div class="editPanel__fields">
           <div class="authField">
-            <label class="authLabel required" for="addSongName">Navê stranê</label>
-            <input id="addSongName" class="authInput" type="text" required placeholder="Mînak: Stranên Kurdî" inputmode="text" autocomplete="off" />
+            <label class="authLabel required" for="addSongName" data-i18n="label_song_name">Navê stranê</label>
+            <input id="addSongName" class="authInput" type="text" required placeholder="Mînak: Stranên Kurdî" inputmode="text" autocomplete="off" data-i18n-placeholder="placeholder_song_name" />
             <div id="addSongKeySuggestion" class="keySuggestion muted" style="display:none;"></div>
           </div>
           <div class="authField">
             <label class="authLabel required" for="addSongArtist">
-              Hunermend
-              <span class="infoIcon" data-tooltip="Navê hunermendê rast binivîse, ji bo ku stran li ser rûpela hunermendê xuya bibe.">ℹ️</span>
+              <span data-i18n="label_artist">Hunermend</span>
+              <span class="infoIcon" data-tooltip="Navê hunermendê rast binivîse, ji bo ku stran li ser rûpela hunermendê xuya bibe." data-i18n-tooltip="tooltip_artist">ℹ️</span>
             </label>
-            <input id="addSongArtist" class="authInput" type="text" required placeholder="Mînak: Şivan Perwer" inputmode="text" autocomplete="off" />
+            <input id="addSongArtist" class="authInput" type="text" required placeholder="Mînak: Şivan Perwer" inputmode="text" autocomplete="off" data-i18n-placeholder="placeholder_artist_name" />
             <div id="addSongArtistSuggest" class="suggestList"></div>
           </div>
           <div class="authField">
-            <label class="authLabel required" for="addSongKey">Tonê orîjînal</label>
+            <label class="authLabel required" for="addSongKey" data-i18n="label_key">Tonê orîjînal</label>
             <select id="addSongKey" class="authInput" required>
-              <option value="">Tonê hilbijêre</option>
+              <option value="" data-i18n="key_select_placeholder">Tonê hilbijêre</option>
               <option value="C">C</option>
               <option value="Cm">Cm</option>
               <option value="Db">Db</option>
@@ -125,14 +142,14 @@
       <div class="editPanel__tools">
         <div class="editToolsRow">
           <div class="templateButtons">
-            <button type="button" class="btn btn--compact" id="addTemplateVerse">Verse</button>
-            <button type="button" class="btn btn--compact" id="addTemplateChorus">Chorus</button>
-            <button type="button" class="btn btn--compact" id="addTemplateBridge">Bridge</button>
+            <button type="button" class="btn btn--compact" id="addTemplateVerse" data-i18n="template_verse">Verse</button>
+            <button type="button" class="btn btn--compact" id="addTemplateChorus" data-i18n="template_chorus">Chorus</button>
+            <button type="button" class="btn btn--compact" id="addTemplateBridge" data-i18n="template_bridge">Bridge</button>
           </div>
           <div class="chordDictionary">
-            <button type="button" class="btn btn--compact" id="toggleChordDict">Akorlar</button>
+            <button type="button" class="btn btn--compact" id="toggleChordDict" data-i18n="chords_label">Akorlar</button>
             <div id="chordDictionary" class="chordDictionaryPanel is-hidden">
-              <div class="chordDictTitle">Akorlar</div>
+              <div class="chordDictTitle" data-i18n="chords_label">Akorlar</div>
               <div class="chordDictGrid" id="chordDictGrid"></div>
             </div>
           </div>
@@ -140,17 +157,17 @@
       </div>
       <div class="authField editTextareaField">
         <div class="editTextareaHeader">
-          <label class="authLabel" for="addSongText">Nivîsa stranê</label>
+          <label class="authLabel" for="addSongText" data-i18n="label_text">Nivîsa stranê</label>
           <div class="editTextareaMeta">
             <span id="addSongCharCount" class="charCount muted">0 karakter</span>
             <span id="addSongChordCount" class="chordCount muted">0 akor</span>
-            <button type="button" class="btn btn--tiny btn--ghost" id="addSongPreviewToggle">Önizleme</button>
+            <button type="button" class="btn btn--tiny btn--ghost" id="addSongPreviewToggle" data-i18n="preview_label">Önizleme</button>
           </div>
         </div>
         <div class="editTextareaWrapper">
           <div class="textareaWithLines">
             <div id="addSongLineNumbers" class="lineNumbers"></div>
-            <textarea id="addSongText" class="authInput editTextarea" placeholder="Nivîsa bi akorê li virê bike..." inputmode="text" autocomplete="off"></textarea>
+            <textarea id="addSongText" class="authInput editTextarea" placeholder="Nivîsa bi akorê li virê bike..." inputmode="text" autocomplete="off" data-i18n-placeholder="placeholder_text"></textarea>
             <div id="addSongPreview" class="editPreview is-hidden"></div>
           </div>
         </div>
@@ -158,10 +175,10 @@
       </div>
       <div class="editActions">
         <div class="editActionsLeft">
-          <span class="keyboardHint muted">Ctrl+S: Kaydet | Esc: Kapat</span>
+          <span class="keyboardHint muted" data-i18n="keyboard_hint">Ctrl+S: Kaydet | Esc: Kapat</span>
         </div>
         <div class="editActionsRight">
-          <button id="addSongSave" class="btn" type="button">Tomar bike</button>
+          <button id="addSongSave" class="btn" type="button" data-i18n="action_save">Tomar bike</button>
         </div>
       </div>
       <div id="addSongNotice" class="editNotice muted"></div>
@@ -175,29 +192,29 @@
           <div class="homeMid">
             <div class="visualCard visualCard--photo visualCard--logo" style="background-image:url('/assets/logo.png');">
               <div class="visualCard__overlay">
-                <div class="visualCard__overlayTitle">Repertûara Kurdî</div>
-                <div class="muted">Repertûara Stranan</div>
+                <div class="visualCard__overlayTitle" data-i18n="footer_title">Repertûara Kurdî</div>
+                <div class="muted" data-i18n="footer_subtitle">Repertûara Stranan</div>
               </div>
             </div>
           </div>
           <div class="homeSide">
             <div class="visualCard">
               <div class="visualCard__top">
-                <div class="visualCard__title">Repertûar</div>
-                <div class="muted">Agahîya Lîsteyê</div>
+                <div class="visualCard__title" data-i18n="footer_stats_title">Repertûar</div>
+                <div class="muted" data-i18n="footer_stats_subtitle">Agahîya Lîsteyê</div>
               </div>
               <div class="stats" id="stats" style="margin-top:12px;">
                 <div class="stat">
                   <div class="stat__n" id="statSongs">—</div>
-                  <div class="stat__t muted">Stran</div>
+                  <div class="stat__t muted" data-i18n="footer_stat_songs">Stran</div>
                 </div>
                 <div class="stat">
                   <div class="stat__n" id="statArtists">—</div>
-                  <div class="stat__t muted">Hunermend</div>
+                  <div class="stat__t muted" data-i18n="footer_stat_artists">Hunermend</div>
                 </div>
                 <div class="stat">
                   <div class="stat__n" id="statUpdated">2</div>
-                  <div class="stat__t muted">Repertûar</div>
+                  <div class="stat__t muted" data-i18n="footer_stat_repertoire">Repertûar</div>
                 </div>
               </div>
             </div>
@@ -210,10 +227,10 @@
   width:100%;
 ">
           <span class="muted" style="text-align:left;">
-            © Repertûara Kurdî
+            <span data-i18n="footer_copyright">© Repertûara Kurdî</span>
           </span>
           <span class="muted" style="text-align:right;">
-            Pêşvebir: Ahmet Uçar
+            <span data-i18n="footer_credit">Pêşvebir: Ahmet Uçar</span>
           </span>
         </div>
       </div>

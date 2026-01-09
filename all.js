@@ -1,12 +1,14 @@
 // all.js — rûpela hemû stranan
+(function(){
 let SONGS = [];
 let currentPage = 1;
 window.__currentPage = 1; // Closure sorununu önlemek için
 const itemsPerPage = 20;
+const t = (key, fallback, vars) => window.t ? window.t(key, vars) : fallback;
 
 function makeId(s){
   if(typeof songId === "function") return songId(s);
-  return `${s.pdf}|${s.page_original}`;
+  return s?.id || "";
 }
 function openLink(s){ return `/song.html?id=${encodeURIComponent(makeId(s))}`; }
 
@@ -65,7 +67,7 @@ function render(){
   if(!list) return;
   
   if(!SONGS || SONGS.length === 0) {
-    list.innerHTML = `<div class="empty">Stran tên barkirinê...</div>`;
+    list.innerHTML = `<div class="empty">${t("status_loading_songs", "Stran tên barkirinê...")}</div>`;
     return;
   }
 
@@ -91,7 +93,7 @@ function render(){
   if(count) count.textContent = items.length.toString();
 
   if(!items.length){
-    list.innerHTML = `<div class="empty">Tınne</div>`;
+    list.innerHTML = `<div class="empty">${t("status_no_results", "Tınne")}</div>`;
     // Pagination'ı temizle
     const pagination = document.getElementById("pagination");
     if(pagination) pagination.innerHTML = "";
@@ -126,7 +128,7 @@ function render(){
   const sId = window.songId || ((s) => s._id || "");
   
   list.innerHTML = paginatedItems.map(s => {
-    const pendingBadge = s.pending ? `<span class="badge badge--pending">Li benda pejirandinê</span>` : "";
+    const pendingBadge = s.pending ? `<span class="badge badge--pending">${t("badge_pending", "Li benda pejirandinê")}</span>` : "";
     const title = window.formatSongTitle ? window.formatSongTitle(s.song) : (s.song || "");
     const songId = sId(s);
     const isFav = window.isFavorite?.(songId, userFavorites) || false;
@@ -143,7 +145,7 @@ function render(){
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
         </button>
-        <a class="open" href="${openLink(s)}">Veke</a>
+        <a class="open" href="${openLink(s)}">${t("action_open", "Veke")}</a>
       </div>
     </div>
   `;
@@ -390,7 +392,7 @@ async function init(){
     
     if(!SONGS || SONGS.length === 0){
       const list = $("#list");
-      if(list) list.innerHTML = `<div class="empty">Stran nehatin barkirin.</div>`;
+      if(list) list.innerHTML = `<div class="empty">${t("status_song_unavailable", "Stran nehatin barkirin.")}</div>`;
       return;
     }
   }catch(err){
@@ -586,7 +588,7 @@ async function init(){
         if (!pendingOption) {
           const newOption = document.createElement("option");
           newOption.value = "pending";
-          newOption.textContent = "Li benda pejirandinê";
+          newOption.textContent = t("badge_pending");
           filterBy.appendChild(newOption);
         }
       } else {
@@ -708,3 +710,4 @@ init().catch(err => {
   }
 })();
 // LIVE_BG_END
+})();

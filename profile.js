@@ -1,4 +1,6 @@
 // profile.js — kullanıcı profili
+(function(){
+const t = (key, fallback, vars) => window.t ? window.t(key, vars) : fallback;
 
 function artistArr(a){
   if(Array.isArray(a)) return a.filter(Boolean).map(String);
@@ -34,9 +36,9 @@ function statusBadge(status){
   const cls = s === "approved" ? "badge badge--approved"
     : s === "rejected" ? "badge badge--rejected"
     : "badge badge--pending";
-  const label = s === "approved" ? "Pejirandî"
-    : s === "rejected" ? "Redkirî"
-    : "Li benda pejirandinê";
+  const label = s === "approved" ? t("badge_approved", "Pejirandî")
+    : s === "rejected" ? t("badge_rejected", "Redkirî")
+    : t("badge_pending", "Li benda pejirandinê");
   return `<span class="${cls}">${label}</span>`;
 }
 
@@ -77,7 +79,7 @@ function renderFavorites(list, items){
   if(count) count.textContent = items.length.toString();
   if(!list) return;
   if(!items.length){
-    list.innerHTML = `<div class="empty">Hêj favorî tune.</div>`;
+    list.innerHTML = `<div class="empty">${t("profile_no_favorites", "Hêj favorî tune.")}</div>`;
     return;
   }
   list.innerHTML = items.map(f => `
@@ -87,7 +89,7 @@ function renderFavorites(list, items){
         <div class="item__sub">${escapeHtml(artistText(f.artist) || "—")}</div>
       </div>
       <div class="badges">
-        <a class="open" href="${openSong(f.songId || "")}">Veke</a>
+        <a class="open" href="${openSong(f.songId || "")}">${t("action_open", "Veke")}</a>
       </div>
     </div>
   `).join("");
@@ -98,7 +100,7 @@ function renderArtistFavorites(list, items){
   if(count) count.textContent = items.length.toString();
   if(!list) return;
   if(!items.length){
-    list.innerHTML = `<div class="empty">Hêj hunermendê favorî tune.</div>`;
+    list.innerHTML = `<div class="empty">${t("profile_no_artist_favorites", "Hêj hunermendê favorî tune.")}</div>`;
     return;
   }
   
@@ -124,12 +126,12 @@ function renderArtistFavorites(list, items){
         <div class="item__title">${escapeHtml(window.formatArtistName ? window.formatArtistName(artistName) : artistName || "—")}</div>
       </div>
       <div class="badges">
-        <button class="favoriteBtn is-favorite" type="button" aria-label="Ji favoriyan derxe" data-artist-key="${escapeHtml(artistKeyValue)}" data-artist-name="${escapeHtml(artistName)}">
+        <button class="favoriteBtn is-favorite" type="button" aria-label="${t("action_remove_favorite", "Ji favoriyan derxe")}" data-artist-key="${escapeHtml(artistKeyValue)}" data-artist-name="${escapeHtml(artistName)}">
           <svg class="favoriteIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
         </button>
-        <a class="open" href="${artistLink}">Veke</a>
+        <a class="open" href="${artistLink}">${t("action_open", "Veke")}</a>
       </div>
     </div>
   `;
@@ -158,7 +160,7 @@ function renderArtistFavorites(list, items){
         window.requireAuthAction?.(() => {
           // Giriş yapıldıktan sonra tekrar dene
           newBtn.click();
-        }, "Ji bo favorîkirina hunermendê divê tu têkevî.");
+        }, t("status_requires_login_artist_favorite", "Ji bo favorîkirina hunermendê divê tu têkevî."));
         return;
       }
       
@@ -203,8 +205,8 @@ function renderSubmissions(list, items, emptyLabel, onDelete){
         </div>
         <div class="badges">
           ${statusBadge(s.status)}
-          <a class="open" href="${openSong(id)}">Veke</a>
-          ${canDelete ? `<button class="btn btn--danger btn--small" data-action="delete" data-id="${s._id}" type="button">Jê bibe</button>` : ""}
+          <a class="open" href="${openSong(id)}">${t("action_open", "Veke")}</a>
+          ${canDelete ? `<button class="btn btn--danger btn--small" data-action="delete" data-id="${s._id}" type="button">${t("action_delete", "Jê bibe")}</button>` : ""}
         </div>
       </div>
     `;
@@ -230,8 +232,14 @@ function renderSubmissions(list, items, emptyLabel, onDelete){
         return;
       }
       
-      const submissionType = submission.type === "new" ? "stran" : "guhartin";
-      const confirmMessage = `Tu dixwazî vê ${submissionType} jê bibî? Ev kar bêpaş nabe.`;
+      const submissionType = submission.type === "new"
+        ? t("profile_delete_type_song", "stran")
+        : t("profile_delete_type_edit", "guhartin");
+      const confirmMessage = t(
+        "profile_confirm_delete",
+        "Tu dixwazî vê {type} jê bibî? Ev kar bêpaş nabe.",
+        { type: submissionType }
+      );
       
       if(!confirm(confirmMessage)) return;
       
@@ -240,23 +248,23 @@ function renderSubmissions(list, items, emptyLabel, onDelete){
       const user = auth?.currentUser;
       
       if(!db) {
-        alert("Firestore nehate barkirin.");
+        alert(t("status_firestore_unready", "Firestore nehate barkirin."));
         return;
       }
       
       if(!user) {
-        alert("Divê tu têkevî.");
+        alert(t("status_requires_login_edit", "Divê tu têkevî."));
         return;
       }
       
       if(submission.createdBy !== user.uid) {
-        alert("Yetkîn tune an jî ev naverok ji te re nîne.");
+        alert(t("profile_not_authorized", "Yetkîn tune an jî ev naverok ji te re nîne."));
         return;
       }
       
       try {
         newBtn.disabled = true;
-        newBtn.textContent = "Jêbirin…";
+        newBtn.textContent = t("action_deleting", "Jêbirin…");
         
         console.log("🗑️ Submission siliniyor:", submissionId);
         await db.collection("song_submissions").doc(submissionId).delete();
@@ -298,18 +306,18 @@ function renderSubmissions(list, items, emptyLabel, onDelete){
           stack: err.stack
         });
         
-        let errorMessage = "Çewtiyek çêbû.";
+        let errorMessage = t("auth_error_generic", "Çewtiyek çêbû.");
         if(err.code === "permission-denied") {
-          errorMessage = "Yetkîn tune. Tenê guhartinên te yên li benda pejirandinê an jî redkirî dikarî jê bibî.";
+          errorMessage = t("profile_delete_permission_denied", "Yetkîn tune. Tenê guhartinên te yên li benda pejirandinê an jî redkirî dikarî jê bibî.");
         } else if(err.code === "unavailable") {
-          errorMessage = "Firestore nehate gihîştin. Ji kerema xwe dîsa biceribîne.";
+          errorMessage = t("profile_firestore_unavailable", "Firestore nehate gihîştin. Ji kerema xwe dîsa biceribîne.");
         } else if(err.message) {
-          errorMessage = `Çewtiyek çêbû: ${err.message}`;
+          errorMessage = `${t("auth_error_generic", "Çewtiyek çêbû.")}: ${err.message}`;
         }
         
         alert(errorMessage);
         newBtn.disabled = false;
-        newBtn.textContent = "Jê bibe";
+        newBtn.textContent = t("action_delete", "Jê bibe");
       }
     });
   });
@@ -369,7 +377,7 @@ function init(){
         setTimeout(() => init(), 100);
       } else if(retryCount >= maxRetries){
         clearInterval(waitForAuth);
-        if(profileStatus) profileStatus.textContent = "Sîstema têketinê nehate dîtin.";
+        if(profileStatus) profileStatus.textContent = t("profile_auth_unavailable", "Sîstema têketinê nehate dîtin.");
       }
     }, 500);
     return;
@@ -404,8 +412,8 @@ function init(){
       renderFiltered();
     };
     
-    renderSubmissions(newList, filteredNew, "Hêj stran nehat zêdekirin.", onDelete);
-    renderSubmissions(editList, filteredEdit, "Hêj guhartin tune.", onDelete);
+    renderSubmissions(newList, filteredNew, t("profile_no_submissions_new", "Hêj stran nehat zêdekirin."), onDelete);
+    renderSubmissions(editList, filteredEdit, t("profile_no_submissions_edit", "Hêj guhartin tune."), onDelete);
   };
 
   newFilter?.addEventListener("change", renderFiltered);
@@ -415,7 +423,7 @@ function init(){
     profileSignOut.addEventListener("click", async (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const ok = window.confirm("Tu dixwazî derkevî?");
+      const ok = window.confirm(t("confirm_sign_out", "Tu dixwazî derkevî?"));
       if(!ok) return;
       try{
         if(!auth){
@@ -427,7 +435,7 @@ function init(){
       }catch(err){
         console.error("Derketin çewtiyek:", err);
         if(profilePhotoStatus){
-          profilePhotoStatus.textContent = err?.message || "Derketin bi ser neket.";
+          profilePhotoStatus.textContent = err?.message || t("status_sign_out_failed", "Derketin bi ser neket.");
           profilePhotoStatus.style.color = "#ef4444";
         }
       }
@@ -437,7 +445,7 @@ function init(){
   profilePhotoSave?.addEventListener("click", async () => {
     const user = auth.currentUser;
     if(!user){
-      if(profilePhotoStatus) profilePhotoStatus.textContent = "Divê tu têkevî.";
+      if(profilePhotoStatus) profilePhotoStatus.textContent = t("status_requires_login_profile", "Divê tu têkevî.");
       return;
     }
     const url = (profilePhotoUrl?.value || "").trim();
@@ -450,12 +458,12 @@ function init(){
       }
       setAvatar(url || "");
       if(profilePhotoStatus){
-        profilePhotoStatus.textContent = "Wêne hate nûkirin.";
+        profilePhotoStatus.textContent = t("profile_photo_updated", "Wêne hate nûkirin.");
         profilePhotoStatus.style.color = "";
       }
     }catch(err){
       if(profilePhotoStatus){
-        profilePhotoStatus.textContent = err?.message || "Nehat nûkirin.";
+        profilePhotoStatus.textContent = err?.message || t("profile_photo_update_failed", "Nehat nûkirin.");
         profilePhotoStatus.style.color = "#ef4444";
       }
     }
@@ -463,10 +471,10 @@ function init(){
 
   auth.onAuthStateChanged(async (user) => {
     if(!user){
-      if(profileName) profileName.textContent = "Divê tu têkevî";
+      if(profileName) profileName.textContent = t("profile_name_requires_login", "Divê tu têkevî");
       if(profileEmail) profileEmail.textContent = "—";
-      if(profileStatus) profileStatus.textContent = "Têketin tune";
-      if(profileSubtitle) profileSubtitle.textContent = "Ji bo profîlê têkeve.";
+      if(profileStatus) profileStatus.textContent = t("profile_status_logged_out", "Têketin tune");
+      if(profileSubtitle) profileSubtitle.textContent = t("profile_subtitle_logged_out", "Ji bo profîlê têkeve.");
       if(profilePhotoUrl) profilePhotoUrl.value = "";
       setAvatar("");
       renderFavorites(favList, []);
@@ -479,10 +487,10 @@ function init(){
       return;
     }
 
-    if(profileName) profileName.textContent = user.displayName || "Bikarhêner";
+    if(profileName) profileName.textContent = user.displayName || t("profile_name_fallback", "Bikarhêner");
     if(profileEmail) profileEmail.textContent = user.email || "—";
     if(profileStatus) profileStatus.textContent = "";
-    if(profileSubtitle) profileSubtitle.textContent = "Hesabın ve içeriklerin";
+    if(profileSubtitle) profileSubtitle.textContent = t("profile_subtitle_logged_in", "Hesabın ve içeriklerin");
     if(profilePhotoUrl) profilePhotoUrl.value = user.photoURL || "";
     setAvatar(user.photoURL || "");
 
@@ -577,3 +585,4 @@ function init(){
 }
 
 init();
+})();

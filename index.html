@@ -4,6 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Repertûara Kurdî</title>
+  <script>
+    (function(){
+      try {
+        var lang = (localStorage.getItem("lang") || "ku").toLowerCase();
+        document.documentElement.setAttribute("lang", lang === "tr" ? "tr" : "ku");
+        if (lang === "tr") document.documentElement.classList.add("i18n-pending");
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="icon" type="image/png" href="/assets/images/favicon.png">
   <link rel="stylesheet" href="/styles.css?v=2.0" />
 </head>
@@ -12,7 +24,7 @@
 
   <header class="topbar">
     <div class="container topbar__inner">
-      <a class="brand" href="/index.html" aria-label="Serrûpel">
+      <a class="brand" href="/index.html" aria-label="Serrûpel" data-i18n-aria-label="nav_home">
   <div class="logo" aria-hidden="true">
     <img src="/assets/logo_web_assets/logo-256.webp" alt="Repertûara Kurdî logo">
     
@@ -23,27 +35,32 @@
   </div>
 </a>
       <div class="topbar__actions">
-        <a class="btn btn--ghost homeLink" href="/index.html" aria-label="Serrûpel">
+        <a class="btn btn--ghost homeLink" href="/index.html" aria-label="Serrûpel" data-i18n-aria-label="nav_home">
           <svg class="iconHome" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-10.5z" fill="currentColor"/>
           </svg>
         </a>
-        <a class="btn btn--ghost btn--lg" href="/all.html">Hemû</a>
-        <a id="addSongMenuBtn" class="btn btn--ghost btn--lg" href="/login.html?return=/index.html">Zêdeke</a>
-        <a class="btn btn--ghost btn--lg" href="#sources">Çavkani</a>
-        <a class="btn btn--ghost btn--lg" href="#contact">Peywendî</a>
-        <a id="adminLink" class="btn btn--ghost btn--lg" href="/admin.html" style="display:none;">Rêveber</a>
-        <a id="authOpen" class="btn btn--ghost btn--lg" href="/login.html?return=/index.html">Têkev</a>
-        <div class="search search--header" aria-label="Lêgerîn">
+        <a class="btn btn--ghost btn--lg" href="/all.html" data-i18n="nav_all">Hemû</a>
+        <a id="addSongMenuBtn" class="btn btn--ghost btn--lg" href="/login.html?return=/index.html" data-i18n="nav_add">Zêdeke</a>
+        <a class="btn btn--ghost btn--lg" href="#sources" data-i18n="nav_sources">Çavkani</a>
+        <a class="btn btn--ghost btn--lg" href="#contact" data-i18n="nav_contact">Peywendî</a>
+        <a id="adminLink" class="btn btn--ghost btn--lg" href="/admin.html" style="display:none;" data-i18n="nav_admin">Rêveber</a>
+        <a id="authOpen" class="btn btn--ghost btn--lg" href="/login.html?return=/index.html" data-i18n="nav_login">Têkev</a>
+        <div class="search search--header" aria-label="Lêgerîn" data-i18n-aria-label="search_label">
           <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
             <path d="M16.8 16.8L21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
-          <input id="q" class="search__input" type="search" placeholder="Stran an hunermend bigere…" autocomplete="off" />
-          <button id="clear" class="search__clear" type="button" aria-label="Paqij bike">✕</button>
+          <input id="q" class="search__input" type="search" placeholder="Stran an hunermend bigere…" autocomplete="off" data-i18n-placeholder="search_placeholder" />
+          <button id="clear" class="search__clear" type="button" aria-label="Paqij bike" data-i18n-aria-label="search_overlay_clear">✕</button>
         </div>
-        <a id="profileLink" class="btn btn--ghost btn--lg" href="/profile.html" style="display:none;">Profîl</a>
-        <button id="authSignOut" class="btn btn--ghost btn--lg" type="button" style="display:none;">Derketin</button>
+        <div class="langToggle" role="group" data-i18n-aria-label="lang_switcher_label">
+          <button class="langBtn" type="button" data-lang="ku" data-i18n="lang_ku">Kurdî</button>
+          <span class="langDivider" aria-hidden="true">/</span>
+          <button class="langBtn" type="button" data-lang="tr" data-i18n="lang_tr">Türkçe</button>
+        </div>
+        <a id="profileLink" class="btn btn--ghost btn--lg" href="/profile.html" style="display:none;" data-i18n="nav_profile">Profîl</a>
+        <button id="authSignOut" class="btn btn--ghost btn--lg" type="button" style="display:none;" data-i18n="nav_logout">Derketin</button>
         
       </div>
     </div>
@@ -55,32 +72,13 @@
       <div class="heroCard">
         <div class="heroCard__content">
           <div class="heroCard__header">
-            <h1 class="heroCard__title">Akorên stranên kurdî li yek rûpelê bibîne.</h1>
-            <p class="heroCard__subtitle">Bigere, keşf bike, bitikîne, bibîne</p>
+            <div class="heroCard__kicker" data-i18n="home_kicker">Hûn bi xêr hatin</div>
+            <h1 class="heroCard__title" data-i18n="home_title">Akorên stranên kurdî li yek rûpelê bibîne.</h1>
+            <p class="heroCard__subtitle" data-i18n="home_subtitle">Bigere, keşf bike, bitikîne, bibîne</p>
           </div>
           <div class="heroCard__actions">
-            <div class="heroCard__welcome">
-              <h2 class="heroCard__welcomeText">
-                <span class="welcome-char">H</span>
-                <span class="welcome-char">û</span>
-                <span class="welcome-char">n</span>
-                <span class="welcome-char"> </span>
-                <span class="welcome-char">b</span>
-                <span class="welcome-char">i</span>
-                <span class="welcome-char"> </span>
-                <span class="welcome-char">x</span>
-                <span class="welcome-char">ê</span>
-                <span class="welcome-char">r</span>
-                <span class="welcome-char"> </span>
-                <span class="welcome-char">h</span>
-                <span class="welcome-char">a</span>
-                <span class="welcome-char">t</span>
-                <span class="welcome-char">i</span>
-                <span class="welcome-char">n</span>
-              </h2>
-            </div>
             <div class="heroCard__buttons">
-              <button id="heroLoginBtn" class="btn btn--primary heroCard__btn heroCard__btn--minimal" style="display:none;">Têkeve</button>
+              <button id="heroLoginBtn" class="btn btn--primary heroCard__btn heroCard__btn--minimal" style="display:none;" data-i18n="action_login">Têkeve</button>
             </div>
           </div>
         </div>
@@ -89,26 +87,26 @@
 
     <section id="addSongPanel" class="editPanel editPanel--paper is-hidden">
       <div class="editPanel__top">
-        <div class="editPanel__title">Stran Nû Zêde Bike</div>
-        <button id="addSongClose" class="editPanel__close" type="button" aria-label="Betal bike">✕</button>
+        <div class="editPanel__title" data-i18n="add_song_title">Stran Nû Zêde Bike</div>
+        <button id="addSongClose" class="editPanel__close" type="button" aria-label="Betal bike" data-i18n-aria-label="action_close">✕</button>
         <div class="editPanel__fields">
           <div class="authField">
-            <label class="authLabel required" for="addSongName">Navê stranê</label>
-            <input id="addSongName" class="authInput" type="text" required placeholder="Mînak: Stranên Kurdî" inputmode="text" autocomplete="off" />
+            <label class="authLabel required" for="addSongName" data-i18n="label_song_name">Navê stranê</label>
+            <input id="addSongName" class="authInput" type="text" required placeholder="Mînak: Stranên Kurdî" inputmode="text" autocomplete="off" data-i18n-placeholder="placeholder_song_name" />
             <div id="addSongKeySuggestion" class="keySuggestion muted" style="display:none;"></div>
           </div>
           <div class="authField">
             <label class="authLabel required" for="addSongArtist">
-              Hunermend
-              <span class="infoIcon" data-tooltip="Navê hunermendê rast binivîse, ji bo ku stran li ser rûpela hunermendê xuya bibe.">ℹ️</span>
+              <span data-i18n="label_artist">Hunermend</span>
+              <span class="infoIcon" data-tooltip="Navê hunermendê rast binivîse, ji bo ku stran li ser rûpela hunermendê xuya bibe." data-i18n-tooltip="tooltip_artist">ℹ️</span>
             </label>
-            <input id="addSongArtist" class="authInput" type="text" required placeholder="Mînak: Şivan Perwer" inputmode="text" autocomplete="off" />
+            <input id="addSongArtist" class="authInput" type="text" required placeholder="Mînak: Şivan Perwer" inputmode="text" autocomplete="off" data-i18n-placeholder="placeholder_artist_name" />
             <div id="addSongArtistSuggest" class="suggestList"></div>
           </div>
           <div class="authField">
-            <label class="authLabel required" for="addSongKey">Tonê orîjînal</label>
+            <label class="authLabel required" for="addSongKey" data-i18n="label_key">Tonê orîjînal</label>
             <select id="addSongKey" class="authInput" required>
-              <option value="">Tonê hilbijêre</option>
+              <option value="" data-i18n="key_select_placeholder">Tonê hilbijêre</option>
               <option value="C">C</option>
               <option value="Cm">Cm</option>
               <option value="Db">Db</option>
@@ -140,14 +138,14 @@
       <div class="editPanel__tools">
         <div class="editToolsRow">
           <div class="templateButtons">
-            <button type="button" class="btn btn--compact" id="addTemplateVerse">Verse</button>
-            <button type="button" class="btn btn--compact" id="addTemplateChorus">Chorus</button>
-            <button type="button" class="btn btn--compact" id="addTemplateBridge">Bridge</button>
+            <button type="button" class="btn btn--compact" id="addTemplateVerse" data-i18n="template_verse">Verse</button>
+            <button type="button" class="btn btn--compact" id="addTemplateChorus" data-i18n="template_chorus">Chorus</button>
+            <button type="button" class="btn btn--compact" id="addTemplateBridge" data-i18n="template_bridge">Bridge</button>
           </div>
           <div class="chordDictionary">
-            <button type="button" class="btn btn--compact" id="toggleChordDict">Akorlar</button>
+            <button type="button" class="btn btn--compact" id="toggleChordDict" data-i18n="chords_label">Akorlar</button>
             <div id="chordDictionary" class="chordDictionaryPanel is-hidden">
-              <div class="chordDictTitle">Akorlar</div>
+              <div class="chordDictTitle" data-i18n="chords_label">Akorlar</div>
               <div class="chordDictGrid" id="chordDictGrid"></div>
             </div>
           </div>
@@ -155,17 +153,17 @@
       </div>
       <div class="authField editTextareaField">
         <div class="editTextareaHeader">
-          <label class="authLabel" for="addSongText">Nivîsa stranê</label>
+          <label class="authLabel" for="addSongText" data-i18n="label_text">Nivîsa stranê</label>
           <div class="editTextareaMeta">
             <span id="addSongCharCount" class="charCount muted">0 karakter</span>
             <span id="addSongChordCount" class="chordCount muted">0 akor</span>
-            <button type="button" class="btn btn--tiny btn--ghost" id="addSongPreviewToggle">Önizleme</button>
+            <button type="button" class="btn btn--tiny btn--ghost" id="addSongPreviewToggle" data-i18n="preview_label">Önizleme</button>
           </div>
         </div>
         <div class="editTextareaWrapper">
           <div class="textareaWithLines">
             <div id="addSongLineNumbers" class="lineNumbers"></div>
-            <textarea id="addSongText" class="authInput editTextarea" placeholder="Nivîsa bi akorê li virê bike..." inputmode="text" autocomplete="off"></textarea>
+            <textarea id="addSongText" class="authInput editTextarea" placeholder="Nivîsa bi akorê li virê bike..." inputmode="text" autocomplete="off" data-i18n-placeholder="placeholder_text"></textarea>
             <div id="addSongPreview" class="editPreview is-hidden"></div>
           </div>
         </div>
@@ -173,10 +171,10 @@
       </div>
       <div class="editActions">
         <div class="editActionsLeft">
-          <span class="keyboardHint muted">Ctrl+S: Kaydet | Esc: Kapat</span>
+          <span class="keyboardHint muted" data-i18n="keyboard_hint">Ctrl+S: Kaydet | Esc: Kapat</span>
         </div>
         <div class="editActionsRight">
-          <button id="addSongSave" class="btn" type="button">Tomar bike</button>
+          <button id="addSongSave" class="btn" type="button" data-i18n="action_save">Tomar bike</button>
         </div>
       </div>
       <div id="addSongNotice" class="editNotice muted"></div>
@@ -185,24 +183,24 @@
     <section class="homeListWrap">
       <section class="resultsHeader">
         <div class="resultsHeader__left">
-          <div id="resultsTitle" class="resultsHeader__title">Yên Berçav</div>
-          <div class="resultsMeta"><span id="count">0</span> encam</div>
+          <div id="resultsTitle" class="resultsHeader__title" data-i18n="home_results_default">Yên Berçav</div>
+          <div class="resultsMeta"><span id="count">0</span> <span data-i18n="home_results_count">encam</span></div>
         </div>
         <div class="resultsHeader__right">
-          <a class="btn btn--ghost" href="/all.html">Hemû</a>
+          <button id="refreshRecs" class="btn btn--ghost" type="button" data-i18n="home_refresh">Nûve bike</button>
         </div>
       </section>
 
       <section id="list" class="list"></section>
       <div class="homeListWrap__footer">
-        <a href="/all.html" class="btn btn--primary">Hemûyan Bibîne</a>
+        <a href="/all.html" class="btn btn--primary" data-i18n="home_view_all">Hemûyan Bibîne</a>
       </div>
     </section>
 
     <section id="sources" class="section">
       <div class="sectionHeader">
-        <h2 class="sectionTitle">Çavkaniyên</h2>
-        <p class="sectionSub">Spas ji hevalên me yên ku vê repertuarê parve dikin.</p>
+        <h2 class="sectionTitle" data-i18n="sources_title">Çavkaniyên</h2>
+        <p class="sectionSub" data-i18n="sources_subtitle">Spas ji hevalên me yên ku vê repertuarê parve dikin.</p>
       </div>
       <div class="sourcesRow">
         <a href="https://helezonikkresendo.com" target="_blank" rel="noopener noreferrer" class="sourceItem">
@@ -219,7 +217,7 @@
         </a>
         <a href="https://helezonikkresendo.com/tag/serdar-turkmen/" target="_blank" rel="noopener noreferrer" class="sourceItem">
           <div class="sourceCircle sourceCircle--logo">
-            <img src="/assets/Gitar, müzik notaları ve logo.png" alt="Gitar notaları">
+            <img src="/assets/gitar-muzik-notalari-logo.png" alt="Gitar notaları">
           </div>
           <div class="sourceLabel">Serdar Y. Türkmen</div>
         </a>
@@ -228,32 +226,32 @@
 
     <section id="contact" class="section">
       <div class="sectionHeader">
-        <h2 class="sectionTitle">Peywendî</h2>
-        <p class="sectionSub">Tu dikarî repertuara xwe an mijarek din bi me re parve bikî.</p>
+        <h2 class="sectionTitle" data-i18n="contact_title">Peywendî</h2>
+        <p class="sectionSub" data-i18n="contact_subtitle">Tu dikarî repertuara xwe an mijarek din bi me re parve bikî.</p>
       </div>
       <form id="contactForm" class="contactForm">
         <div class="contactFields">
           <div class="authField">
-            <label class="authLabel" for="contactName">Nav û Paşnav</label>
-            <input id="contactName" class="authInput" type="text" placeholder="Nav û Paşnav" />
+            <label class="authLabel" for="contactName" data-i18n="contact_label_name">Nav û Paşnav</label>
+            <input id="contactName" class="authInput" type="text" placeholder="Nav û Paşnav" data-i18n-placeholder="contact_placeholder_name" />
           </div>
           <div class="authField">
-            <label class="authLabel" for="contactInfo">Peywendî</label>
-            <input id="contactInfo" class="authInput" type="text" placeholder="E-name an telefon" />
+            <label class="authLabel" for="contactInfo" data-i18n="contact_label_contact">Peywendî</label>
+            <input id="contactInfo" class="authInput" type="text" placeholder="E-name an telefon" data-i18n-placeholder="contact_placeholder_contact" />
           </div>
         </div>
         <div class="contactBottom">
           <div class="authField">
-            <label class="authLabel" for="contactMessage">Peyam</label>
-            <textarea id="contactMessage" class="authInput editTextarea" placeholder="Kurtî binivîse..."></textarea>
+            <label class="authLabel" for="contactMessage" data-i18n="contact_label_message">Peyam</label>
+            <textarea id="contactMessage" class="authInput editTextarea" placeholder="Kurtî binivîse..." data-i18n-placeholder="contact_placeholder_message"></textarea>
           </div>
           <div class="authField">
-            <label class="authLabel" for="contactFiles">Pel Zêde Bike</label>
+            <label class="authLabel" for="contactFiles" data-i18n="contact_label_files">Pel Zêde Bike</label>
             <input id="contactFiles" class="fileInput" type="file" accept=".pdf,.png,.jpg,.jpeg" multiple />
           </div>
         </div>
         <div class="contactActions">
-          <button class="btn btn--primary" type="submit">Bişîne</button>
+          <button class="btn btn--primary" type="submit" data-i18n="action_send">Bişîne</button>
         </div>
         <div id="contactStatus" class="authStatus muted"></div>
       </form>
@@ -268,29 +266,29 @@
                 <img src="/assets/logo_web_assets/logo-512.webp" alt="Repertûara Kurdî" class="footerLogoImg" />
               </div>
               <div class="footerLogoContent">
-                <div class="visualCard__overlayTitle">Repertûara Kurdî</div>
-                <div class="muted">Repertûara Stranan</div>
+                <div class="visualCard__overlayTitle" data-i18n="footer_title">Repertûara Kurdî</div>
+                <div class="muted" data-i18n="footer_subtitle">Repertûara Stranan</div>
               </div>
             </div>
           </div>
           <div class="homeSide">
             <div class="visualCard">
               <div class="visualCard__top">
-                <div class="visualCard__title">Repertûar</div>
-                <div class="muted">Agahîya Lîsteyê</div>
+                <div class="visualCard__title" data-i18n="footer_stats_title">Repertûar</div>
+                <div class="muted" data-i18n="footer_stats_subtitle">Agahîya Lîsteyê</div>
               </div>
               <div class="stats" id="stats" style="margin-top:12px;">
                 <div class="stat">
                   <div class="stat__n" id="statSongs">—</div>
-                  <div class="stat__t muted">Stran</div>
+                  <div class="stat__t muted" data-i18n="footer_stat_songs">Stran</div>
                 </div>
                 <div class="stat">
                   <div class="stat__n" id="statArtists">—</div>
-                  <div class="stat__t muted">Hunermend</div>
+                  <div class="stat__t muted" data-i18n="footer_stat_artists">Hunermend</div>
                 </div>
                 <div class="stat">
                   <div class="stat__n" id="statUpdated">2</div>
-                  <div class="stat__t muted">Repertûar</div>
+                  <div class="stat__t muted" data-i18n="footer_stat_repertoire">Repertûar</div>
                 </div>
               </div>
             </div>
@@ -303,125 +301,20 @@
   width:100%;
 ">
           <span class="muted" style="text-align:left;">
-            © Repertûara Kurdî
+            <span data-i18n="footer_copyright">© Repertûara Kurdî</span>
           </span>
           <span class="muted" style="text-align:right;">
-            Pêşvebir: Ahmet Uçar
+            <span data-i18n="footer_credit">Pêşvebir: Ahmet Uçar</span>
           </span>
         </div>
       </div>
     </footer>
   </main>
 
-  <!-- Firebase Scripts with Error Handling for Mobile Data -->
-  <script>
-    // Firebase script yükleme fonksiyonu - mobil veri uyumluluğu için
-    function loadFirebaseScript(src, onError) {
-      return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = src;
-        script.async = true;
-        script.crossOrigin = 'anonymous';
-        let resolved = false;
-        
-        script.onload = () => {
-          if(!resolved) {
-            resolved = true;
-            resolve();
-          }
-        };
-        
-        script.onerror = () => {
-          if(!resolved) {
-            resolved = true;
-            console.warn('⚠️ Firebase script yüklenemedi:', src);
-            if(onError) onError();
-            reject(new Error('Script load failed: ' + src));
-          }
-        };
-        
-        // Timeout kontrolü - Mobil veri için 60 saniye (yavaş bağlantılar için)
-        const timeoutId = setTimeout(() => {
-          if(!resolved) {
-            resolved = true;
-            console.warn('⏱️ Firebase script timeout:', src);
-            script.remove();
-            if(onError) onError();
-            reject(new Error('Script load timeout: ' + src));
-          }
-        }, 60000); // 60 saniye - mobil veri için daha uzun
-        
-        // Timeout'u temizle
-        script.onload = () => {
-          clearTimeout(timeoutId);
-          if(!resolved) {
-            resolved = true;
-            resolve();
-          }
-        };
-        document.head.appendChild(script);
-      });
-    }
-    
-    // Firebase script'lerini sırayla yükle - Mobil veri uyumluluğu için retry mekanizması
-    (async function() {
-      const maxRetries = 5; // 3'ten 5'e çıkarıldı - mobil veri için daha fazla deneme
-      const baseRetryDelay = 2000; // 2 saniye
-      
-      async function loadWithRetry(src, retries = maxRetries) {
-        for(let i = 0; i < retries; i++) {
-          try {
-            await loadFirebaseScript(src);
-            return;
-          } catch(err) {
-            if(i < retries - 1) {
-              // Production'da retry log'ları sessizce atla
-              if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.search.includes('debug=true')) {
-                console.warn(`⚠️ Retry ${i + 1}/${retries} for:`, src);
-              }
-              // Exponential backoff - her retry'da bekleme süresi artar
-              const delay = baseRetryDelay * Math.pow(2, i); // 2s, 4s, 8s, 16s, 32s
-              await new Promise(resolve => setTimeout(resolve, delay));
-            } else {
-              throw err;
-            }
-          }
-        }
-      }
-      
-      try {
-        await loadWithRetry('https://www.gstatic.com/firebasejs/10.7.2/firebase-app-compat.js');
-        await loadWithRetry('https://www.gstatic.com/firebasejs/10.7.2/firebase-auth-compat.js');
-        await loadWithRetry('https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore-compat.js');
-        await loadWithRetry('https://www.gstatic.com/firebasejs/10.7.2/firebase-storage-compat.js');
-        // Production'da log'ları sessizce atla
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.search.includes('debug=true')) {
-          console.log('✅ Firebase scripts loaded successfully');
-        }
-        
-        // Script'ler yüklendikten sonra firebase.js'in çalışması için biraz bekle
-        setTimeout(() => {
-          if(typeof window.firebase === "undefined" || !window.firebase) {
-            // Production'da sessizce devam et
-            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.search.includes('debug=true')) {
-              console.warn("⚠️ Firebase object not found after script load");
-            }
-          }
-        }, 500);
-      } catch(err) {
-        // Production'da sessizce devam et, offline mode'a geç
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.search.includes('debug=true')) {
-          console.warn('⚠️ Firebase scripts failed to load after retries:', err);
-          console.log('ℹ️ Site offline mode ile çalışacak');
-        }
-        // Firebase olmadan da site çalışabilir - offline mode
-        window.firebase = null;
-        window.fbAuth = null;
-        window.fbDb = null;
-        window.fbStorage = null;
-      }
-    })();
-  </script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-storage-compat.js"></script>
   <script src="/firebase.js?v=2.1"></script>
   <script src="/common.js?v=2.1"></script>
   <script src="/app.js?v=2.1"></script>

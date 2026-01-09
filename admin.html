@@ -4,13 +4,25 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin | Repertûara Kurdî</title>
+  <script>
+    (function(){
+      try {
+        var lang = (localStorage.getItem("lang") || "ku").toLowerCase();
+        document.documentElement.setAttribute("lang", lang === "tr" ? "tr" : "ku");
+        if (lang === "tr") document.documentElement.classList.add("i18n-pending");
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
   <link rel="stylesheet" href="/styles.css?v=2.0" />
 </head>
 <body>
   <div class="home-page">
   <header class="topbar">
     <div class="container topbar__inner">
-      <a class="brand" href="/index.html" aria-label="Serrûpel">
+      <a class="brand" href="/index.html" aria-label="Serrûpel" data-i18n-aria-label="nav_home">
         <div class="logo" aria-hidden="true">
           <img src="/assets/logo_web_assets/logo-256.webp" alt="Repertûara Kurdî logo">
         </div>
@@ -19,27 +31,32 @@
         </div>
       </a>
       <div class="topbar__actions">
-        <a class="btn btn--ghost homeLink" href="/index.html" aria-label="Serrûpel">
+        <a class="btn btn--ghost homeLink" href="/index.html" aria-label="Serrûpel" data-i18n-aria-label="nav_home">
           <svg class="iconHome" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-10.5z" fill="currentColor"/>
           </svg>
         </a>
-        <a class="btn btn--ghost btn--lg" href="/all.html">Hemû</a>
-        <a id="addSongMenuBtn" class="btn btn--ghost btn--lg" href="/login.html?return=/admin.html">Zêdeke</a>
-        <a class="btn btn--ghost btn--lg" href="/index.html#sources">Çavkani</a>
-        <a class="btn btn--ghost btn--lg" href="/index.html#contact">Peywendî</a>
-        <a id="adminLink" class="btn btn--ghost btn--lg" href="/admin.html" style="display:none;">Rêveber</a>
-        <a id="authOpen" class="btn btn--ghost btn--lg" href="/login.html?return=/admin.html">Têkev</a>
-        <div class="search search--header" aria-label="Lêgerîn">
+        <a class="btn btn--ghost btn--lg" href="/all.html" data-i18n="nav_all">Hemû</a>
+        <a id="addSongMenuBtn" class="btn btn--ghost btn--lg" href="/login.html?return=/admin.html" data-i18n="nav_add">Zêdeke</a>
+        <a class="btn btn--ghost btn--lg" href="/index.html#sources" data-i18n="nav_sources">Çavkani</a>
+        <a class="btn btn--ghost btn--lg" href="/index.html#contact" data-i18n="nav_contact">Peywendî</a>
+        <a id="adminLink" class="btn btn--ghost btn--lg" href="/admin.html" style="display:none;" data-i18n="nav_admin">Rêveber</a>
+        <a id="authOpen" class="btn btn--ghost btn--lg" href="/login.html?return=/admin.html" data-i18n="nav_login">Têkev</a>
+        <div class="search search--header" aria-label="Lêgerîn" data-i18n-aria-label="search_label">
           <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
             <path d="M16.8 16.8L21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
-          <input id="q" class="search__input" type="search" placeholder="Stran an hunermend bigere…" autocomplete="off" />
-          <button id="clear" class="search__clear" type="button" aria-label="Paqij bike">✕</button>
+          <input id="q" class="search__input" type="search" placeholder="Stran an hunermend bigere…" autocomplete="off" data-i18n-placeholder="search_placeholder" />
+          <button id="clear" class="search__clear" type="button" aria-label="Paqij bike" data-i18n-aria-label="search_overlay_clear">✕</button>
         </div>
-        <a id="profileLink" class="btn btn--ghost btn--lg" href="/profile.html" style="display:none;">Profîl</a>
-        <button id="authSignOut" class="btn btn--ghost btn--lg" type="button" style="display:none;">Derketin</button>
+        <div class="langToggle" role="group" data-i18n-aria-label="lang_switcher_label">
+          <button class="langBtn" type="button" data-lang="ku" data-i18n="lang_ku">Kurdî</button>
+          <span class="langDivider" aria-hidden="true">/</span>
+          <button class="langBtn" type="button" data-lang="tr" data-i18n="lang_tr">Türkçe</button>
+        </div>
+        <a id="profileLink" class="btn btn--ghost btn--lg" href="/profile.html" style="display:none;" data-i18n="nav_profile">Profîl</a>
+        <button id="authSignOut" class="btn btn--ghost btn--lg" type="button" style="display:none;" data-i18n="nav_logout">Derketin</button>
       </div>
     </div>
   </header>
@@ -47,11 +64,11 @@
   <main class="container">
     <section class="resultsHeader" style="margin-top:10px;">
       <div class="resultsHeader__left">
-        <div class="resultsHeader__title">Pejirandina Rêveber</div>
-        <div class="muted" id="adminStatus">Li benda têketinê ye…</div>
+        <div class="resultsHeader__title" data-i18n="admin_title">Pejirandina Rêveber</div>
+        <div class="muted" id="adminStatus" data-i18n="admin_status_loading">Li benda têketinê ye…</div>
       </div>
       <div class="resultsHeader__right">
-        <div class="muted"><span id="pendingCount">0</span> li bendê</div>
+        <div class="muted"><span id="pendingCount">0</span> <span data-i18n="admin_pending_label">li bendê</span></div>
       </div>
     </section>
 
@@ -59,14 +76,14 @@
       <div class="adminCol">
         <div class="resultsHeader adminHeader">
           <div class="resultsHeader__left">
-            <div class="resultsHeader__title">Stranên nû</div>
-            <div class="muted"><span id="pendingNewCount">0</span> li bendê</div>
+            <div class="resultsHeader__title" data-i18n="admin_new_songs">Stranên nû</div>
+            <div class="muted"><span id="pendingNewCount">0</span> <span data-i18n="admin_pending_label">li bendê</span></div>
           </div>
           <div class="resultsHeader__right adminBulk">
-            <button id="selectAllNew" class="btn btn--ghost" type="button">Hemûyan hilbijêre</button>
-            <button id="approveAllNew" class="btn btn--ok" type="button">Hemûyan pejirîne</button>
-            <button id="approveSelectedNew" class="btn btn--ghost" type="button">Hilbijartiyan pejirîne</button>
-            <button id="rejectSelectedNew" class="btn btn--danger" type="button">Hilbijartiyan red bike</button>
+            <button id="selectAllNew" class="btn btn--ghost" type="button" data-i18n="action_select_all">Hemûyan hilbijêre</button>
+            <button id="approveAllNew" class="btn btn--ok" type="button" data-i18n="action_approve_all">Hemûyan pejirîne</button>
+            <button id="approveSelectedNew" class="btn btn--ghost" type="button" data-i18n="action_approve_selected">Hilbijartiyan pejirîne</button>
+            <button id="rejectSelectedNew" class="btn btn--danger" type="button" data-i18n="action_reject_selected">Hilbijartiyan red bike</button>
           </div>
         </div>
         <section id="adminNewList" class="list"></section>
@@ -75,14 +92,14 @@
       <div class="adminCol">
         <div class="resultsHeader adminHeader">
           <div class="resultsHeader__left">
-            <div class="resultsHeader__title">Guhartin</div>
-            <div class="muted"><span id="pendingEditCount">0</span> li bendê</div>
+            <div class="resultsHeader__title" data-i18n="admin_edits">Guhartin</div>
+            <div class="muted"><span id="pendingEditCount">0</span> <span data-i18n="admin_pending_label">li bendê</span></div>
           </div>
           <div class="resultsHeader__right adminBulk">
-            <button id="selectAllEdit" class="btn btn--ghost" type="button">Hemûyan hilbijêre</button>
-            <button id="approveAllEdit" class="btn btn--ok" type="button">Hemûyan pejirîne</button>
-            <button id="approveSelectedEdit" class="btn btn--ghost" type="button">Hilbijartiyan pejirîne</button>
-            <button id="rejectSelectedEdit" class="btn btn--danger" type="button">Hilbijartiyan red bike</button>
+            <button id="selectAllEdit" class="btn btn--ghost" type="button" data-i18n="action_select_all">Hemûyan hilbijêre</button>
+            <button id="approveAllEdit" class="btn btn--ok" type="button" data-i18n="action_approve_all">Hemûyan pejirîne</button>
+            <button id="approveSelectedEdit" class="btn btn--ghost" type="button" data-i18n="action_approve_selected">Hilbijartiyan pejirîne</button>
+            <button id="rejectSelectedEdit" class="btn btn--danger" type="button" data-i18n="action_reject_selected">Hilbijartiyan red bike</button>
           </div>
         </div>
         <section id="adminEditList" class="list"></section>
@@ -91,13 +108,13 @@
 
     <section class="resultsHeader adminHeader" style="margin-top:24px;">
       <div class="resultsHeader__left">
-        <div class="resultsHeader__title">Peyamên Peywendiyê</div>
-        <div class="muted"><span id="contactCount">0</span> peyam</div>
+        <div class="resultsHeader__title" data-i18n="admin_contact_messages">Peyamên Peywendiyê</div>
+        <div class="muted"><span id="contactCount">0</span> <span data-i18n="label_message">peyam</span></div>
       </div>
       <div class="resultsHeader__right adminBulk">
-        <button id="selectAllContact" class="btn btn--ghost" type="button">Hemûyan hilbijêre</button>
-        <button id="deleteAllContact" class="btn btn--danger" type="button">Hemûyan jê bibe</button>
-        <button id="deleteSelectedContact" class="btn btn--danger" type="button">Hilbijartiyan jê bibe</button>
+        <button id="selectAllContact" class="btn btn--ghost" type="button" data-i18n="action_select_all">Hemûyan hilbijêre</button>
+        <button id="deleteAllContact" class="btn btn--danger" type="button" data-i18n="action_delete_all">Hemûyan jê bibe</button>
+        <button id="deleteSelectedContact" class="btn btn--danger" type="button" data-i18n="action_delete_selected">Hilbijartiyan jê bibe</button>
       </div>
     </section>
     <section id="adminContactList" class="list"></section>
@@ -108,37 +125,37 @@
           <div class="homeMid">
             <div class="visualCard visualCard--photo visualCard--logo" style="background-image:url('/assets/logo.png');">
               <div class="visualCard__overlay">
-                <div class="visualCard__overlayTitle">Repertûara Kurdî</div>
-                <div class="muted">Repertûara Stranan</div>
+                <div class="visualCard__overlayTitle" data-i18n="footer_title">Repertûara Kurdî</div>
+                <div class="muted" data-i18n="footer_subtitle">Repertûara Stranan</div>
               </div>
             </div>
           </div>
           <div class="homeSide">
             <div class="visualCard">
               <div class="visualCard__top">
-                <div class="visualCard__title">Repertûar</div>
-                <div class="muted">Agahîya Lîsteyê</div>
+                <div class="visualCard__title" data-i18n="footer_stats_title">Repertûar</div>
+                <div class="muted" data-i18n="footer_stats_subtitle">Agahîya Lîsteyê</div>
               </div>
               <div class="stats" id="stats" style="margin-top:12px;">
                 <div class="stat">
                   <div class="stat__n" id="statSongs">—</div>
-                  <div class="stat__t muted">Stran</div>
+                  <div class="stat__t muted" data-i18n="footer_stat_songs">Stran</div>
                 </div>
                 <div class="stat">
                   <div class="stat__n" id="statArtists">—</div>
-                  <div class="stat__t muted">Hunermend</div>
+                  <div class="stat__t muted" data-i18n="footer_stat_artists">Hunermend</div>
                 </div>
                 <div class="stat">
                   <div class="stat__n" id="statUpdated">2</div>
-                  <div class="stat__t muted">Repertûar</div>
+                  <div class="stat__t muted" data-i18n="footer_stat_repertoire">Repertûar</div>
                 </div>
               </div>
             </div>
           </div>
         </section>
         <div class="footerRow" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-          <span class="muted" style="text-align:left;">© Repertûara Kurdî</span>
-          <span class="muted" style="text-align:right;">Pêşvebir: Ahmet Uçar</span>
+          <span class="muted" style="text-align:left;"><span data-i18n="footer_copyright">© Repertûara Kurdî</span></span>
+          <span class="muted" style="text-align:right;"><span data-i18n="footer_credit">Pêşvebir: Ahmet Uçar</span></span>
         </div>
       </div>
     </footer>

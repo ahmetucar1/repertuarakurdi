@@ -1,11 +1,13 @@
 // artist.js — hunermend rûpel
+(function(){
 let SONGS = [];
 let ARTIST = "";
 let BASE = [];
+const t = (key, fallback, vars) => window.t ? window.t(key, vars) : fallback;
 
 function makeId(s){
   if(typeof songId === "function") return songId(s);
-  return `${s.pdf}|${s.page_original}`;
+  return s?.id || "";
 }
 function openLink(s){ return `/song.html?id=${encodeURIComponent(makeId(s))}`; }
 
@@ -67,14 +69,12 @@ function sameArtist(song){
 }
 
 function normalSort(a, b){
-  // kaynak sırası: önce volume/pdf, sonra sayfa
-  const va = String(a.volume || "");
-  const vb = String(b.volume || "");
-  if(va !== vb) return va.localeCompare(vb);
-  const pa = Number(a.page_original) || 0;
-  const pb = Number(b.page_original) || 0;
-  if(pa !== pb) return pa - pb;
-  return String(a.song||"").localeCompare(String(b.song||""));
+  const sa = String(a.song || "");
+  const sb = String(b.song || "");
+  if(sa !== sb) return sa.localeCompare(sb, "ku");
+  const aa = artistArr(a.artist)[0] || "";
+  const bb = artistArr(b.artist)[0] || "";
+  return aa.localeCompare(bb, "ku");
 }
 
 function render(){
@@ -92,7 +92,7 @@ function render(){
 
   if(titleEl){
     const displayName = window.formatArtistName ? window.formatArtistName(ARTIST) : ARTIST;
-    titleEl.textContent = displayName || "Hunermend";
+    titleEl.textContent = displayName || t("label_artist", "Hunermend");
   }
 
   let items = BASE;
@@ -109,12 +109,12 @@ function render(){
   if(countEl) countEl.textContent = items.length.toString();
 
   if(!items.length){
-    list.innerHTML = `<div class="empty">Tınne</div>`;
+    list.innerHTML = `<div class="empty">${t("status_no_results", "Tınne")}</div>`;
     return;
   }
 
   list.innerHTML = items.map(s => {
-    const pendingBadge = s.pending ? `<span class="badge badge--pending">Li benda pejirandina edîtorê ye</span>` : "";
+    const pendingBadge = s.pending ? `<span class="badge badge--pending">${t("badge_pending_editor", "Li benda pejirandina edîtorê ye")}</span>` : "";
     const title = window.formatSongTitle ? window.formatSongTitle(s.song) : (s.song || "");
     return `
     <div class="item">
@@ -124,7 +124,7 @@ function render(){
       </div>
       <div class="badges">
         ${pendingBadge}
-        <a class="open" href="${openLink(s)}">Veke</a>
+        <a class="open" href="${openLink(s)}">${t("action_open", "Veke")}</a>
       </div>
     </div>
   `;
@@ -154,7 +154,9 @@ async function init(){
   };
   const updateFavBtn = () => {
     if(!favBtn) return;
-    favBtn.textContent = favActive ? "Favoriden çıkar" : "Sanatçıyı favorile";
+    favBtn.textContent = favActive
+      ? t("action_unfavorite_artist", "Favoriden çıkar")
+      : t("action_favorite_artist", "Sanatçıyı favorile");
   };
   updateFavBtn();
 
@@ -163,7 +165,7 @@ async function init(){
     if(!user || !db){
       window.requireAuthAction?.(() => {
         toggleFavorite();
-      }, "Ji bo favorîkirina hunermendê divê tu têkevî.");
+      }, t("status_requires_login_artist_favorite", "Ji bo favorîkirina hunermendê divê tu têkevî."));
       return;
     }
     if(!favRef){
@@ -174,7 +176,7 @@ async function init(){
         await favRef.delete();
         favActive = false;
         updateFavBtn();
-        setFavStatus("Sanatçı favorilerden çıkarıldı.");
+        setFavStatus(t("status_artist_unfavorited", "Sanatçı favorilerden çıkarıldı."));
       }else{
         const stamp = window.firebase?.firestore?.FieldValue?.serverTimestamp?.() || null;
         await favRef.set({
@@ -185,10 +187,10 @@ async function init(){
         });
         favActive = true;
         updateFavBtn();
-        setFavStatus("Sanatçı favorilere eklendi.");
+        setFavStatus(t("status_artist_favorited", "Sanatçı favorilere eklendi."));
       }
     }catch(err){
-      setFavStatus(err?.message || "Sanatçı favorilenemedi.", true);
+      setFavStatus(err?.message || t("status_artist_favorite_failed", "Sanatçı favorilenemedi."), true);
     }
   };
 
@@ -323,7 +325,7 @@ async function init(){
 init().catch(err => {
   console.error(err);
   const list = $("#list");
-  if(list) list.innerHTML = `<div class="empty">Me gu xwar</div>`;
+  if(list) list.innerHTML = `<div class="empty">${t("status_artist_load_failed", "Stran nehatin barkirin.")}</div>`;
 });
 
 // LIVE_BG_START
@@ -370,3 +372,4 @@ init().catch(err => {
   }
 })();
 // LIVE_BG_END
+})();

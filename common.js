@@ -17,6 +17,648 @@ const error = (...args) => {
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 
+const I18N = {
+  ku: {
+    lang_ku: "Kurdî",
+    lang_tr: "Türkçe",
+    nav_home: "Serrûpel",
+    nav_all: "Hemû",
+    nav_add: "Zêdeke",
+    nav_sources: "Çavkani",
+    nav_contact: "Peywendî",
+    nav_admin: "Rêveber",
+    nav_login: "Têkev",
+    nav_profile: "Profîl",
+    nav_logout: "Derketin",
+    action_open: "Veke",
+    action_back: "Vegere",
+    action_close: "Betal bike",
+    action_save: "Tomar bike",
+    action_send: "Bişîne",
+    action_shuffle: "Nû bike",
+    action_select_all: "Hemûyan hilbijêre",
+    action_approve_all: "Hemûyan pejirîne",
+    action_approve_selected: "Hilbijartiyan pejirîne",
+    action_reject_selected: "Hilbijartiyan red bike",
+    action_delete_all: "Hemûyan jê bibe",
+    action_delete_selected: "Hilbijartiyan jê bibe",
+    action_add_song: "Stran Nû Zêde Bike",
+    action_add_song_short: "Stran Zêde Bike",
+    action_login: "Têkeve",
+    action_favorite: "Favorî bike",
+    search_placeholder: "Stran an hunermend bigere…",
+    search_placeholder_artist: "Di nav stranên vî hunermendî de bigere…",
+    home_kicker: "Hûn bi xêr hatin",
+    home_title: "Akorên stranên kurdî li yek rûpelê bibîne.",
+    home_subtitle: "Bigere, keşf bike, bitikîne, bibîne",
+    home_results_default: "Yên Berçav",
+    home_results_search: "Encamên lêgerînê",
+    home_results_count: "encam",
+    home_refresh: "Nûve bike",
+    home_view_all: "Hemûyan Bibîne",
+    sources_title: "Çavkaniyên",
+    sources_subtitle: "Spas ji hevalên me yên ku vê repertuarê parve dikin.",
+    contact_title: "Peywendî",
+    contact_subtitle: "Tu dikarî repertuara xwe an mijarek din bi me re parve bikî.",
+    contact_label_name: "Nav û Paşnav",
+    contact_placeholder_name: "Nav û Paşnav",
+    contact_label_contact: "Peywendî",
+    contact_placeholder_contact: "E-name an telefon",
+    contact_label_message: "Peyam",
+    contact_placeholder_message: "Kurtî binivîse...",
+    contact_label_files: "Pel Zêde Bike",
+    contact_status_db_unready: "Danegeh amade nîne.",
+    contact_status_sending: "Tê şandin...",
+    contact_status_empty: "Ji kerema xwe peyam binivîse an jî pel zêde bike.",
+    contact_status_file_too_large: "\"{name}\" pir mezin e. (Max 12MB)",
+    contact_status_upload_disabled: "Barkirina pelê çalak nîne.",
+    contact_status_sent: "Hate şandin. Spas, em ê di demek nêzîk de vegerin.",
+    contact_status_failed: "Peyam nehat şandin.",
+    footer_title: "Repertûara Kurdî",
+    footer_subtitle: "Repertûara Stranan",
+    footer_stats_title: "Repertûar",
+    footer_stats_subtitle: "Agahîya Lîsteyê",
+    footer_stat_songs: "Stran",
+    footer_stat_artists: "Hunermend",
+    footer_stat_repertoire: "Repertûar",
+    footer_credit: "Pêşvebir: Ahmet Uçar",
+    status_loading_songs: "Stran tên barkirinê...",
+    status_no_results: "Tınne",
+    status_error_prefix: "Çewtî",
+    status_song_unavailable: "Stran nehat barkirin. Ji kerema xwe rûpelê nû bike.",
+    status_text_missing: "Metin bulunamadı.",
+    label_song: "Stran",
+    label_artist: "Hunermend",
+    label_result: "encam",
+    badge_pending_editor: "Li benda pejirandina edîtorê ye",
+    badge_pending: "Li benda pejirandinê",
+    add_song_title: "Stran Nû Zêde Bike",
+    edit_song_title: "Guhartin",
+    label_song_name: "Navê stranê",
+    label_artist_name: "Navê hunermendê",
+    label_key: "Tonê orîjînal",
+    label_text: "Nivîsa stranê",
+    placeholder_song_name: "Mînak: Stranên Kurdî",
+    placeholder_artist_name: "Mînak: Şivan Perwer",
+    placeholder_text: "Nivîsa bi akorê li virê bike...",
+    key_select_placeholder: "Tonê hilbijêre",
+    tooltip_artist: "Navê hunermendê rast binivîse, ji bo ku stran li ser rûpela hunermendê xuya bibe.",
+    template_verse: "Verse",
+    template_chorus: "Chorus",
+    template_bridge: "Bridge",
+    chords_label: "Akorlar",
+    preview_label: "Önizleme",
+    keyboard_hint: "Ctrl+S: Kaydet | Esc: Kapat",
+    status_requires_login_favorite: "Ji bo favorî divê tu têkevî.",
+    status_requires_login_add: "Ji bo stran zêde kirinê divê tu têkevî.",
+    status_requires_login_edit: "Ji bo guhertinê divê tu têkevî.",
+    status_text_required: "Nivîsa stranê pêwîst e.",
+    status_song_required: "Navê stranê pêwîst e.",
+    status_artist_required: "Navê hunermendê pêwîst e.",
+    status_key_required: "Tonê orîjînal pêwîst e.",
+    status_save_failed: "Nehat tomarkirin.",
+    status_saving: "Tomar tê kirin...",
+    status_edit_required_fields: "Navê stranê û nivîs pêwîst in.",
+    status_edit_saved: "Niha tomar kir. Guhertinên te ji bo pejirandina edîtorê li benda ne. Piştî pejirandinê guhertinên te dê xuya bibin.",
+    status_firestore_unready: "Firestore ne amade ye. Ji kerema xwe rûpelê nû bike û dîsa biceribîne.",
+    status_firestore_error: "Firestore hatası. Ji kerema xwe rûpelê nû bike û dîsa biceribîne.",
+    status_favorite_failed: "Favorî nehat tomarkirin.",
+    status_favorite_load_failed: "Favoriler yüklenemedi:",
+    search_overlay_clear: "Paqij bike",
+    search_overlay_close: "Betal bike",
+    search_overlay_no_results: "Encam nehate dîtin",
+    search_overlay_results: "Encamên lêgerînê",
+    search_overlay_suggestions: "Yên Berçav",
+    label_no_title: "Bê nav",
+    label_no_artist: "Bê hunermend",
+    artist_link_title: "Ji bo dîtina stranên hunermendê bikeve",
+    youtube_search: "YouTube'da ara"
+    ,
+    auth_error_unauthorized_domain: "Ev domain destûr nedaye. Firebase console'ê kontrol bike.",
+    auth_error_popup_blocked: "Popup hate astengkirin.",
+    auth_error_popup_closed: "Popup hate girtin.",
+    auth_error_network: "Girêdana înternetê tune.",
+    auth_error_too_many_requests: "Gelek daxwaz. Pişt re bêje.",
+    auth_error_user_disabled: "Bikarhêner hate astengkirin.",
+    auth_error_user_not_found: "Bikarhêner nehate dîtin.",
+    auth_error_wrong_password: "Şîfre çewt e.",
+    auth_error_email_in_use: "E-name berê hat qeydkirin.",
+    auth_error_weak_password: "Şîfre zêde nerm e.",
+    auth_error_invalid_email: "E-name nederbasdar e.",
+    auth_error_operation_not_allowed: "Operasyon destûr nedaye.",
+    auth_error_requires_recent_login: "Dîsa têkeve.",
+    auth_error_credential_in_use: "Kredensiyal berê hat bikaranîn.",
+    auth_error_generic: "Çewtiyek çêbû.",
+    lang_switcher_label: "Hilbijartina zimanê",
+    search_label: "Lêgerîn",
+    footer_copyright: "© Repertûara Kurdî",
+    footer_copyright_year: "© 2024 Repertûara Kurdî",
+    all_title: "Hemû Stran",
+    label_count: "Hejmara",
+    filter_all: "Hemû",
+    filter_pending: "Li benda pejirandinê",
+    filter_approved: "Pejirandî",
+    filter_rejected: "Redkirî",
+    sort_song_asc: "Stran (A → Z)",
+    sort_song_desc: "Stran (Z → A)",
+    sort_artist_asc: "Hunermend (A → Z)",
+    sort_label: "Rêzkirin",
+    sort_normal: "Rêzkirin: Asayî",
+    sort_az: "Rêzkirin: A–Z",
+    action_edit: "Biguherîne",
+    song_listen_title: "Stranê guhdarî bike",
+    recs_title: "Pêşniyarên",
+    song_prev: "Strana berê",
+    song_next: "Strana paş",
+    label_original_key: "Orjînal:",
+    label_current_key: "Niha:",
+    label_rhythm: "Govend:",
+    admin_title: "Pejirandina Rêveber",
+    admin_status_loading: "Li benda têketinê ye…",
+    admin_pending_label: "li bendê",
+    admin_new_songs: "Stranên nû",
+    admin_edits: "Guhartin",
+    admin_contact_messages: "Peyamên Peywendiyê",
+    label_message: "peyam",
+    admin_no_pending: "Ti şandiyên li bendê tune.",
+    admin_no_messages: "Hêj peyam tune.",
+    label_anonymous: "Bênav",
+    label_file: "pel",
+    action_approve: "Pejirîne",
+    action_reject: "Red bike",
+    action_delete: "Jê bibe",
+    admin_status_approving: "Pejirandin…",
+    admin_status_rejecting: "Redkirin…",
+    admin_type_new_song: "Strana nû",
+    admin_type_edit: "Guhartin",
+    status_firebase_unready: "Firebase amade nîne.",
+    status_requires_login: "Têketin pêwîst e.",
+    admin_not_authorized: "Yetkîn tune.",
+    status_nothing_selected: "Tiştek nehate hilbijartin.",
+    admin_status_pending: "Şandiyên li bendê",
+    admin_status_no_pending: "Ti şandiyên li bendê tune.",
+    admin_status_approved_count: "{count} şandî pejirandî. Cache tê paqijkirin…",
+    admin_status_rejected_count: "{count} şandî redkirî.",
+    admin_confirm_delete_messages: "{count} peyam jêdibe. Tu piştrast î?",
+    admin_status_deleting: "Jêbirin…",
+    admin_status_deleted_count: "{count} peyam jêbirî.",
+    admin_status_load_failed: "Lîste nehat barkirin: {message}",
+    admin_messages_load_failed: "Peyam nehat barkirin: {message}",
+    admin_status_render_error: "Render çewtiyek: {message}",
+    badge_approved: "Pejirandî",
+    badge_rejected: "Redkirî",
+    profile_no_favorites: "Hêj favorî tune.",
+    profile_no_artist_favorites: "Hêj hunermendê favorî tune.",
+    action_remove_favorite: "Ji favoriyan derxe",
+    status_requires_login_artist_favorite: "Ji bo favorîkirina hunermendê divê tu têkevî.",
+    profile_delete_type_song: "stran",
+    profile_delete_type_edit: "guhartin",
+    profile_confirm_delete: "Tu dixwazî vê {type} jê bibî? Ev kar bêpaş nabe.",
+    profile_not_authorized: "Yetkîn tune an jî ev naverok ji te re nîne.",
+    action_deleting: "Jêbirin…",
+    profile_delete_permission_denied: "Yetkîn tune. Tenê guhartinên te yên li benda pejirandinê an jî redkirî dikarî jê bibî.",
+    profile_firestore_unavailable: "Firestore nehate gihîştin. Ji kerema xwe dîsa biceribîne.",
+    profile_subtitle_default: "Agahiyên hesabê",
+    profile_photo_label: "URL ya wêneya profîlê",
+    profile_fav_songs: "Stranên Favorî",
+    profile_fav_artists: "Hunermendên Favorî",
+    profile_my_songs: "Stranên min",
+    profile_my_edits: "Guhartinên min",
+    label_edit: "guhartin",
+    profile_auth_unavailable: "Sîstema têketinê nehate dîtin.",
+    profile_no_submissions_new: "Hêj stran nehat zêdekirin.",
+    profile_no_submissions_edit: "Hêj guhartin tune.",
+    confirm_sign_out: "Tu dixwazî derkevî?",
+    status_sign_out_failed: "Derketin bi ser neket.",
+    status_requires_login_profile: "Divê tu têkevî.",
+    profile_photo_updated: "Wêne hate nûkirin.",
+    profile_photo_update_failed: "Nehat nûkirin.",
+    profile_name_requires_login: "Divê tu têkevî",
+    profile_status_logged_out: "Têketin tune",
+    profile_subtitle_logged_out: "Ji bo profîlê têkeve.",
+    profile_name_fallback: "Bikarhêner",
+    profile_subtitle_logged_in: "Hesab û naverokên te",
+    action_favorite_artist: "Hunermendê favorî bike",
+    action_unfavorite_artist: "Ji favoriyan derxe",
+    status_artist_favorited: "Hunermend hate zêdekirin.",
+    status_artist_unfavorited: "Hunermend ji favoriyan hat derxistin.",
+    status_artist_favorite_failed: "Hunermend favorî nebû.",
+    status_artist_load_failed: "Stran nehatin barkirin.",
+    key_suggestion: "💡 Pêşniyar: tonê {key}",
+    label_char_count: "{count} karakter",
+    label_chord_count: "{count} akor",
+    validation_invalid_chords: "⚠️ {count} akor ne derbasdar: {list}",
+    validation_no_chords: "ℹ️ Akor nehat dîtin",
+    validation_format_ok: "✓ Format rast e",
+    login_title: "Têketin",
+    login_subtitle: "Ji bo stran zêde kirinê divê tu têkevî.",
+    login_google: "Bi Google re têketin",
+    login_divider_or: "an",
+    login_label_email: "E-name",
+    login_placeholder_email: "mînak@email.com",
+    login_label_password: "Şîfre",
+    login_action_sign_in: "Têkev",
+    login_action_sign_up: "Tomar bibe",
+    login_action_reset: "Şîfreya xwe ji bîr kirî?",
+    login_status_signing_in: "Têketin tê kirin...",
+    login_status_sign_in_success: "Bi serkeftî têketin! Tê guhertin...",
+    login_error_missing_fields: "Ji kerema xwe e-name û şîfre binivîse.",
+    login_error_firebase_unready: "Firebase hêj nehate barkirin, ji kerema xwe li benda bimîne...",
+    login_error_sign_in_failed: "Têketin bi ser neket. Ji kerema xwe dîsa biceribîne.",
+    login_error_user_not_found: "Ev e-name qeyd nebûye. Ji kerema xwe pêşî tomar bibe.",
+    login_error_wrong_password: "Şîfre çewt e. Ji kerema xwe dîsa biceribîne.",
+    login_error_invalid_credential: "E-name an jî şîfre çewt e. Ger tu qeyd nebûyî, pêşî tomar bibe.",
+    login_error_invalid_email: "E-name nederbasdar e. Ji kerema xwe e-nameyek derbasdar binivîse.",
+    login_error_too_many_requests: "Zêde hewl hat kirin. Piştî demekê dîsa biceribîne.",
+    login_error_network: "Girêdana înternetê tune. Ji kerema xwe kontrol bike.",
+    login_error_user_disabled: "Ev hesab hate astengkirin. Ji kerema xwe bi rêveberiyê re têkilî daynin.",
+    login_error_operation_not_allowed: "Ev awayê têketinê destûr nedaye. Ji kerema xwe bi rêveberiyê re têkilî daynin.",
+    login_error_generic: "Çewtiyek çêbû.",
+    login_error_password_length: "Şîfre divê herî kêm 6 karakter be.",
+    login_status_signing_up: "Tomar tê kirin...",
+    login_status_sign_up_success: "Bi serkeftî tomar bû! Tê guhertin...",
+    login_error_sign_up_failed: "Tomar bi ser neket. Ji kerema xwe dîsa biceribîne.",
+    login_error_email_in_use: "Ev e-name jixwe qeyd bûye. Ger ev e-nameya te ye, têkev.",
+    login_error_weak_password: "Şîfre pir hêsan e. Divê herî kêm 6 karakter be.",
+    login_status_google_signing_in: "Bi Google re têketin tê kirin...",
+    login_status_google_success: "Bi serkeftî têketin! Tê guhertin...",
+    login_error_google_failed: "Bi Google re têketin bi ser neket. Ji kerema xwe dîsa biceribîne.",
+    login_error_popup_closed: "Giriş vekirî bû.",
+    login_error_popup_blocked: "Popup hate astengkirin. Ji kerema xwe popup destûrê bide.",
+    login_error_unauthorized_domain: "Ev domain destûr nedaye. Firebase console'ê kontrol bike.",
+    login_status_reset_sending: "E-nameyê tê şandin...",
+    login_status_reset_sent: "E-nameyê şand! Posta quteya xwe kontrol bike.",
+    login_error_reset_missing_email: "Ji kerema xwe e-nameyê binivîse.",
+    login_error_reset_failed: "E-name şandina bi ser neket. Ji kerema xwe dîsa biceribîne.",
+    login_error_reset_user_not_found: "Ev e-name qeyd nebûye.",
+    login_error_reset_invalid_email: "E-name nederbasdar e.",
+    login_error_reset_invalid_credential: "E-name nederbasdar e. Ji kerema xwe kontrol bike.",
+    login_error_firebase_load_failed: "Firebase nehate barkirin. Ji kerema xwe rûpelê nû bike."
+  },
+  tr: {
+    lang_ku: "Kürtçe",
+    lang_tr: "Türkçe",
+    nav_home: "Ana Sayfa",
+    nav_all: "Tümü",
+    nav_add: "Ekle",
+    nav_sources: "Kaynaklar",
+    nav_contact: "İletişim",
+    nav_admin: "Yönetici",
+    nav_login: "Giriş",
+    nav_profile: "Profil",
+    nav_logout: "Çıkış",
+    action_open: "Aç",
+    action_back: "Geri",
+    action_close: "Kapat",
+    action_save: "Kaydet",
+    action_send: "Gönder",
+    action_shuffle: "Yenile",
+    action_select_all: "Tümünü seç",
+    action_approve_all: "Tümünü onayla",
+    action_approve_selected: "Seçileni onayla",
+    action_reject_selected: "Seçileni reddet",
+    action_delete_all: "Tümünü sil",
+    action_delete_selected: "Seçileni sil",
+    action_add_song: "Yeni Şarkı Ekle",
+    action_add_song_short: "Şarkı Ekle",
+    action_login: "Giriş",
+    action_favorite: "Favoriye ekle",
+    search_placeholder: "Şarkı veya sanatçı ara…",
+    search_placeholder_artist: "Bu sanatçının şarkılarında ara…",
+    home_kicker: "Hoş geldin",
+    home_title: "Kürtçe şarkı akorlarını tek sayfada bul.",
+    home_subtitle: "Ara, keşfet, tıkla, gör",
+    home_results_default: "Öne Çıkanlar",
+    home_results_search: "Arama Sonuçları",
+    home_results_count: "sonuç",
+    home_refresh: "Yenile",
+    home_view_all: "Hepsini Gör",
+    sources_title: "Kaynaklar",
+    sources_subtitle: "Repertuarı paylaşan dostlarımıza teşekkürler.",
+    contact_title: "İletişim",
+    contact_subtitle: "Repertuarını veya başka bir konuyu bizimle paylaşabilirsin.",
+    contact_label_name: "Ad Soyad",
+    contact_placeholder_name: "Ad Soyad",
+    contact_label_contact: "İletişim",
+    contact_placeholder_contact: "E-posta veya telefon",
+    contact_label_message: "Mesaj",
+    contact_placeholder_message: "Kısaca yaz...",
+    contact_label_files: "Dosya Ekle",
+    contact_status_db_unready: "Veritabanı hazır değil.",
+    contact_status_sending: "Gönderiliyor...",
+    contact_status_empty: "Lütfen mesaj yazın veya dosya ekleyin.",
+    contact_status_file_too_large: "\"{name}\" çok büyük. (Max 12MB)",
+    contact_status_upload_disabled: "Dosya yükleme devre dışı.",
+    contact_status_sent: "Gönderildi. Teşekkürler, en kısa sürede döneceğiz.",
+    contact_status_failed: "Mesaj gönderilemedi.",
+    footer_title: "Repertûara Kurdî",
+    footer_subtitle: "Şarkı Repertuarı",
+    footer_stats_title: "Repertuar",
+    footer_stats_subtitle: "Liste Bilgisi",
+    footer_stat_songs: "Şarkı",
+    footer_stat_artists: "Sanatçı",
+    footer_stat_repertoire: "Repertuar",
+    footer_credit: "Geliştirici: Ahmet Uçar",
+    status_loading_songs: "Şarkılar yükleniyor...",
+    status_no_results: "Bulunamadı",
+    status_error_prefix: "Hata",
+    status_song_unavailable: "Şarkı yüklenemedi. Lütfen sayfayı yenileyin.",
+    status_text_missing: "Metin bulunamadı.",
+    label_song: "Şarkı",
+    label_artist: "Sanatçı",
+    label_result: "sonuç",
+    badge_pending_editor: "Editör onayı bekliyor",
+    badge_pending: "Onay bekliyor",
+    add_song_title: "Yeni Şarkı Ekle",
+    edit_song_title: "Düzenleme",
+    label_song_name: "Şarkı adı",
+    label_artist_name: "Sanatçı adı",
+    label_key: "Orijinal ton",
+    label_text: "Şarkı metni",
+    placeholder_song_name: "Örnek: Kürtçe Şarkılar",
+    placeholder_artist_name: "Örnek: Şivan Perwer",
+    placeholder_text: "Akorlu metni buraya yaz...",
+    key_select_placeholder: "Ton seç",
+    tooltip_artist: "Sanatçı adını doğru yaz, böylece şarkı sanatçı sayfasında görünür.",
+    template_verse: "Kıta",
+    template_chorus: "Nakarat",
+    template_bridge: "Köprü",
+    chords_label: "Akorlar",
+    preview_label: "Önizleme",
+    keyboard_hint: "Ctrl+S: Kaydet | Esc: Kapat",
+    status_requires_login_favorite: "Favori için giriş yapmalısın.",
+    status_requires_login_add: "Şarkı eklemek için giriş yapmalısın.",
+    status_requires_login_edit: "Düzenlemek için giriş yapmalısın.",
+    status_text_required: "Şarkı metni gerekli.",
+    status_song_required: "Şarkı adı gerekli.",
+    status_artist_required: "Sanatçı adı gerekli.",
+    status_key_required: "Orijinal ton gerekli.",
+    status_save_failed: "Kaydedilemedi.",
+    status_saving: "Kaydediliyor...",
+    status_edit_required_fields: "Şarkı adı ve metin gerekli.",
+    status_edit_saved: "Kaydedildi. Değişikliklerin editör onayı bekliyor. Onaydan sonra görünür.",
+    status_firestore_unready: "Firestore hazır değil. Lütfen sayfayı yenileyip tekrar deneyin.",
+    status_firestore_error: "Firestore hatası. Lütfen sayfayı yenileyip tekrar deneyin.",
+    status_favorite_failed: "Favori kaydedilemedi.",
+    status_favorite_load_failed: "Favoriler yüklenemedi:",
+    search_overlay_clear: "Temizle",
+    search_overlay_close: "Kapat",
+    search_overlay_no_results: "Sonuç bulunamadı",
+    search_overlay_results: "Arama Sonuçları",
+    search_overlay_suggestions: "Öne Çıkanlar",
+    label_no_title: "İsimsiz",
+    label_no_artist: "Sanatçı yok",
+    artist_link_title: "Sanatçı şarkılarını gör",
+    youtube_search: "YouTube'da ara"
+    ,
+    auth_error_unauthorized_domain: "Bu domain yetkili değil. Firebase console'u kontrol edin.",
+    auth_error_popup_blocked: "Popup engellendi.",
+    auth_error_popup_closed: "Popup kapatıldı.",
+    auth_error_network: "İnternet bağlantısı yok.",
+    auth_error_too_many_requests: "Çok fazla istek. Biraz sonra deneyin.",
+    auth_error_user_disabled: "Kullanıcı devre dışı bırakıldı.",
+    auth_error_user_not_found: "Kullanıcı bulunamadı.",
+    auth_error_wrong_password: "Şifre hatalı.",
+    auth_error_email_in_use: "E-posta zaten kayıtlı.",
+    auth_error_weak_password: "Şifre çok zayıf.",
+    auth_error_invalid_email: "E-posta geçersiz.",
+    auth_error_operation_not_allowed: "İşlem izinli değil.",
+    auth_error_requires_recent_login: "Tekrar giriş yapın.",
+    auth_error_credential_in_use: "Kimlik bilgisi zaten kullanılıyor.",
+    auth_error_generic: "Bir hata oluştu.",
+    lang_switcher_label: "Dil seçimi",
+    search_label: "Arama",
+    footer_copyright: "© Repertûara Kurdî",
+    footer_copyright_year: "© 2024 Repertûara Kurdî",
+    all_title: "Tüm Şarkılar",
+    label_count: "Sayı",
+    filter_all: "Tümü",
+    filter_pending: "Onay bekliyor",
+    filter_approved: "Onaylandı",
+    filter_rejected: "Reddedildi",
+    sort_song_asc: "Şarkı (A → Z)",
+    sort_song_desc: "Şarkı (Z → A)",
+    sort_artist_asc: "Sanatçı (A → Z)",
+    sort_label: "Sıralama",
+    sort_normal: "Sıralama: Varsayılan",
+    sort_az: "Sıralama: A–Z",
+    action_edit: "Düzenle",
+    song_listen_title: "Şarkıyı dinle",
+    recs_title: "Öneriler",
+    song_prev: "Önceki şarkı",
+    song_next: "Sonraki şarkı",
+    label_original_key: "Orijinal:",
+    label_current_key: "Şimdi:",
+    label_rhythm: "Govend:",
+    admin_title: "Yönetici Onayı",
+    admin_status_loading: "Giriş bekleniyor…",
+    admin_pending_label: "bekliyor",
+    admin_new_songs: "Yeni şarkılar",
+    admin_edits: "Düzenlemeler",
+    admin_contact_messages: "İletişim Mesajları",
+    label_message: "mesaj",
+    admin_no_pending: "Bekleyen gönderi yok.",
+    admin_no_messages: "Henüz mesaj yok.",
+    label_anonymous: "Anonim",
+    label_file: "dosya",
+    action_approve: "Onayla",
+    action_reject: "Reddet",
+    action_delete: "Sil",
+    admin_status_approving: "Onaylanıyor…",
+    admin_status_rejecting: "Reddediliyor…",
+    admin_type_new_song: "Yeni şarkı",
+    admin_type_edit: "Düzenleme",
+    status_firebase_unready: "Firebase hazır değil.",
+    status_requires_login: "Giriş gerekli.",
+    admin_not_authorized: "Yetkin yok.",
+    status_nothing_selected: "Hiçbir şey seçilmedi.",
+    admin_status_pending: "Bekleyen gönderiler",
+    admin_status_no_pending: "Bekleyen gönderi yok.",
+    admin_status_approved_count: "{count} gönderi onaylandı. Önbellek temizleniyor…",
+    admin_status_rejected_count: "{count} gönderi reddedildi.",
+    admin_confirm_delete_messages: "{count} mesaj silinecek. Emin misiniz?",
+    admin_status_deleting: "Siliniyor…",
+    admin_status_deleted_count: "{count} mesaj silindi.",
+    admin_status_load_failed: "Liste yüklenemedi: {message}",
+    admin_messages_load_failed: "Mesajlar yüklenemedi: {message}",
+    admin_status_render_error: "Render hatası: {message}",
+    badge_approved: "Onaylandı",
+    badge_rejected: "Reddedildi",
+    profile_no_favorites: "Henüz favori yok.",
+    profile_no_artist_favorites: "Henüz favori sanatçı yok.",
+    action_remove_favorite: "Favoriden çıkar",
+    status_requires_login_artist_favorite: "Sanatçıyı favorilemek için giriş yapmalısın.",
+    profile_delete_type_song: "şarkı",
+    profile_delete_type_edit: "düzenleme",
+    profile_confirm_delete: "Bu {type} silinsin mi? Bu işlem geri alınamaz.",
+    profile_not_authorized: "Yetkin yok veya bu içerik sana ait değil.",
+    action_deleting: "Siliniyor…",
+    profile_delete_permission_denied: "Yetkin yok. Sadece bekleyen veya reddedilen düzenlemelerini silebilirsin.",
+    profile_firestore_unavailable: "Firestore ulaşılamıyor. Lütfen tekrar deneyin.",
+    profile_subtitle_default: "Hesap bilgileri",
+    profile_photo_label: "Profil fotoğrafı URL",
+    profile_fav_songs: "Favori Şarkılar",
+    profile_fav_artists: "Favori Sanatçılar",
+    profile_my_songs: "Şarkılarım",
+    profile_my_edits: "Düzenlemelerim",
+    label_edit: "düzenleme",
+    profile_auth_unavailable: "Giriş sistemi bulunamadı.",
+    profile_no_submissions_new: "Henüz şarkı eklemedin.",
+    profile_no_submissions_edit: "Henüz düzenleme yok.",
+    confirm_sign_out: "Çıkış yapmak istiyor musun?",
+    status_sign_out_failed: "Çıkış başarısız.",
+    status_requires_login_profile: "Giriş yapmalısın.",
+    profile_photo_updated: "Fotoğraf güncellendi.",
+    profile_photo_update_failed: "Güncellenemedi.",
+    profile_name_requires_login: "Giriş yapmalısın",
+    profile_status_logged_out: "Giriş yok",
+    profile_subtitle_logged_out: "Profil için giriş yap.",
+    profile_name_fallback: "Kullanıcı",
+    profile_subtitle_logged_in: "Hesabın ve içeriklerin",
+    action_favorite_artist: "Sanatçıyı favorile",
+    action_unfavorite_artist: "Favoriden çıkar",
+    status_artist_favorited: "Sanatçı favorilere eklendi.",
+    status_artist_unfavorited: "Sanatçı favorilerden çıkarıldı.",
+    status_artist_favorite_failed: "Sanatçı favorilenemedi.",
+    status_artist_load_failed: "Şarkılar yüklenemedi.",
+    key_suggestion: "💡 Öneri: {key} tonu",
+    label_char_count: "{count} karakter",
+    label_chord_count: "{count} akor",
+    validation_invalid_chords: "⚠️ {count} geçersiz akor: {list}",
+    validation_no_chords: "ℹ️ Akor bulunamadı",
+    validation_format_ok: "✓ Format doğru",
+    login_title: "Giriş",
+    login_subtitle: "Şarkı eklemek için giriş yapmalısın.",
+    login_google: "Google ile giriş",
+    login_divider_or: "veya",
+    login_label_email: "E-posta",
+    login_placeholder_email: "ornek@email.com",
+    login_label_password: "Şifre",
+    login_action_sign_in: "Giriş",
+    login_action_sign_up: "Kayıt ol",
+    login_action_reset: "Şifreni mi unuttun?",
+    login_status_signing_in: "Giriş yapılıyor...",
+    login_status_sign_in_success: "Giriş başarılı! Yönlendiriliyor...",
+    login_error_missing_fields: "Lütfen e-posta ve şifre gir.",
+    login_error_firebase_unready: "Firebase henüz yüklenmedi, lütfen bekle...",
+    login_error_sign_in_failed: "Giriş başarısız. Lütfen tekrar dene.",
+    login_error_user_not_found: "Bu e-posta kayıtlı değil. Önce kayıt ol.",
+    login_error_wrong_password: "Şifre yanlış. Lütfen tekrar dene.",
+    login_error_invalid_credential: "E-posta veya şifre yanlış. Kayıtlı değilsen önce kayıt ol.",
+    login_error_invalid_email: "E-posta geçersiz. Lütfen geçerli bir e-posta gir.",
+    login_error_too_many_requests: "Çok fazla deneme. Biraz sonra tekrar dene.",
+    login_error_network: "İnternet bağlantısı yok. Lütfen kontrol et.",
+    login_error_user_disabled: "Bu hesap devre dışı bırakıldı. Lütfen yöneticiyle iletişime geç.",
+    login_error_operation_not_allowed: "Bu giriş yöntemi kapalı. Lütfen yöneticiyle iletişime geç.",
+    login_error_generic: "Bir hata oluştu.",
+    login_error_password_length: "Şifre en az 6 karakter olmalı.",
+    login_status_signing_up: "Kayıt yapılıyor...",
+    login_status_sign_up_success: "Kayıt başarılı! Yönlendiriliyor...",
+    login_error_sign_up_failed: "Kayıt başarısız. Lütfen tekrar dene.",
+    login_error_email_in_use: "Bu e-posta zaten kayıtlı. Bu sana aitse giriş yap.",
+    login_error_weak_password: "Şifre çok zayıf. En az 6 karakter olmalı.",
+    login_status_google_signing_in: "Google ile giriş yapılıyor...",
+    login_status_google_success: "Giriş başarılı! Yönlendiriliyor...",
+    login_error_google_failed: "Google ile giriş başarısız. Lütfen tekrar dene.",
+    login_error_popup_closed: "Giriş penceresi kapatıldı.",
+    login_error_popup_blocked: "Popup engellendi. Lütfen izin ver.",
+    login_error_unauthorized_domain: "Bu domain yetkili değil. Firebase ayarlarını kontrol edin.",
+    login_status_reset_sending: "E-posta gönderiliyor...",
+    login_status_reset_sent: "E-posta gönderildi! Gelen kutunu kontrol et.",
+    login_error_reset_missing_email: "Lütfen e-posta yaz.",
+    login_error_reset_failed: "E-posta gönderilemedi. Lütfen tekrar dene.",
+    login_error_reset_user_not_found: "Bu e-posta kayıtlı değil.",
+    login_error_reset_invalid_email: "E-posta geçersiz.",
+    login_error_reset_invalid_credential: "E-posta geçersiz. Lütfen kontrol et.",
+    login_error_firebase_load_failed: "Firebase yüklenemedi. Lütfen sayfayı yenile."
+  }
+};
+
+const DEFAULT_LANG = "ku";
+let currentLang = (localStorage.getItem("lang") || DEFAULT_LANG).toLowerCase();
+if(!I18N[currentLang]) currentLang = DEFAULT_LANG;
+
+function t(key, vars = {}){
+  const table = I18N[currentLang] || I18N[DEFAULT_LANG] || {};
+  const fallback = (I18N[DEFAULT_LANG] || {})[key] || key;
+  let out = table[key] || fallback;
+  Object.keys(vars || {}).forEach((k) => {
+    out = out.replaceAll(`{${k}}`, vars[k]);
+  });
+  return out;
+}
+
+function applyTranslations(root = document){
+  if(!root) return;
+  root.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if(key) el.textContent = t(key);
+  });
+  root.querySelectorAll("[data-i18n-html]").forEach(el => {
+    const key = el.getAttribute("data-i18n-html");
+    if(key) el.innerHTML = t(key);
+  });
+  root.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const key = el.getAttribute("data-i18n-placeholder");
+    if(key) el.setAttribute("placeholder", t(key));
+  });
+  root.querySelectorAll("[data-i18n-title]").forEach(el => {
+    const key = el.getAttribute("data-i18n-title");
+    if(key) el.setAttribute("title", t(key));
+  });
+  root.querySelectorAll("[data-i18n-aria-label]").forEach(el => {
+    const key = el.getAttribute("data-i18n-aria-label");
+    if(key) el.setAttribute("aria-label", t(key));
+  });
+  root.querySelectorAll("[data-i18n-tooltip]").forEach(el => {
+    const key = el.getAttribute("data-i18n-tooltip");
+    if(key) el.setAttribute("data-tooltip", t(key));
+  });
+}
+
+function updateLangToggle(){
+  document.querySelectorAll(".langBtn[data-lang]").forEach(btn => {
+    const lang = btn.getAttribute("data-lang");
+    btn.classList.toggle("is-active", lang === currentLang);
+    btn.setAttribute("aria-pressed", lang === currentLang ? "true" : "false");
+  });
+}
+
+function setLanguage(lang){
+  if(!I18N[lang]) return;
+  currentLang = lang;
+  localStorage.setItem("lang", lang);
+  document.documentElement.setAttribute("lang", lang === "tr" ? "tr" : "ku");
+  applyTranslations();
+  updateLangToggle();
+}
+
+function initLanguageToggle(){
+  document.querySelectorAll(".langBtn[data-lang]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      setLanguage(btn.getAttribute("data-lang"));
+    });
+  });
+  updateLangToggle();
+}
+
+function initI18n(){
+  document.documentElement.setAttribute("lang", currentLang === "tr" ? "tr" : "ku");
+  applyTranslations();
+  initLanguageToggle();
+  document.documentElement.classList.remove("i18n-pending");
+}
+
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", initI18n);
+} else {
+  initI18n();
+}
+
+window.t = t;
+window.setLanguage = setLanguage;
+window.getLanguage = () => currentLang;
+
 // Fail-safe: overlay açık kalmışsa kapalı başlat
 document.body?.classList.remove("auth-open");
 
@@ -68,6 +710,21 @@ function normalizeArtistInput(raw){
     .filter(Boolean);
   if(!parts.length) return "";
   return parts.length === 1 ? parts[0] : parts;
+}
+
+function artistArr(a){
+  if(Array.isArray(a)) return a.filter(Boolean).map(String);
+  if(a == null) return [];
+  return [String(a)].filter(Boolean);
+}
+
+function escapeHtml(str){
+  return (str ?? "").toString()
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
 
 const STATIC_BG = true;
@@ -405,7 +1062,7 @@ function mergeSongs(baseSongs, submissions, options = {}){
     log("🔄 Şarkı merge ediliyor:", song.sourceId, "submission:", sub._id, "status:", sub.status);
 
     const overlay = {};
-    ["song","artist","key","pdf","volume","page_original","text"].forEach(key => {
+    ["song","artist","key","ritim","text"].forEach(key => {
       const val = sub[key];
       if(val != null && val !== "") overlay[key] = val;
     });
@@ -491,19 +1148,25 @@ function waitForFirebaseInit() {
 }
 
 // Global loadSongs lock - eşzamanlı çağrıları engelle
-let __loadSongsInProgress = null;
+let __loadSongsInProgress = { fast: null, full: null };
 
 async function loadSongs(options = {}){
+  const waitForFirebase = options.waitForFirebase !== false;
+  const mode = waitForFirebase ? "full" : "fast";
   // Eğer zaten bir loadSongs çağrısı devam ediyorsa, onu bekle
-  if (__loadSongsInProgress) {
-    return __loadSongsInProgress;
+  if (__loadSongsInProgress[mode]) {
+    return __loadSongsInProgress[mode];
   }
   
   // Yeni bir promise oluştur
-  __loadSongsInProgress = (async () => {
+  __loadSongsInProgress[mode] = (async () => {
     try {
       // Firebase'in hazır olmasını bekle (tüm çağrılar aynı promise'i bekler)
-      await waitForFirebaseInit();
+      const firebaseReady = waitForFirebase ? await waitForFirebaseInit() : false;
+      if (!waitForFirebase && !__firebaseInitPromise) {
+        // Firebase'i arka planda başlat ama bekleme
+        waitForFirebaseInit().catch(() => {});
+      }
       
       const currentUser = window.fbAuth?.currentUser;
       const includePending = typeof options.includePending === "boolean"
@@ -514,8 +1177,13 @@ async function loadSongs(options = {}){
       // Cache key'e currentUserId de ekle
       const cacheKey = `${includePending}_${currentUserId || 'anonymous'}`;
       
+      const cacheKeyMatches = window.__songsCache
+        && window.__songsCacheKey === cacheKey
+        && window.__songsCache.length > 0;
+      const cacheIsMerged = window.__songsCacheMerged === true;
+      
       // Eğer cache varsa ve key eşleşiyorsa, cache'i kullan
-      if (window.__songsCache && window.__songsCacheKey === cacheKey && window.__songsCache.length > 0) {
+      if (cacheKeyMatches && (waitForFirebase ? cacheIsMerged : true)) {
         window.SONGS = window.__songsCache;
         return window.__songsCache;
       }
@@ -524,11 +1192,16 @@ async function loadSongs(options = {}){
       if (window.__songsCache && window.__songsCacheKey !== cacheKey) {
         window.__songsCache = null;
         window.__songsCacheKey = null;
+        window.__songsCacheMerged = null;
       }
 
       let base = [];
       let jsonRetryCount = 0;
       const jsonMaxRetries = 5; // 3'ten 5'e çıkarıldı - mobil veri için daha fazla deneme
+      
+      if (cacheKeyMatches && !cacheIsMerged) {
+        base = window.__songsCache;
+      }
       
       while(jsonRetryCount < jsonMaxRetries && base.length === 0) {
         try{
@@ -583,7 +1256,7 @@ async function loadSongs(options = {}){
 
       let subs = [];
       const db = window.fbDb;
-      if(db){
+      if(db && waitForFirebase && firebaseReady){
         try{
           // Firestore'un hazır olduğundan emin ol - daha uzun bekleme
           if (!db._delegate || !db._delegate._databaseId) {
@@ -627,7 +1300,23 @@ async function loadSongs(options = {}){
       }
 
       try {
+        if (!waitForFirebase || !firebaseReady) {
+          if (window.__songsCacheMerged === true && window.__songsCacheKey === cacheKey) {
+            window.SONGS = window.__songsCache;
+            return window.__songsCache;
+          }
+          window.__songsCache = base;
+          window.__songsCacheMerged = false;
+          window.__songsCacheIncludePending = includePending;
+          window.__songsCacheKey = cacheKey;
+          window.SONGS = window.__songsCache;
+          
+          updateGlobalStats(window.__songsCache);
+          return window.__songsCache;
+        }
+        
         window.__songsCache = mergeSongs(base, subs, { includePending, currentUserId });
+        window.__songsCacheMerged = true;
         window.__songsCacheIncludePending = includePending;
         window.__songsCacheKey = cacheKey;
         window.SONGS = window.__songsCache;
@@ -637,17 +1326,18 @@ async function loadSongs(options = {}){
       } catch(err) {
         error("❌ mergeSongs() error:", err);
         window.__songsCache = base;
+        window.__songsCacheMerged = false;
         window.__songsCacheKey = cacheKey;
         window.SONGS = window.__songsCache;
         return window.__songsCache;
       }
     } finally {
       // Lock'u temizle
-      __loadSongsInProgress = null;
+      __loadSongsInProgress[mode] = null;
     }
   })();
   
-  return __loadSongsInProgress;
+  return __loadSongsInProgress[mode];
 }
 
 // loadSongs'u window objesine de ata - mobil search overlay için
@@ -659,6 +1349,7 @@ function clearSongsCache(){
   window.__songsCache = null;
   window.__songsCacheIncludePending = null;
   window.__songsCacheKey = null;
+  window.__songsCacheMerged = null;
   window.SONGS = null;
   // Firebase init promise'i de sıfırla (yeniden başlatmak için)
   __firebaseInitPromise = null;
@@ -719,7 +1410,7 @@ async function toggleFavoriteSong(song){
   if(!user || !db){
     window.requireAuthAction?.(() => {
       toggleFavoriteSong(song);
-    }, "Ji bo favorî divê tu têkevî.");
+    }, t("status_requires_login_favorite"));
     return false;
   }
   
@@ -759,6 +1450,8 @@ window.clearSongsCache = clearSongsCache;
 window.formatSongTitle = formatSongTitle;
 window.norm = norm;
 window.pickRandom = pickRandom;
+window.artistArr = artistArr;
+window.escapeHtml = escapeHtml;
 window.formatArtistName = formatArtistName;
 window.formatArtistList = formatArtistList;
 window.formatArtistInputValue = formatArtistInputValue;
@@ -776,7 +1469,10 @@ window.isAdminUser = (user) => {
 
 (function initGlobalStats(){
   if(document.getElementById("statSongs") || document.getElementById("statArtists")){
-    loadSongs().catch(() => {});
+    const path = window.location.pathname || "";
+    const isHome = path === "/" || path.endsWith("/index.html");
+    const options = isHome ? { waitForFirebase: false } : {};
+    loadSongs(options).catch(() => {});
   }
 })();
 
@@ -1039,7 +1735,7 @@ function initAddSongPanel(onSaved){
           addPanel.scrollIntoView({ behavior: "smooth", block: "start" });
         }
         setTimeout(() => adjustTextareaHeight(addSongText), 100);
-      }, "Ji bo stran zêde kirinê divê tu têkevî.");
+      }, t("status_requires_login_add"));
       return;
     }
     addPanel.classList.remove("is-hidden");
@@ -1077,7 +1773,7 @@ function initAddSongPanel(onSaved){
     if(!db || !user){
       window.requireAuthAction?.(() => {
         addPanel.classList.remove("is-hidden");
-      }, "Ji bo stran zêde kirinê divê tu têkevî.");
+      }, t("status_requires_login_add"));
       return;
     }
     
@@ -1097,7 +1793,7 @@ function initAddSongPanel(onSaved){
     let hasError = false;
     
     if(!song){
-      setNotice("Navê stranê pêwîst e.", true);
+      setNotice(t("status_song_required"), true);
       if(addSongName){
         addSongName.classList.add("error");
         addSongName.focus();
@@ -1107,7 +1803,7 @@ function initAddSongPanel(onSaved){
     
     if(!rawArtist || !artist){
       if(!hasError){
-        setNotice("Navê hunermendê pêwîst e.", true);
+        setNotice(t("status_artist_required"), true);
         if(addSongArtist){
           addSongArtist.classList.add("error");
           addSongArtist.focus();
@@ -1118,7 +1814,7 @@ function initAddSongPanel(onSaved){
     
     if(!key){
       if(!hasError){
-        setNotice("Tonê orîjînal pêwîst e.", true);
+        setNotice(t("status_key_required"), true);
         if(addSongKey){
           addSongKey.classList.add("error");
           addSongKey.focus();
@@ -1129,7 +1825,7 @@ function initAddSongPanel(onSaved){
     
     if(!text || !text.trim()){
       if(!hasError){
-        setNotice("Nivîsa stranê pêwîst e.", true);
+        setNotice(t("status_text_required"), true);
         if(addSongText){
           addSongText.classList.add("error");
           addSongText.focus();
@@ -1149,7 +1845,6 @@ function initAddSongPanel(onSaved){
         artist,
         key,
         text,
-        volume: "USER",
         createdBy: user.uid,
         createdByEmail: user.email || "",
         createdAt: stamp,
@@ -1157,7 +1852,7 @@ function initAddSongPanel(onSaved){
       });
 
       clearSongsCache?.();
-      setNotice("Niha tomar kir. Guhertinên te ji bo pejirandina edîtorê li benda ne. Piştî pejirandinê guhertinên te dê xuya bibin.");
+      setNotice(t("status_edit_saved"));
       if(addNotice){
         addNotice.style.color = "#059669";
         addNotice.style.background = "rgba(5, 150, 105, 0.1)";
@@ -1174,7 +1869,7 @@ function initAddSongPanel(onSaved){
         if(typeof onSaved === "function") onSaved();
       }, 2000);
     }catch(err){
-      setNotice(translateError(err) || "Nehat tomarkirin.", true);
+      setNotice(translateError(err) || t("status_save_failed"), true);
     }
   });
 
@@ -1341,10 +2036,10 @@ function initEditPanelEnhancements(panelPrefix, textareaId, charCountId, chordCo
     // Boşlukları (space, tab, newline, vb.) çıkararak karakter sayısı
     const textWithoutSpaces = text.replace(/\s+/g, ''); // Tüm whitespace karakterleri
     const charLength = textWithoutSpaces.length;
-    if(charCount) charCount.textContent = `${charLength} karakter`;
+    if(charCount) charCount.textContent = t("label_char_count", { count: charLength });
     
     const chords = extractChords(text);
-    if(chordCount) chordCount.textContent = `${chords.length} akor`;
+    if(chordCount) chordCount.textContent = t("label_chord_count", { count: chords.length });
     
     // Update line numbers
     updateLineNumbers(textareaId, lineNumbersId);
@@ -1356,13 +2051,16 @@ function initEditPanelEnhancements(panelPrefix, textareaId, charCountId, chordCo
       
       if(validationResult.errors.length > 0){
         validation.className += " has-errors";
-        validation.textContent = `⚠️ ${validationResult.errors.length} geçersiz akor: ${validationResult.errors.slice(0, 3).join(", ")}`;
+        validation.textContent = t("validation_invalid_chords", {
+          count: validationResult.errors.length,
+          list: validationResult.errors.slice(0, 3).join(", ")
+        });
       } else if(text.length > 0 && chords.length === 0){
         validation.className += " has-warnings";
-        validation.textContent = "ℹ️ Akor bulunamadı";
+        validation.textContent = t("validation_no_chords");
       } else if(text.length > 0){
         validation.className += " is-valid";
-        validation.textContent = "✓ Format doğru";
+        validation.textContent = t("validation_format_ok");
       } else {
         validation.textContent = "";
       }
@@ -1410,7 +2108,9 @@ function initEditPanelEnhancements(panelPrefix, textareaId, charCountId, chordCo
   if(previewToggle && preview){
     previewToggle.addEventListener("click", () => {
       preview.classList.toggle("is-hidden");
-      previewToggle.textContent = preview.classList.contains("is-hidden") ? "Önizleme" : "Düzenle";
+      previewToggle.textContent = preview.classList.contains("is-hidden")
+        ? t("preview_label")
+        : t("action_edit");
     });
   }
   
@@ -1492,7 +2192,7 @@ function initEditPanelEnhancements(panelPrefix, textareaId, charCountId, chordCo
       
       for(const [key, value] of Object.entries(keyMap)){
         if(songName.includes(key)){
-          keySuggestion.textContent = `💡 Öneri: ${value} tonu`;
+          keySuggestion.textContent = t("key_suggestion", { key: value });
           keySuggestion.style.display = "block";
           if(keySelect && !keySelect.value){
             // Auto-select if empty
@@ -1624,8 +2324,8 @@ window.initAddSongPanel = initAddSongPanel;
                 }
               }
             }, 500);
-          }, "Ji bo stran zêde kirinê divê tu têkevî.");
-        } else {
+        }, t("status_requires_login_add"));
+      } else {
           const authOpen = document.getElementById("authOpen");
           if(authOpen) authOpen.click();
         }
@@ -2006,38 +2706,38 @@ window.initAddSongPanel = initAddSongPanel;
     
     // Firebase hata kodlarına göre Kürtçe mesajlar
     const errorMap = {
-      "auth/unauthorized-domain": "Ev domain destûr nedaye. Firebase console'ê kontrol bike.",
-      "auth/popup-blocked": "Popup hate astengkirin.",
-      "auth/popup-closed-by-user": "Popup hate girtin.",
-      "auth/network-request-failed": "Girêdana înternetê tune.",
-      "auth/too-many-requests": "Gelek daxwaz. Pişt re bêje.",
-      "auth/user-disabled": "Bikarhêner hate astengkirin.",
-      "auth/user-not-found": "Bikarhêner nehate dîtin.",
-      "auth/wrong-password": "Şîfre çewt e.",
-      "auth/email-already-in-use": "E-name berê hat qeydkirin.",
-      "auth/weak-password": "Şîfre zêde nerm e.",
-      "auth/invalid-email": "E-name nederbasdar e.",
-      "auth/operation-not-allowed": "Operasyon destûr nedaye.",
-      "auth/requires-recent-login": "Dîsa têkeve.",
-      "auth/credential-already-in-use": "Kredensiyal berê hat bikaranîn."
+      "auth/unauthorized-domain": "auth_error_unauthorized_domain",
+      "auth/popup-blocked": "auth_error_popup_blocked",
+      "auth/popup-closed-by-user": "auth_error_popup_closed",
+      "auth/network-request-failed": "auth_error_network",
+      "auth/too-many-requests": "auth_error_too_many_requests",
+      "auth/user-disabled": "auth_error_user_disabled",
+      "auth/user-not-found": "auth_error_user_not_found",
+      "auth/wrong-password": "auth_error_wrong_password",
+      "auth/email-already-in-use": "auth_error_email_in_use",
+      "auth/weak-password": "auth_error_weak_password",
+      "auth/invalid-email": "auth_error_invalid_email",
+      "auth/operation-not-allowed": "auth_error_operation_not_allowed",
+      "auth/requires-recent-login": "auth_error_requires_recent_login",
+      "auth/credential-already-in-use": "auth_error_credential_in_use"
     };
     
     // Önce kod kontrolü
-    if(errorMap[code]) return errorMap[code];
+    if(errorMap[code]) return t(errorMap[code]);
     
     // Sonra mesaj kontrolü (İngilizce mesajları çevir)
-    if(message.includes("unauthorized-domain")) return "Ev domain destûr nedaye.";
-    if(message.includes("popup-blocked")) return "Popup hate astengkirin.";
-    if(message.includes("network")) return "Girêdana înternetê tune.";
-    if(message.includes("too many requests")) return "Gelek daxwaz. Pişt re bêje.";
-    if(message.includes("user not found")) return "Bikarhêner nehate dîtin.";
-    if(message.includes("wrong password")) return "Şîfre çewt e.";
-    if(message.includes("email already")) return "E-name berê hat qeydkirin.";
-    if(message.includes("weak password")) return "Şîfre zêde nerm e.";
-    if(message.includes("invalid email")) return "E-name nederbasdar e.";
+    if(message.includes("unauthorized-domain")) return t("auth_error_unauthorized_domain");
+    if(message.includes("popup-blocked")) return t("auth_error_popup_blocked");
+    if(message.includes("network")) return t("auth_error_network");
+    if(message.includes("too many requests")) return t("auth_error_too_many_requests");
+    if(message.includes("user not found")) return t("auth_error_user_not_found");
+    if(message.includes("wrong password")) return t("auth_error_wrong_password");
+    if(message.includes("email already")) return t("auth_error_email_in_use");
+    if(message.includes("weak password")) return t("auth_error_weak_password");
+    if(message.includes("invalid email")) return t("auth_error_invalid_email");
     
     // Genel mesaj
-    return "Çewtiyek çêbû.";
+    return t("auth_error_generic");
   };
 
   const setStatus = (msg, isError = false) => {
@@ -2139,7 +2839,7 @@ window.initAddSongPanel = initAddSongPanel;
   // Derketin butonu
   if(signOutBtn) {
     signOutBtn.addEventListener("click", async () => {
-      const ok = window.confirm("Tu dixwazî derkevî?");
+      const ok = window.confirm(t("confirm_sign_out"));
       if(!ok) return;
       try{
         await auth.signOut();
@@ -2199,7 +2899,7 @@ function updateFilterOptions(user) {
     if (!pendingOption) {
       const newOption = document.createElement("option");
       newOption.value = "pending";
-      newOption.textContent = "Li benda pejirandinê";
+      newOption.textContent = t("badge_pending");
       filterBy.appendChild(newOption);
     }
   } else {
@@ -2241,11 +2941,11 @@ window.updateFilterOptions = updateFilterOptions;
           id="searchOverlayInput" 
           class="search-overlay__input" 
           type="search" 
-          placeholder="Stran an hunermend bigere…" 
+          placeholder="${t("search_placeholder")}" 
           autocomplete="off" 
         />
-        <button id="searchOverlayClear" class="search-overlay__clear" type="button" aria-label="Paqij bike">✕</button>
-        <button class="search-overlay__close" type="button" aria-label="Betal bike">✕</button>
+        <button id="searchOverlayClear" class="search-overlay__clear" type="button" aria-label="${t("search_overlay_clear")}">✕</button>
+        <button class="search-overlay__close" type="button" aria-label="${t("search_overlay_close")}">&larr;</button>
       </div>
       <div id="searchOverlayResults" class="search-overlay__results"></div>
     `;
@@ -2253,10 +2953,13 @@ window.updateFilterOptions = updateFilterOptions;
   }
   
   // Arama sonuçlarını göster
-  let searchTimeout = null;
+  let searchRaf = null;
+  let searchSongsLoading = false;
+  let lastOverlayQuery = "";
   function renderSearchResults(query) {
     const resultsContainer = document.getElementById("searchOverlayResults");
     if (!resultsContainer) return;
+    lastOverlayQuery = query;
     
     // Query boşsa önerileri göster
     if (!query || query.trim().length === 0) {
@@ -2270,8 +2973,26 @@ window.updateFilterOptions = updateFilterOptions;
     
     if (!songs || songs.length === 0) {
       warn("⚠️ renderSearchResults: SONGS not found");
-      // Songs yoksa boş bırak, mesaj gösterme
-      resultsContainer.innerHTML = "";
+      if (!searchSongsLoading && window.loadSongs && typeof window.loadSongs === "function") {
+        searchSongsLoading = true;
+        window.loadSongs({ waitForFirebase: false }).then(loadedSongs => {
+          if (loadedSongs && loadedSongs.length > 0) {
+            window.SONGS = loadedSongs;
+            const currentInput = document.getElementById("searchOverlayInput");
+            const currentQuery = currentInput?.value ?? lastOverlayQuery;
+            renderSearchResults(currentQuery);
+          } else {
+            resultsContainer.innerHTML = "";
+          }
+        }).catch(err => {
+          error("❌ Error loading songs:", err);
+          resultsContainer.innerHTML = "";
+        }).finally(() => {
+          searchSongsLoading = false;
+        });
+      } else {
+        resultsContainer.innerHTML = "";
+      }
       return;
     }
     
@@ -2287,7 +3008,7 @@ window.updateFilterOptions = updateFilterOptions;
     if (results.length === 0) {
       resultsContainer.innerHTML = `
         <div class="search-overlay__empty">
-          Encam nehate dîtin
+          ${t("search_overlay_no_results")}
         </div>
       `;
       return;
@@ -2303,11 +3024,11 @@ window.updateFilterOptions = updateFilterOptions;
     const songId = window.songId || ((s) => s._id || s.sourceId || "");
     
     resultsContainer.innerHTML = `
-      <div class="search-overlay__section-title">Encamên lêgerînê (${results.length})</div>
+      <div class="search-overlay__section-title">${t("search_overlay_results")} (${results.length})</div>
       ${results.map(song => {
       const id = songId(song);
-      const title = song.song || "Bê nav";
-      const artist = artistText(song.artist) || "Bê hunermend";
+      const title = song.song || t("label_no_title");
+      const artist = artistText(song.artist) || t("label_no_artist");
       const url = id ? `/song.html?id=${encodeURIComponent(id)}` : "#";
       
         return `
@@ -2358,11 +3079,11 @@ window.updateFilterOptions = updateFilterOptions;
       // homeSample'ı kontrol et ve güncelle
       if ((!window.homeSample || window.homeSample.length === 0) && window.SONGS && window.SONGS.length > 0) {
         if (window.pickRandom) {
-          window.homeSample = window.pickRandom(window.SONGS, 7);
+          window.homeSample = window.pickRandom(window.SONGS, 10);
         } else {
           // Fallback
           const shuffled = [...window.SONGS].sort(() => 0.5 - Math.random());
-          window.homeSample = shuffled.slice(0, 7);
+          window.homeSample = shuffled.slice(0, 10);
         }
         log("✅ Created homeSample, found", window.homeSample.length, "suggestions");
       }
@@ -2437,7 +3158,7 @@ window.updateFilterOptions = updateFilterOptions;
       warn("⚠️ SONGS not found, trying to load...");
       // loadSongs fonksiyonu varsa çağır
       if (window.loadSongs && typeof window.loadSongs === "function") {
-        window.loadSongs().then(loadedSongs => {
+        window.loadSongs({ waitForFirebase: false }).then(loadedSongs => {
           if (loadedSongs && loadedSongs.length > 0) {
             window.SONGS = loadedSongs;
             log("✅ Songs loaded, re-rendering suggestions...");
@@ -2466,11 +3187,11 @@ window.updateFilterOptions = updateFilterOptions;
     } else {
       // Random 7 şarkı seç
       if (window.pickRandom) {
-        suggestions = window.pickRandom(songs, 7);
+        suggestions = window.pickRandom(songs, 10);
       } else {
         // Fallback
         const shuffled = [...songs].sort(() => 0.5 - Math.random());
-        suggestions = shuffled.slice(0, 7);
+        suggestions = shuffled.slice(0, 10);
       }
     }
     
@@ -2489,11 +3210,11 @@ window.updateFilterOptions = updateFilterOptions;
     const songId = window.songId || ((s) => s._id || s.sourceId || "");
     
     resultsContainer.innerHTML = `
-      <div class="search-overlay__section-title">Yên Berçav</div>
+      <div class="search-overlay__section-title">${t("search_overlay_suggestions")}</div>
       ${suggestions.map(song => {
         const id = songId(song);
-        const title = song.song || "Bê nav";
-        const artist = artistText(song.artist) || "Bê hunermend";
+        const title = song.song || t("label_no_title");
+        const artist = artistText(song.artist) || t("label_no_artist");
         const url = id ? `/song.html?id=${encodeURIComponent(id)}` : "#";
         
         return `
@@ -2624,21 +3345,43 @@ window.updateFilterOptions = updateFilterOptions;
       });
     }
     
+    let isComposing = false;
+    const scheduleOverlaySearch = (value) => {
+      updateClearButton(input);
+      lastOverlayQuery = value;
+      if (searchRaf) cancelAnimationFrame(searchRaf);
+      searchRaf = requestAnimationFrame(() => {
+        renderSearchResults(value);
+      });
+    };
+    
     // Input değişikliklerini dinle - anlık arama
     input.addEventListener("input", (e) => {
-      const query = e.target.value;
-      updateClearButton(input);
-      
-      // Debounce ile arama yap
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => {
-        renderSearchResults(query);
-      }, 150);
-      
+      if (isComposing) return;
+      scheduleOverlaySearch(e.target.value);
       // ÖNEMLİ: Mobil search overlay'de arama yapıldığında 
       // orijinal input'a değer KOPYALAMA - sayfadaki listeleri güncellemesin
       // Overlay açıkken sayfadaki listeler değişmesin, sadece overlay içinde sonuçlar görünsün
       // Orijinal input'a değer kopyalamayı tamamen kaldırdık
+    });
+    
+    input.addEventListener("compositionstart", () => {
+      isComposing = true;
+    });
+    
+    input.addEventListener("compositionend", (e) => {
+      isComposing = false;
+      scheduleOverlaySearch(e.target.value);
+    });
+    
+    input.addEventListener("keyup", (e) => {
+      if (isComposing) return;
+      scheduleOverlaySearch(e.target.value);
+    });
+    
+    input.addEventListener("search", (e) => {
+      if (isComposing) return;
+      scheduleOverlaySearch(e.target.value);
     });
     
     // ESC tuşu ile kapat

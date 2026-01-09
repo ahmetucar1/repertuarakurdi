@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap");
-
 :root{
   --bg:#0c1016;
   --text:#f9f6ef;
@@ -45,6 +43,9 @@ body{
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   position: relative;
+}
+html.i18n-pending body{
+  visibility: hidden;
 }
 body.auth-open{ overflow:hidden; }
 
@@ -133,8 +134,8 @@ body {
     display: flex !important;
     opacity: 1 !important;
     cursor: pointer !important;
-    width: 18px !important;
-    height: 18px !important;
+    width: 16px !important;
+    height: 16px !important;
     transition: transform 0.2s ease, opacity 0.2s ease;
   }
   
@@ -148,24 +149,25 @@ body {
     width: auto !important;
     min-width: auto !important;
     max-width: none !important;
-    height: 40px !important; /* Yükseklik artırıldı */
+    height: 40px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    padding: 0 14px !important; /* Diğer butonlarla aynı padding */
-    margin-top: 10px !important; /* Üstten boşluk */
+    padding: 0 12px !important;
+    margin-top: 0 !important;
     /* Diğer butonlarla aynı tasarım */
     background: transparent !important;
-    border: 1.5px solid rgba(255,255,255,.25) !important;
-    border-radius: 8px !important;
+    border: 1px solid rgba(255,255,255,.25) !important;
+    border-radius: 7px !important;
     cursor: pointer !important;
     transition: all 0.15s ease !important;
     position: relative !important;
     overflow: hidden !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
     font-weight: 500 !important;
     flex-shrink: 0 !important;
     white-space: nowrap !important;
+    box-sizing: border-box !important;
   }
   
   /* Hover efekti - Diğer butonlarla aynı */
@@ -447,6 +449,46 @@ body {
   flex:0 0 auto;
 }
 
+.langToggle{
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
+  padding: 2px;
+  height:32px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.25);
+  background: rgba(0,0,0,.28);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.05), 0 2px 8px rgba(0,0,0,.15);
+  box-sizing: border-box;
+}
+.langBtn{
+  border:0;
+  background: transparent;
+  color: rgba(255,255,255,.7);
+  font-size:12px;
+  font-weight:600;
+  padding: 0 10px;
+  height:100%;
+  border-radius:999px;
+  cursor:pointer;
+  transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing: border-box;
+}
+.langBtn.is-active{
+  background: linear-gradient(135deg, rgba(255,255,255,.35), rgba(255,255,255,.14));
+  color: var(--text);
+}
+.langBtn:focus-visible{
+  outline: 2px solid rgba(255,255,255,.35);
+  outline-offset: 2px;
+}
+.langDivider{
+  display:none;
+}
+
 .favoriteBtn{
   display: inline-flex;
   align-items: center;
@@ -527,6 +569,8 @@ body {
   padding-inline:10px;
   font-size: 12px;
   border-radius: 8px;
+  margin-top: 0;
+  box-sizing: border-box;
 }
 .topbar__actions .homeLink{
   width:32px;
@@ -537,6 +581,8 @@ body {
   padding-inline:10px; 
   font-size: 12px; 
   height: 32px;
+  margin-top: 0;
+  box-sizing: border-box;
 }
 .homeLink{
   width:32px;
@@ -580,7 +626,19 @@ body {
   width: auto;
   min-width: 200px;
   max-width: 340px;
-  margin-top: 10px;
+  margin-top: 0;
+  align-self: center;
+}
+
+.topbar__actions .search{
+  box-sizing: border-box;
+  height:32px;
+}
+
+.topbar__actions .langToggle{
+  align-self: center;
+  height:32px;
+  box-sizing: border-box;
 }
 
 .search__icon{
@@ -1017,7 +1075,14 @@ body {
 .heroCard__header{
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+}
+
+.heroCard__kicker{
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
 }
 
 .heroCard__title{
@@ -1085,112 +1150,7 @@ body {
   align-items: center;
   width: 100%;
   flex-wrap: wrap;
-  justify-content: center;
-}
-
-.heroCard__welcome {
-  width: 100%;
-  text-align: center;
-  margin-bottom: 16px;
-}
-
-.heroCard__welcomeText {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 0;
-  display: inline-block;
-  line-height: 1.4;
-}
-
-.welcome-char {
-  display: inline-block !important;
-  visibility: visible !important;
-  background: linear-gradient(135deg, var(--accent), var(--accent2)) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-  color: transparent !important;
-  opacity: 0;
-  transform: translateY(20px) scale(0.8);
-  animation: welcomeCharAppear 0.5s ease-out forwards, welcomeCharFloat 2s ease-in-out 1.5s infinite !important;
-  text-shadow: 0 0 20px rgba(244, 163, 64, 0.4);
-}
-
-.heroCard__welcomeText {
-  display: inline-block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-.heroCard__welcome {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-.welcome-char:nth-child(1) { animation-delay: 0.1s, 1.6s; }
-.welcome-char:nth-child(2) { animation-delay: 0.15s, 1.65s; }
-.welcome-char:nth-child(3) { animation-delay: 0.2s, 1.7s; }
-.welcome-char:nth-child(4) { animation-delay: 0.25s, 1.75s; }
-.welcome-char:nth-child(5) { animation-delay: 0.3s, 1.8s; }
-.welcome-char:nth-child(6) { animation-delay: 0.35s, 1.85s; }
-.welcome-char:nth-child(7) { animation-delay: 0.4s, 1.9s; }
-.welcome-char:nth-child(8) { animation-delay: 0.45s, 1.95s; }
-.welcome-char:nth-child(9) { animation-delay: 0.5s, 2s; }
-.welcome-char:nth-child(10) { animation-delay: 0.55s, 2.05s; }
-.welcome-char:nth-child(11) { animation-delay: 0.6s, 2.1s; }
-.welcome-char:nth-child(12) { animation-delay: 0.65s, 2.15s; }
-.welcome-char:nth-child(13) { animation-delay: 0.7s, 2.2s; }
-.welcome-char:nth-child(14) { animation-delay: 0.75s, 2.25s; }
-.welcome-char:nth-child(15) { animation-delay: 0.8s, 2.3s; }
-.welcome-char:nth-child(16) { animation-delay: 0.85s, 2.35s; }
-.welcome-char:nth-child(17) { animation-delay: 0.9s, 2.4s; }
-
-@keyframes welcomeCharAppear {
-  0% {
-    opacity: 0;
-    transform: translateY(20px) scale(0.8) rotateY(-90deg);
-  }
-  50% {
-    opacity: 0.7;
-    transform: translateY(-5px) scale(1.1) rotateY(0deg);
-  }
-  100% {
-    opacity: 1 !important;
-    transform: translateY(0) scale(1) rotateY(0deg);
-  }
-}
-
-/* Animasyon bittikten sonra sürekli float efekti */
-.heroCard__welcomeText .welcome-char {
-  animation: welcomeCharAppear 0.5s ease-out forwards, welcomeCharFloat 2s ease-in-out 1.5s infinite;
-}
-
-.welcome-char:nth-child(1) { animation-delay: 0.1s, 1.6s; }
-.welcome-char:nth-child(2) { animation-delay: 0.15s, 1.65s; }
-.welcome-char:nth-child(3) { animation-delay: 0.2s, 1.7s; }
-.welcome-char:nth-child(4) { animation-delay: 0.25s, 1.75s; }
-.welcome-char:nth-child(5) { animation-delay: 0.3s, 1.8s; }
-.welcome-char:nth-child(6) { animation-delay: 0.35s, 1.85s; }
-.welcome-char:nth-child(7) { animation-delay: 0.4s, 1.9s; }
-.welcome-char:nth-child(8) { animation-delay: 0.45s, 1.95s; }
-.welcome-char:nth-child(9) { animation-delay: 0.5s, 2s; }
-.welcome-char:nth-child(10) { animation-delay: 0.55s, 2.05s; }
-.welcome-char:nth-child(11) { animation-delay: 0.6s, 2.1s; }
-.welcome-char:nth-child(12) { animation-delay: 0.65s, 2.15s; }
-.welcome-char:nth-child(13) { animation-delay: 0.7s, 2.2s; }
-.welcome-char:nth-child(14) { animation-delay: 0.75s, 2.25s; }
-.welcome-char:nth-child(15) { animation-delay: 0.8s, 2.3s; }
-.welcome-char:nth-child(16) { animation-delay: 0.85s, 2.35s; }
-.welcome-char:nth-child(17) { animation-delay: 0.9s, 2.4s; }
-
-@keyframes welcomeCharFloat {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(-3px) scale(1.02);
-  }
+  justify-content: flex-start;
 }
 
 .heroCard__btn{
@@ -1315,6 +1275,7 @@ body {
   flex: 1 1 auto;
 }
 .resultsMeta{ font-size:13.5px; color:var(--muted); }
+.homeListWrap:not(.is-searching) .resultsMeta{ display:none; }
 .resultsHeader__right{ 
   display:flex; 
   align-items: center;
@@ -2990,30 +2951,6 @@ main.container > .footer {
 @media (min-width: 860px){
   .homeGrid{ grid-template-columns: 1.15fr .85fr; gap: 16px; }
   .contactGrid{ grid-template-columns: 1.1fr .9fr; }
-  
-  /* Büyük ekranlarda animasyonlu yazıyı görünür yap */
-  .heroCard__welcome {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
-  .heroCard__welcomeText {
-    display: inline-block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
-  .heroCard__actions {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
-  .welcome-char {
-    display: inline-block !important;
-    visibility: visible !important;
-  }
 }
 
 @media (max-width: 960px){
@@ -3684,21 +3621,69 @@ main.container{ animation: fadeUp .2s ease; }
   
   /* 2. Satır: Menü Öğeleri - Komple Yeni Tasarım */
   .topbar__actions {
-    gap: 6px !important;
-    flex-wrap: nowrap !important; /* Tek satırda kal */
+    gap: 10px !important;
+    row-gap: 0;
+    flex-wrap: nowrap !important;
     flex-shrink: 0;
     min-width: 0;
-    justify-content: center !important; /* Ortala */
+    justify-content: center !important;
     order: 2;
     width: 100%;
     display: flex !important;
     align-items: center;
     padding-top: 4px !important; /* Üstten azıcık padding */
-    padding-bottom: 4px !important; /* Alttan azıcık padding */
-    overflow-x: auto; /* Taşarsa kaydırılabilir */
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Firefox scrollbar gizle */
-    -ms-overflow-style: none; /* IE/Edge scrollbar gizle */
+    padding-bottom: 4px !important; /* Alttan azicik padding */
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    overflow-x: auto;
+    align-content: center;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .langToggle{
+    height:40px;
+    padding: 2px;
+    gap: 2px;
+    border:1px solid rgba(255,255,255,.25);
+    background: rgba(0,0,0,.28);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
+    box-sizing: border-box;
+    min-height: 40px;
+    align-self: center;
+  }
+  .langBtn{
+    height: 100%;
+    font-size: 12px;
+    padding: 0 10px;
+    border-radius: 999px;
+    line-height: 1;
+  }
+  .topbar__actions > *{
+    flex: 0 0 auto;
+  }
+  .topbar__actions .search{
+    height: 40px;
+    box-sizing: border-box;
+  }
+  .topbar__actions .search--header{
+    flex: 0 0 auto;
+    min-width: 40px;
+    max-width: 160px;
+    margin-top: 0;
+    height: 40px;
+    padding: 6px 10px;
+    box-sizing: border-box;
+    align-self: center;
+  }
+  .topbar__actions .search--header.search--icon-only{
+    flex: 0 0 auto;
+    min-width: 40px;
+  }
+  .topbar__actions .search--header .search__icon{
+    width: 16px;
+    height: 16px;
+    display: block;
   }
   
   .topbar__actions::-webkit-scrollbar {
@@ -3718,16 +3703,16 @@ main.container{ animation: fadeUp .2s ease; }
   /* Minimal, Modern Buton Tasarımı */
   .topbar__actions .btn,
   .topbar__actions .btn--lg {
-    height: 34px;
-    padding: 0 14px;
-    font-size: 13px;
+    height: 40px;
+    padding: 0 12px;
+    font-size: 12px;
     font-weight: 500;
     min-width: auto;
     flex-shrink: 0;
     white-space: nowrap;
-    border-radius: 8px;
+    border-radius: 7px;
     background: transparent;
-    border: 1.5px solid rgba(255,255,255,.25);
+    border: 1px solid rgba(255,255,255,.25);
     color: rgba(255,255,255,.9);
     transition: all 0.15s ease;
     display: inline-flex;
@@ -3774,12 +3759,12 @@ main.container{ animation: fadeUp .2s ease; }
   
   /* Home Link - Minimal İkon Butonu */
   .topbar__actions .homeLink {
-    width: 34px;
-    height: 34px;
+    width: 40px;
+    height: 40px;
     padding: 0;
-    border-radius: 8px;
+    border-radius: 7px;
     background: transparent;
-    border: 1.5px solid rgba(255,255,255,.25);
+    border: 1px solid rgba(255,255,255,.25);
     color: rgba(255,255,255,.9);
     display: flex;
     align-items: center;
@@ -3826,14 +3811,14 @@ main.container{ animation: fadeUp .2s ease; }
   
   /* Profile Link - Daire Tasarım */
   .topbar__actions .profileLink {
-    width: 34px;
-    height: 34px;
+    width: 40px;
+    height: 40px;
     padding: 0;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     border-radius: 50% !important; /* Daire */
     background: transparent;
-    border: 1.5px solid rgba(255,255,255,.25);
+    border: 1px solid rgba(255,255,255,.25);
     color: rgba(255,255,255,.9);
     transition: all 0.15s ease;
     position: relative;
@@ -3889,6 +3874,10 @@ main.container{ animation: fadeUp .2s ease; }
   
   .topbar__actions .profileLink:active {
     transform: scale(0.98);
+  }
+
+  #addSongMenuBtn {
+    display: none !important;
   }
   
   /* Song Page - Mobile */
@@ -4441,21 +4430,13 @@ main.container{ animation: fadeUp .2s ease; }
   .heroCard__buttons {
     flex-direction: column;
     gap: 10px;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
   }
   
   .heroCard__btn {
     width: auto;
     padding: 12px;
-  }
-  
-  .heroCard__welcomeText {
-    font-size: 24px;
-  }
-  
-  .welcome-char {
-    font-size: inherit;
   }
   
   .homeIntro {
@@ -4660,28 +4641,10 @@ main.container{ animation: fadeUp .2s ease; }
     display: flex !important;
   }
   
-  /* Tablet'te animasyonlu yazıyı görünür yap */
-  .heroCard__welcome {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
-  .heroCard__welcomeText {
-    display: inline-block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
   .heroCard__actions {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-  }
-  
-  .welcome-char {
-    display: inline-block !important;
-    visibility: visible !important;
   }
 }
 
@@ -4689,27 +4652,8 @@ main.container{ animation: fadeUp .2s ease; }
    BREAKPOINT 3: DESKTOP (> 1024px)
    ============================================ */
 @media (min-width: 1025px) {
-  /* Büyük ekranlarda animasyonlu yazıyı görünür yap */
-  .heroCard__welcome {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
-  .heroCard__welcomeText {
-    display: inline-block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
   .heroCard__actions {
     display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
-  .welcome-char {
-    display: inline-block !important;
     visibility: visible !important;
     opacity: 1 !important;
   }
@@ -4818,8 +4762,18 @@ main.container{ animation: fadeUp .2s ease; }
     padding: 12px 20px;
   }
   
-  .topbar__actions .btn {
+  .topbar__actions .btn,
+  .topbar__actions .homeLink,
+  .topbar__actions .profileLink,
+  .topbar__actions .langToggle,
+  .topbar__actions .search {
+    height: 40px;
     min-height: 40px;
+  }
+  
+  .topbar__actions .btn,
+  .topbar__actions .homeLink,
+  .topbar__actions .profileLink {
     min-width: 40px;
   }
   
@@ -5593,4 +5547,10 @@ main.container{ animation: fadeUp .2s ease; }
 .editToggleRow #addSongBtn:hover .btn-icon svg {
   color: #ff8c5a !important;
   stroke: #ff8c5a !important;
+}
+
+@media (max-width: 639px) {
+  #addSongMenuBtn {
+    display: none !important;
+  }
 }

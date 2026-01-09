@@ -1,4 +1,6 @@
 // admin.js — moderasyon paneli
+(function(){
+const t = (key, fallback, vars) => window.t ? window.t(key, vars) : fallback;
 
 function artistArr(a){
   if(Array.isArray(a)) return a.filter(Boolean).map(String);
@@ -56,7 +58,7 @@ function renderList(listEl, items, typeLabel){
   }
   if(!items || !items.length){
     console.log(`📭 renderList: No items for ${typeLabel}`);
-    listEl.innerHTML = `<div class="empty">Bekleyen gönderi yok.</div>`;
+    listEl.innerHTML = `<div class="empty">${t("admin_no_pending", "Bekleyen gönderi yok.")}</div>`;
     return;
   }
 
@@ -76,8 +78,8 @@ function renderList(listEl, items, typeLabel){
           <pre class="adminPreview">${escapeHtml(preview)}</pre>
         </div>
         <div class="badges adminActions">
-          <button class="btn btn--ok" data-action="approve" data-id="${s._id}">Pejirîne</button>
-          <button class="btn btn--danger" data-action="reject" data-id="${s._id}">Reddet</button>
+          <button class="btn btn--ok" data-action="approve" data-id="${s._id}">${t("action_approve", "Pejirîne")}</button>
+          <button class="btn btn--danger" data-action="reject" data-id="${s._id}">${t("action_reject", "Red bike")}</button>
         </div>
       </div>
     `;
@@ -92,13 +94,13 @@ function renderContactList(listEl, items){
   }
   if(!items || !items.length){
     console.log("📭 renderContactList: No items");
-    listEl.innerHTML = `<div class="empty">Henüz mesaj yok.</div>`;
+    listEl.innerHTML = `<div class="empty">${t("admin_no_messages", "Henüz mesaj yok.")}</div>`;
     return;
   }
 
   console.log(`✅ renderContactList: Rendering ${items.length} messages`);
   listEl.innerHTML = items.map((m) => {
-    const name = m.name || "Adsız";
+    const name = m.name || t("label_anonymous", "Adsız");
     const contact = m.contact || "—";
     const createdAt = formatTime(m.createdAt);
     const message = (m.message || "").toString();
@@ -106,7 +108,7 @@ function renderContactList(listEl, items){
     const filesHtml = files.length
       ? `<div class="contactFiles">${
           files.map((f) => {
-            const label = escapeHtml(f?.name || "dosya");
+            const label = escapeHtml(f?.name || t("label_file", "dosya"));
             const url = f?.url ? escapeHtml(f.url) : "";
             return url
               ? `<a class="contactFile" href="${url}" target="_blank" rel="noreferrer">${label}</a>`
@@ -128,7 +130,7 @@ function renderContactList(listEl, items){
           ${filesHtml}
         </div>
         <div class="badges adminActions">
-          <button class="btn btn--danger" data-action="delete" data-id="${m._id}">Jê bibe</button>
+          <button class="btn btn--danger" data-action="delete" data-id="${m._id}">${t("action_delete", "Jê bibe")}</button>
         </div>
       </div>
     `;
@@ -181,7 +183,7 @@ function init(){
 
   if(!auth || !db){
     console.error("❌ Admin: Firebase not ready");
-    if(statusEl) statusEl.textContent = "Firebase hazır değil.";
+    if(statusEl) statusEl.textContent = t("status_firebase_unready", "Firebase hazır değil.");
     return;
   }
 
@@ -201,16 +203,18 @@ function init(){
   const updateStatusBulk = async (ids, action) => {
     const user = auth.currentUser;
     if(!user || !window.isAdminUser?.(user)) {
-      if(statusEl) statusEl.textContent = "Yetkin yok.";
+      if(statusEl) statusEl.textContent = t("admin_not_authorized", "Yetkin yok.");
       return;
     }
     if(!ids.length) {
-      if(statusEl) statusEl.textContent = "Tiştek nehate hilbijartin.";
+      if(statusEl) statusEl.textContent = t("status_nothing_selected", "Tiştek nehate hilbijartin.");
       return;
     }
     
     try {
-      if(statusEl) statusEl.textContent = action === "approve" ? "Pejirandin…" : "Redkirin…";
+      if(statusEl) statusEl.textContent = action === "approve"
+        ? t("admin_status_approving", "Pejirandin…")
+        : t("admin_status_rejecting", "Redkirin…");
       const stamp = window.firebase?.firestore?.FieldValue?.serverTimestamp?.() || null;
       const batch = db.batch();
       ids.forEach((id) => {
@@ -238,9 +242,9 @@ function init(){
       window.clearSongsCache?.();
       
       // Başarı mesajı göster
-      if(statusEl) statusEl.textContent = action === "approve" 
-        ? `${ids.length} şandî pejirandî. Cache tê paqijkirin…` 
-        : `${ids.length} şandî redkirî.`;
+      if(statusEl) statusEl.textContent = action === "approve"
+        ? t("admin_status_approved_count", "{count} şandî pejirandî. Cache tê paqijkirin…", { count: ids.length })
+        : t("admin_status_rejected_count", "{count} şandî redkirî.", { count: ids.length });
       
       // Onaylanan şarkılar için cache'i temizle ve kısa bir süre sonra sayfayı yenile
       if(action === "approve") {
@@ -258,7 +262,7 @@ function init(){
       }
       
       setTimeout(() => {
-        if(statusEl) statusEl.textContent = "Şandiyên li bendê";
+        if(statusEl) statusEl.textContent = t("admin_status_pending", "Şandiyên li bendê");
         // Listeleri yeniden yükle
         if(unsub) {
           // Listener'lar otomatik güncellenecek
@@ -266,9 +270,9 @@ function init(){
       }, 2000);
     } catch(err) {
       console.error("Admin işlemi başarısız:", err);
-      if(statusEl) statusEl.textContent = `Çewtiyek çêbû: ${err?.message || "Nenas"}`;
+      if(statusEl) statusEl.textContent = `${t("status_error_prefix", "Çewtî")}: ${err?.message || t("auth_error_generic", "Çewtiyek çêbû.")}`;
       setTimeout(() => {
-        if(statusEl) statusEl.textContent = "Şandiyên li bendê";
+        if(statusEl) statusEl.textContent = t("admin_status_pending", "Şandiyên li bendê");
       }, 3000);
     }
   };
@@ -276,20 +280,20 @@ function init(){
   const deleteContactMessages = async (ids) => {
     const user = auth.currentUser;
     if(!user || !window.isAdminUser?.(user)) {
-      if(statusEl) statusEl.textContent = "Yetkin yok.";
+      if(statusEl) statusEl.textContent = t("admin_not_authorized", "Yetkin yok.");
       return;
     }
     if(!ids.length) {
-      if(statusEl) statusEl.textContent = "Tiştek nehate hilbijartin.";
+      if(statusEl) statusEl.textContent = t("status_nothing_selected", "Tiştek nehate hilbijartin.");
       return;
     }
     
-    if(!confirm(`${ids.length} mesaj silinecek. Emin misiniz?`)) {
+    if(!confirm(t("admin_confirm_delete_messages", "{count} mesaj silinecek. Emin misiniz?", { count: ids.length }))) {
       return;
     }
     
     try {
-      if(statusEl) statusEl.textContent = "Jêbirin…";
+      if(statusEl) statusEl.textContent = t("admin_status_deleting", "Jêbirin…");
       const batch = db.batch();
       ids.forEach((id) => {
         const ref = db.collection("contact_messages").doc(id);
@@ -298,18 +302,18 @@ function init(){
       await batch.commit();
       
       // Başarı mesajı göster
-      if(statusEl) statusEl.textContent = `${ids.length} mesaj jêbirî.`;
+      if(statusEl) statusEl.textContent = t("admin_status_deleted_count", "{count} mesaj jêbirî.", { count: ids.length });
       
       // Listeleri otomatik güncellenecek (listener'lar sayesinde)
       
       setTimeout(() => {
-        if(statusEl) statusEl.textContent = "Şandiyên li bendê";
+        if(statusEl) statusEl.textContent = t("admin_status_pending", "Şandiyên li bendê");
       }, 2000);
     } catch(err) {
       console.error("Mesaj silme başarısız:", err);
-      if(statusEl) statusEl.textContent = `Çewtiyek çêbû: ${err?.message || "Nenas"}`;
+      if(statusEl) statusEl.textContent = `${t("status_error_prefix", "Çewtî")}: ${err?.message || t("auth_error_generic", "Çewtiyek çêbû.")}`;
       setTimeout(() => {
-        if(statusEl) statusEl.textContent = "Şandiyên li bendê";
+        if(statusEl) statusEl.textContent = t("admin_status_pending", "Şandiyên li bendê");
       }, 3000);
     }
   };
@@ -321,12 +325,12 @@ function init(){
     if(contactUnsub){ contactUnsub(); contactUnsub = null; }
     if(!user){
       console.log("❌ Admin: No user");
-      if(statusEl) statusEl.textContent = "Têketin pêwîst e.";
+      if(statusEl) statusEl.textContent = t("status_requires_login", "Têketin pêwîst e.");
       currentNew = [];
       currentEdits = [];
       currentContacts = [];
-      renderList(newListEl, [], "Strana nû");
-      renderList(editListEl, [], "Guhartin");
+      renderList(newListEl, [], t("admin_type_new_song", "Strana nû"));
+      renderList(editListEl, [], t("admin_type_edit", "Guhartin"));
       renderContactList(contactListEl, []);
       setCounts();
       return;
@@ -341,12 +345,12 @@ function init(){
     
     if(!isAdmin){
       console.warn("❌ Admin: User is not admin");
-      if(statusEl) statusEl.textContent = "Yetkin yok.";
+      if(statusEl) statusEl.textContent = t("admin_not_authorized", "Yetkin yok.");
       currentNew = [];
       currentEdits = [];
       currentContacts = [];
-      renderList(newListEl, [], "Strana nû");
-      renderList(editListEl, [], "Guhartin");
+      renderList(newListEl, [], t("admin_type_new_song", "Strana nû"));
+      renderList(editListEl, [], t("admin_type_edit", "Guhartin"));
       renderContactList(contactListEl, []);
       setCounts();
       return;
@@ -354,7 +358,7 @@ function init(){
     
     console.log("✅ Admin: User is admin, setting up listeners...");
 
-    if(statusEl) statusEl.textContent = "Şandiyên li bendê";
+    if(statusEl) statusEl.textContent = t("admin_status_pending", "Şandiyên li bendê");
     
     // Önce get() ile tek seferlik veri çek (onSnapshot çalışmazsa yedek)
     const loadPendingSubmissions = async () => {
@@ -379,9 +383,9 @@ function init(){
           currentNew = [];
           currentEdits = [];
           setCounts();
-          renderList(newListEl, [], "Yeni şarkı");
-          renderList(editListEl, [], "Düzenleme");
-          if(statusEl) statusEl.textContent = "Ti şandiyên li bendê tune.";
+          renderList(newListEl, [], t("admin_type_new_song", "Strana nû"));
+          renderList(editListEl, [], t("admin_type_edit", "Guhartin"));
+          if(statusEl) statusEl.textContent = t("admin_status_no_pending", "Ti şandiyên li bendê tune.");
           return;
         }
         
@@ -399,10 +403,10 @@ function init(){
         currentNew = newItems;
         currentEdits = dedupeEdits(editItems);
         setCounts();
-        renderList(newListEl, currentNew, "Yeni şarkı");
-        renderList(editListEl, currentEdits, "Düzenleme");
+        renderList(newListEl, currentNew, t("admin_type_new_song", "Strana nû"));
+        renderList(editListEl, currentEdits, t("admin_type_edit", "Guhartin"));
         
-        if(statusEl) statusEl.textContent = "Şandiyên li bendê";
+        if(statusEl) statusEl.textContent = t("admin_status_pending", "Şandiyên li bendê");
       } catch(err) {
         console.error("❌ Admin: get() error:", err);
         console.error("❌ Admin: Error details:", {
@@ -410,11 +414,13 @@ function init(){
           code: err.code,
           stack: err.stack
         });
-        if(statusEl) statusEl.textContent = `Lîste nehat barkirin: ${err?.message || "Nenas"}`;
+        if(statusEl) statusEl.textContent = t("admin_status_load_failed", "Lîste nehat barkirin: {message}", {
+          message: err?.message || t("auth_error_generic", "Çewtiyek çêbû.")
+        });
         currentNew = [];
         currentEdits = [];
-        renderList(newListEl, [], "Yeni şarkı");
-        renderList(editListEl, [], "Düzenleme");
+        renderList(newListEl, [], t("admin_type_new_song", "Strana nû"));
+        renderList(editListEl, [], t("admin_type_edit", "Guhartin"));
         setCounts();
       }
     };
@@ -440,13 +446,15 @@ function init(){
             currentNew = newItems;
             currentEdits = dedupeEdits(editItems);
             setCounts();
-            renderList(newListEl, currentNew, "Yeni şarkı");
-            renderList(editListEl, currentEdits, "Düzenleme");
+            renderList(newListEl, currentNew, t("admin_type_new_song", "Strana nû"));
+            renderList(editListEl, currentEdits, t("admin_type_edit", "Guhartin"));
             
-            if(statusEl) statusEl.textContent = "Şandiyên li bendê";
+            if(statusEl) statusEl.textContent = t("admin_status_pending", "Şandiyên li bendê");
           } catch(renderErr) {
             console.error("❌ Admin: Render error:", renderErr);
-            if(statusEl) statusEl.textContent = `Render çewtiyek: ${renderErr?.message || "Nenas"}`;
+            if(statusEl) statusEl.textContent = t("admin_status_render_error", "Render çewtiyek: {message}", {
+              message: renderErr?.message || t("auth_error_generic", "Çewtiyek çêbû.")
+            });
           }
         }, (err) => {
           console.error("❌ Admin: song_submissions listener error:", err);
@@ -495,7 +503,9 @@ function init(){
           code: err.code,
           stack: err.stack
         });
-        if(contactListEl) contactListEl.innerHTML = `<div class="empty">Mesajlar yüklenemedi: ${err?.message || "Nenas"}</div>`;
+        if(contactListEl) contactListEl.innerHTML = `<div class="empty">${t("admin_messages_load_failed", "Mesajlar yüklenemedi: {message}", {
+          message: err?.message || t("auth_error_generic", "Çewtiyek çêbû.")
+        })}</div>`;
         currentContacts = [];
         setCounts();
       }
@@ -519,7 +529,9 @@ function init(){
             renderContactList(contactListEl, currentContacts);
           } catch(renderErr) {
             console.error("❌ Admin: Contact render error:", renderErr);
-            if(contactListEl) contactListEl.innerHTML = `<div class="empty">Render çewtiyek: ${renderErr?.message || "Nenas"}</div>`;
+            if(contactListEl) contactListEl.innerHTML = `<div class="empty">${t("admin_status_render_error", "Render çewtiyek: {message}", {
+              message: renderErr?.message || t("auth_error_generic", "Çewtiyek çêbû.")
+            })}</div>`;
           }
         }, (err) => {
           console.error("❌ Admin: contact_messages listener error:", err);
@@ -699,3 +711,4 @@ if (document.readyState === 'loading') {
     init();
   });
 }
+})();

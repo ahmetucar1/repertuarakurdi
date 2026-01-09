@@ -1,9 +1,10 @@
 // song.js — rûpela stranê ya bi nivîsê
+(function(){
 
 // Yardımcılar
 function makeId(s){
   if(typeof songId === "function") return songId(s);
-  return `${s.pdf}|${s.page_original}`;
+  return s?.id || "";
 }
 function openLink(s){ return `/song.html?id=${encodeURIComponent(makeId(s))}`; }
 
@@ -30,7 +31,7 @@ function artistLinks(a){
   if(!arr.length) return "—";
   return arr.map(name => {
     const href = `/artist.html?name=${encodeURIComponent(name)}`;
-    return `<a class="artistLink" href="${href}" title="Ji bo dîtina stranên hunermendê bikeve">${escapeHtml(name)}</a>`;
+    return `<a class="artistLink" href="${href}" title="${t("artist_link_title", "Ji bo dîtina stranên hunermendê bikeve")}">${escapeHtml(name)}</a>`;
   }).join(" · ");
 }
 function normalizeKey(s){
@@ -65,6 +66,7 @@ function escapeHtml(str){
 // Transpose helpers
 // 🔴 YouTube API KEY (user provided)
 const YT_API_KEY = "AIzaSyDC5vzDXhSwySsDaL_VsBxTpVSgGolphjw";
+const t = (key, fallback, vars) => window.t ? window.t(key, vars) : fallback;
 
 const NOTE_TO_I = {
   "C":0, "B#":0,
@@ -211,14 +213,14 @@ function loadYoutubeVideo(song, artist){
       console.warn("YouTube hata:", err);
       const wrap = card.querySelector(".youtubeWrap");
       if(wrap){
-        wrap.innerHTML = `<a href="https://www.youtube.com/results?search_query=${q}" target="_blank" rel="noopener noreferrer" style="display:block;padding:14px;text-align:center;color:#fff;text-decoration:none;background:#111;border-radius:12px;">YouTube'da ara</a>`;
+        wrap.innerHTML = `<a href="https://www.youtube.com/results?search_query=${q}" target="_blank" rel="noopener noreferrer" style="display:block;padding:14px;text-align:center;color:#fff;text-decoration:none;background:#111;border-radius:12px;">${t("youtube_search", "YouTube'da ara")}</a>`;
       }
     });
 }
 
 function renderRecList(el, recs){
   el.innerHTML = recs.map(s => {
-    const pendingBadge = s.pending ? `<span class="badge badge--pending">Li benda pejirandina edîtorê ye</span>` : "";
+    const pendingBadge = s.pending ? `<span class="badge badge--pending">${t("badge_pending_editor", "Li benda pejirandina edîtorê ye")}</span>` : "";
     const title = window.formatSongTitle ? window.formatSongTitle(s.song) : (s.song || "");
     return `
     <div class="item">
@@ -228,7 +230,7 @@ function renderRecList(el, recs){
       </div>
       <div class="badges">
         ${pendingBadge}
-        <a class="open" href="${openLink(s)}">Veke</a>
+        <a class="open" href="${openLink(s)}">${t("action_open", "Veke")}</a>
       </div>
     </div>
   `;
@@ -238,6 +240,26 @@ function renderRecList(el, recs){
 function getIdParam(){
   const p = new URLSearchParams(location.search);
   return p.get("id") || "";
+}
+
+const TEXT_SLUG_OVERRIDES = {
+  "pdf2.pdf|68": "beritan-koma-amara"
+};
+
+function slugifySongTitle(title){
+  return (title || "")
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+}
+
+function getTextSlug(song){
+  const id = song?.id || makeId(song);
+  if(id && TEXT_SLUG_OVERRIDES[id]) return TEXT_SLUG_OVERRIDES[id];
+  return slugifySongTitle(song?.song);
 }
 
 async function loadSongText(slug){
@@ -265,7 +287,7 @@ async function init(){
   
   if(!SONGS || SONGS.length === 0){
     const songText = document.getElementById("songText");
-    if(songText) songText.textContent = "Stran nehat barkirin. Ji kerema xwe rûpelê nû bike.";
+    if(songText) songText.textContent = t("status_song_unavailable", "Stran nehat barkirin. Ji kerema xwe rûpelê nû bike.");
     return;
   }
 
@@ -294,6 +316,7 @@ async function init(){
 
   const songNameEl = document.getElementById("songName");
   const songArtistEl = document.getElementById("songArtist");
+  const rhythmEl = document.getElementById("songRhythm");
   
   if(songNameEl){
     songNameEl.textContent = window.formatSongTitle ? window.formatSongTitle(current?.song) : (current?.song || "—");
@@ -304,6 +327,9 @@ async function init(){
     songArtistEl.innerHTML = artistLinks(current?.artist);
     songArtistEl.style.display = "block";
     songArtistEl.style.visibility = "visible";
+  }
+  if(rhythmEl){
+    rhythmEl.textContent = current?.ritim || "-";
   }
   const pendingBadge = document.getElementById("songPending");
   if(pendingBadge){
@@ -514,7 +540,7 @@ async function init(){
         setFavStatus("", false);
       }
     }catch(err){
-      setFavStatus(err?.message || "Favorî nehat tomarkirin.", true);
+      setFavStatus(err?.message || t("status_favorite_failed", "Favorî nehat tomarkirin."), true);
     }
   };
 
@@ -755,7 +781,7 @@ async function init(){
       
       // Firestore'un hazır olduğundan emin ol
       if (!window.fbDb || !window.fbDb._delegate) {
-        throw new Error("Firestore ne amade ye. Ji kerema xwe rûpelê nû bike û dîsa biceribîne.");
+        throw new Error(t("status_firestore_unready", "Firestore ne amade ye. Ji kerema xwe rûpelê nû bike û dîsa biceribîne."));
       }
       
       // Biraz daha bekle - Firestore'un tamamen hazır olması için
@@ -763,7 +789,7 @@ async function init(){
       
       db = window.fbDb;
     } catch(err) {
-      editNotice.textContent = err.message || "Firestore ne amade ye. Ji kerema xwe rûpelê nû bike û dîsa biceribîne.";
+      editNotice.textContent = err.message || t("status_firestore_unready", "Firestore ne amade ye. Ji kerema xwe rûpelê nû bike û dîsa biceribîne.");
       editNotice.style.color = "#ef4444";
       editNotice.style.background = "rgba(239, 68, 68, 0.1)";
       editNotice.style.border = "1px solid rgba(239, 68, 68, 0.2)";
@@ -783,9 +809,9 @@ async function init(){
         window.requireAuthAction(() => {
           // Giriş yapıldıktan sonra kaydetmeyi tekrar dene
           editSave?.click();
-        }, "Ji bo guhertinê divê tu têkevî.");
+        }, t("status_requires_login_edit"));
       } else {
-        editNotice.textContent = "Ji bo guhertinê divê tu têkevî.";
+        editNotice.textContent = t("status_requires_login_edit", "Ji bo guhertinê divê tu têkevî.");
         editNotice.style.color = "#ef4444";
       }
       return;
@@ -797,14 +823,14 @@ async function init(){
     const nextText = (editText?.value || "").toString();
 
     if(!nextSong || !nextText){
-      editNotice.textContent = "Navê stranê û nivîs pêwîst in.";
+      editNotice.textContent = t("status_edit_required_fields", "Navê stranê û nivîs pêwîst in.");
       editNotice.style.color = "#ef4444";
       return;
     }
 
     isSaving = true;
     editSave.disabled = true;
-    editNotice.textContent = "Tomar tê kirin...";
+    editNotice.textContent = t("status_saving", "Tomar tê kirin...");
     editNotice.style.color = "#3b82f6";
 
     try{
@@ -828,9 +854,6 @@ async function init(){
             artist: nextArtist,
             key: nextKey,
             text: nextText,
-            pdf: current?.pdf || "",
-            volume: current?.volume || "",
-            page_original: current?.page_original || "",
             createdBy: user.uid,
             createdByEmail: user.email || "",
             updatedAt: stamp,
@@ -867,7 +890,7 @@ async function init(){
       }
 
       if(!docRef){
-        throw new Error("Kayıt başarısız oldu. Ji kerema xwe dîsa biceribîne.");
+        throw new Error(t("status_save_failed", "Nehat tomarkirin."));
       }
 
       // Cache'i temizle - sayfa yenilendiğinde yeni veriler yüklensin
@@ -895,7 +918,7 @@ async function init(){
       }
       
       // Başarı mesajını göster
-      editNotice.textContent = "Niha tomar kir. Guhertinên te ji bo pejirandina edîtorê li benda ne. Piştî pejirandinê guhertinên te dê xuya bibin.";
+      editNotice.textContent = t("status_edit_saved", "Niha tomar kir. Guhertinên te ji bo pejirandina edîtorê li benda ne. Piştî pejirandinê guhertinên te dê xuya bibin.");
       editNotice.style.color = "#059669";
       editNotice.style.background = "rgba(5, 150, 105, 0.1)";
       editNotice.style.border = "1px solid rgba(5, 150, 105, 0.2)";
@@ -921,14 +944,14 @@ async function init(){
       }, 2000);
     }catch(err){
       console.error("❌ Şarkı düzenleme hatası:", err);
-      let errorMsg = "Nehat tomarkirin.";
+      let errorMsg = t("status_save_failed", "Nehat tomarkirin.");
       
       if(err?.message?.includes("INTERNAL ASSERTION")){
-        errorMsg = "Firestore hatası. Ji kerema xwe rûpelê nû bike û dîsa biceribîne.";
+        errorMsg = t("status_firestore_error", "Firestore hatası. Ji kerema xwe rûpelê nû bike û dîsa biceribîne.");
       } else if(err?.message){
         errorMsg = err.message;
       } else if(err?.code){
-        errorMsg = `Firestore hatası: ${err.code}`;
+        errorMsg = `Firestore: ${err.code}`;
       }
       
       editNotice.textContent = errorMsg;
@@ -944,14 +967,8 @@ async function init(){
     }
   });
 
-  // Nivîsê bar bike (niha slug = navê stranê slugify, mînak: ava-suse)
-  const slug = (current.song || "")
-    .toString()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "");
+  // Nivîsê bar bike (slug = navê stranê slugify)
+  const slug = getTextSlug(current);
   
   try{
     const rawText = current?.text ? current.text : await loadSongText(slug);
@@ -962,7 +979,7 @@ async function init(){
   }catch(err){
     console.error("Metin yükleme hatası:", err, "slug:", slug);
     if(textPre){
-      textPre.textContent = "Metin bulunamadı.";
+      textPre.textContent = t("status_text_missing", "Metin bulunamadı.");
       textPre.dataset.baseText = "";
     }
   }
@@ -1084,3 +1101,4 @@ async function init(){
 }
 
 init().catch(console.error);
+})();

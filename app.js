@@ -1,26 +1,16 @@
 // app.js — serrûpel
-// Production mode - console.log'ları minimize et
-const IS_PRODUCTION = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-const DEBUG = !IS_PRODUCTION || (window.location.search.includes('debug=true'));
-
-const log = (...args) => {
-  if (DEBUG) console.log(...args);
-};
-const warn = (...args) => {
-  if (DEBUG) console.warn(...args);
-};
-const error = (...args) => {
-  console.error(...args);
-};
+(function(){
 
 let SONGS = [];
 let homeSample = [];
 let lastQuery = "";
 let userFavorites = [];
+const HOME_SAMPLE_SIZE = 10;
+const t = (key, fallback, vars) => window.t ? window.t(key, vars) : fallback;
 
 function makeId(s){
   if(typeof songId === "function") return songId(s);
-  return `${s.pdf}|${s.page_original}`;
+  return s?.id || "";
 }
 function openLink(s){ return `/song.html?id=${encodeURIComponent(makeId(s))}`; }
 
@@ -59,6 +49,11 @@ function renderList(){
     return;
   }
   
+  if((!SONGS || SONGS.length === 0) && window.__songsCache && window.__songsCache.length > 0){
+    SONGS = window.__songsCache;
+    window.SONGS = SONGS;
+  }
+  
   log("renderList() called");
   log("SONGS length:", SONGS ? SONGS.length : 0);
   const listEl = $("#list");
@@ -76,15 +71,19 @@ function renderList(){
 
   const qTopbar = norm($("#q")?.value || "");
   const q = qTopbar; // Sadece topbar search'ü kullan
+  const refreshBtn = document.getElementById("refreshRecs");
   
   let items = [];
   const intro = document.querySelector(".homeIntro");
 
   if(titleEl){
-    titleEl.textContent = q ? "Encamên lêgerînê" : "Yên Berçav";
+    titleEl.textContent = q ? t("home_results_search", "Encamên lêgerînê") : t("home_results_default", "Yên Berçav");
   }
   if(listWrap){
     listWrap.classList.toggle("is-searching", !!q);
+    if(refreshBtn){
+      refreshBtn.style.display = q ? "none" : "inline-flex";
+    }
     // Mobilde arama yapıldığında body'ye class ekle
     const isMobile = window.innerWidth <= 639;
     if(isMobile && q) {
@@ -119,7 +118,7 @@ function renderList(){
     } else if(SONGS && SONGS.length > 0){
       // homeSample boşsa ama SONGS varsa, yeni sample oluştur
       log("homeSample is empty, creating new sample from SONGS");
-      homeSample = pickRandom(SONGS, 7);
+      homeSample = pickRandom(SONGS, HOME_SAMPLE_SIZE);
       items = homeSample;
       log("New homeSample created, items count:", items.length);
     } else {
@@ -138,9 +137,9 @@ function renderList(){
 
   if(!items.length){
     if(!q && SONGS.length === 0){
-      listEl.innerHTML = `<div class="empty">Stran tên barkirinê...</div>`;
+      listEl.innerHTML = `<div class="empty">${t("status_loading_songs", "Stran tên barkirinê...")}</div>`;
     } else {
-      listEl.innerHTML = `<div class="empty">Tınne</div>`;
+      listEl.innerHTML = `<div class="empty">${t("status_no_results", "Tınne")}</div>`;
     }
     return;
   }
@@ -148,7 +147,7 @@ function renderList(){
   log("Rendering list with", items.length, "items");
   const sId = window.songId || ((s) => s._id || "");
   const html = items.map(s => {
-    const pendingBadge = s.pending ? `<span class="badge badge--pending">Li benda pejirandina edîtorê ye</span>` : "";
+    const pendingBadge = s.pending ? `<span class="badge badge--pending">${t("badge_pending_editor", "Li benda pejirandina edîtorê ye")}</span>` : "";
     const title = window.formatSongTitle ? window.formatSongTitle(s.song) : (s.song || "");
     const songId = sId(s);
     const isFav = window.isFavorite?.(songId, userFavorites) || false;
@@ -160,12 +159,12 @@ function renderList(){
       </div>
       <div class="badges">
         ${pendingBadge}
-        <button class="favoriteBtn ${isFav ? 'is-favorite' : ''}" type="button" aria-label="Favorile" data-song-id="${escapeHtml(songId)}">
+        <button class="favoriteBtn ${isFav ? 'is-favorite' : ''}" type="button" aria-label="${t("action_favorite", "Favorî bike")}" data-song-id="${escapeHtml(songId)}">
           <svg class="favoriteIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
         </button>
-        <a class="open" href="${openLink(s)}">Veke</a>
+        <a class="open" href="${openLink(s)}">${t("action_open", "Veke")}</a>
       </div>
     </div>
   `;
@@ -289,6 +288,13 @@ function renderList(){
   }, 50);
 }
 
+function refreshHomeSample(){
+  if(!SONGS || SONGS.length === 0) return;
+  homeSample = pickRandom(SONGS, HOME_SAMPLE_SIZE);
+  window.homeSample = homeSample;
+  renderList();
+}
+
 function updateSearchState(){
   const input = $("#q");
   if(input){
@@ -339,12 +345,12 @@ function initContactForm(){
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if(!db){
-      setStatus("Danegeh amade nîne.", true);
+      setStatus(t("contact_status_db_unready", "Danegeh amade nîne."), true);
       return;
     }
 
     if(submitBtn) submitBtn.disabled = true;
-    setStatus("Tê şandin...");
+    setStatus(t("contact_status_sending", "Tê şandin..."));
 
     const name = (nameEl?.value || "").trim();
     const contact = (infoEl?.value || "").trim();
@@ -352,7 +358,7 @@ function initContactForm(){
     const files = Array.from(filesEl?.files || []);
 
     if(!message && !files.length){
-      setStatus("Ji kerema xwe peyam binivîse an jî pel zêde bike.", true);
+      setStatus(t("contact_status_empty", "Ji kerema xwe peyam binivîse an jî pel zêde bike."), true);
       if(submitBtn) submitBtn.disabled = false;
       return;
     }
@@ -360,7 +366,7 @@ function initContactForm(){
     const maxSize = 12 * 1024 * 1024;
     for(const file of files){
       if(file.size > maxSize){
-        setStatus(`"${file.name}" pir mezin e. (Max 12MB)`, true);
+        setStatus(t("contact_status_file_too_large", "\"{name}\" pir mezin e. (Max 12MB)", { name: file.name }), true);
         if(submitBtn) submitBtn.disabled = false;
         return;
       }
@@ -375,7 +381,7 @@ function initContactForm(){
     try{
       if(files.length){
         if(!storage){
-          setStatus("Barkirina pelê çalak nîne.", true);
+          setStatus(t("contact_status_upload_disabled", "Barkirina pelê çalak nîne."), true);
           if(submitBtn) submitBtn.disabled = false;
           return;
         }
@@ -406,9 +412,9 @@ function initContactForm(){
       });
 
       form.reset();
-      setStatus("Hate şandin. Spas, em ê di demek nêzîk de vegerin.");
+      setStatus(t("contact_status_sent", "Hate şandin. Spas, em ê di demek nêzîk de vegerin."));
     }catch(err){
-      setStatus(err?.message || "Peyam nehat şandin.", true);
+      setStatus(err?.message || t("contact_status_failed", "Peyam nehat şandin."), true);
     }finally{
       if(submitBtn) submitBtn.disabled = false;
     }
@@ -419,8 +425,11 @@ async function init(){
   log("=== INIT STARTED ===");
   try {
     log("Loading songs...");
-    // Cache'i temizle
-    window.clearSongsCache?.();
+    const shouldForceRefresh = window.location.search.includes("refresh=true");
+    // Cache'i sadece istenirse temizle
+    if(shouldForceRefresh){
+      window.clearSongsCache?.();
+    }
     SONGS = await loadSongs();
     // window objesine de ata - mobil search overlay için
     window.SONGS = SONGS;
@@ -431,10 +440,17 @@ async function init(){
       warn("SONGS array is empty or null!");
       // Retry once
       log("Retrying loadSongs...");
-      window.clearSongsCache?.();
+      if(shouldForceRefresh){
+        window.clearSongsCache?.();
+      }
       SONGS = await loadSongs();
       window.SONGS = SONGS;
       log("SONGS after retry:", SONGS ? SONGS.length : 0);
+    }
+
+    if((!SONGS || SONGS.length === 0) && window.__songsCache && window.__songsCache.length > 0){
+      SONGS = window.__songsCache;
+      window.SONGS = SONGS;
     }
 
     if(!SONGS || SONGS.length === 0){
@@ -442,7 +458,7 @@ async function init(){
       const listEl = $("#list");
       const listWrap = document.querySelector(".homeListWrap");
       if(listEl) {
-        listEl.innerHTML = `<div class="empty">Stran tên barkirinê...</div>`;
+        listEl.innerHTML = `<div class="empty">${t("status_loading_songs", "Stran tên barkirinê...")}</div>`;
         listEl.style.display = "grid";
       }
       if(listWrap) {
@@ -455,9 +471,9 @@ async function init(){
 
     renderStats();
 
-    // her têketinê de 7 stranên cuda
+    // her têketinê de 10 stranên cuda
     if(SONGS && SONGS.length > 0) {
-      homeSample = pickRandom(SONGS, 7);
+      homeSample = pickRandom(SONGS, HOME_SAMPLE_SIZE);
       // window objesine de ata - mobil search overlay için
       window.homeSample = homeSample;
     } else {
@@ -547,8 +563,8 @@ async function init(){
       if(finalListEl && finalListEl.innerHTML.trim().length === 0 && homeSample.length > 0) {
         warn("List is still empty after renderList! Forcing render...");
         finalListEl.innerHTML = homeSample.map(s => {
-          const title = s.song || "Stran";
-          const artist = artistText(s.artist) || "Hunermend";
+          const title = s.song || t("label_song", "Stran");
+          const artist = artistText(s.artist) || t("label_artist", "Hunermend");
           return `
             <div class="item">
               <div class="item__left">
@@ -556,7 +572,7 @@ async function init(){
                 <div class="item__sub">${escapeHtml(artist)}</div>
               </div>
               <div class="badges">
-                <a class="open" href="${openLink(s)}">Veke</a>
+                <a class="open" href="${openLink(s)}">${t("action_open", "Veke")}</a>
               </div>
             </div>
           `;
@@ -580,11 +596,11 @@ async function init(){
           checkListEl.innerHTML = homeSample.map(s => `
             <div class="item">
               <div class="item__left">
-                <div class="item__title">${escapeHtml(s.song || "Test")}</div>
-                <div class="item__sub">${escapeHtml(artistText(s.artist) || "Test Artist")}</div>
+                <div class="item__title">${escapeHtml(s.song || t("label_song", "Stran"))}</div>
+                <div class="item__sub">${escapeHtml(artistText(s.artist) || t("label_artist", "Hunermend"))}</div>
               </div>
               <div class="badges">
-                <a class="open" href="${openLink(s)}">Veke</a>
+                <a class="open" href="${openLink(s)}">${t("action_open", "Veke")}</a>
               </div>
             </div>
           `).join("");
@@ -604,7 +620,7 @@ async function init(){
     const listEl = $("#list");
     const listWrap = document.querySelector(".homeListWrap");
     if(listEl) {
-      listEl.innerHTML = `<div class="empty">Çewtî: ${err.message}</div>`;
+      listEl.innerHTML = `<div class="empty">${t("status_error_prefix", "Çewtî")}: ${err.message}</div>`;
       listEl.style.display = "grid";
     }
     if(listWrap) {
@@ -623,7 +639,7 @@ async function init(){
     if(isMobile && $("#q").value) {
       document.body.classList.add("has-search-results");
       document.body.classList.remove("has-hero-search");
-    } else if(!$("#q").value && !$("#qHero").value) {
+    } else if(!$("#q").value && !(document.getElementById("qHero")?.value)) {
       document.body.classList.remove("has-search-results", "has-hero-search");
     } else if(!$("#q").value) {
       document.body.classList.remove("has-search-results");
@@ -641,7 +657,7 @@ async function init(){
     $("#q").value = "";
     // Arama temizlendiğinde class'ları kaldır
     document.body.classList.remove("has-search-results", "has-hero-search");
-    homeSample = pickRandom(SONGS, 10);
+    homeSample = pickRandom(SONGS, HOME_SAMPLE_SIZE);
     renderDiscover();
     renderList();
     updateSearchState();
@@ -732,6 +748,7 @@ async function init(){
   initResponsiveSearch();
 
   $("#shuffleDiscover")?.addEventListener("click", () => renderDiscover());
+  $("#refreshRecs")?.addEventListener("click", () => refreshHomeSample());
 
   // topbardaki "Rastgele"
   
@@ -744,7 +761,7 @@ async function init(){
   initAddSongPanel?.(async () => {
     SONGS = await loadSongs();
     renderStats();
-    homeSample = pickRandom(SONGS, 7);
+    homeSample = pickRandom(SONGS, HOME_SAMPLE_SIZE);
     renderDiscover();
     renderList();
   });
@@ -875,7 +892,8 @@ init().catch(err => {
   const list = $("#list");
   const listWrap = document.querySelector(".homeListWrap");
   if(list) {
-    list.innerHTML = `<div class="empty">Çewtî: ${err.message || "Nexşe nehat barkirin"}</div>`;
+    const fallback = err.message || t("status_save_failed", "Nehat tomarkirin.");
+    list.innerHTML = `<div class="empty">${t("status_error_prefix", "Çewtî")}: ${fallback}</div>`;
     list.style.display = "grid";
     list.style.visibility = "visible";
     list.style.opacity = "1";
@@ -931,3 +949,4 @@ init().catch(err => {
   }
 })();
 // LIVE_BG_END
+})();
