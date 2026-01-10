@@ -685,6 +685,36 @@ const norm = (s) => (s || "")
   .replace(/ö/g, "o")
   .replace(/ç/g, "c");
 
+const ARTIST_PHOTOS_URL = "/assets/artist-photos/artist-photos.json?v=1";
+let __artistPhotosPromise = null;
+let __artistPhotoMap = null;
+
+async function loadArtistPhotos(){
+  if(__artistPhotosPromise) return __artistPhotosPromise;
+  __artistPhotosPromise = fetch(ARTIST_PHOTOS_URL)
+    .then((res) => res.ok ? res.json() : [])
+    .then((list) => {
+      const map = {};
+      (Array.isArray(list) ? list : []).forEach((item) => {
+        if(!item || !item.artist || !item.photo) return;
+        map[norm(item.artist)] = item.photo;
+      });
+      __artistPhotoMap = map;
+      return Array.isArray(list) ? list : [];
+    })
+    .catch(() => {
+      __artistPhotoMap = {};
+      return [];
+    });
+  return __artistPhotosPromise;
+}
+
+async function getArtistPhoto(name){
+  if(!name) return "";
+  const map = __artistPhotoMap || (await loadArtistPhotos(), __artistPhotoMap);
+  return map?.[norm(name)] || "";
+}
+
 const LOCALE = "tr-TR";
 function formatSongTitle(title){
   const text = (title || "").toString().trim();
@@ -1451,6 +1481,8 @@ window.loadSongs = loadSongs;
 window.clearSongsCache = clearSongsCache;
 window.formatSongTitle = formatSongTitle;
 window.norm = norm;
+window.loadArtistPhotos = loadArtistPhotos;
+window.getArtistPhoto = getArtistPhoto;
 window.pickRandom = pickRandom;
 window.artistArr = artistArr;
 window.escapeHtml = escapeHtml;

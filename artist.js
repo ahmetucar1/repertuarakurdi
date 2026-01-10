@@ -85,7 +85,6 @@ function render(){
   }
   
   const q = norm($("#q")?.value || "");
-  const mode = $("#sort")?.value || "normal";
   const list = $("#list");
   const countEl = $("#count");
   const titleEl = $("#artistName");
@@ -100,11 +99,7 @@ function render(){
     items = items.filter(s => norm(`${s.song} ${artistText(s.artist)}`).includes(q));
   }
 
-  if(mode === "az"){
-    items = [...items].sort((a,b) => String(a.song||"").localeCompare(String(b.song||""), "ku"));
-  }else{
-    items = [...items].sort(normalSort);
-  }
+  items = [...items].sort(normalSort);
 
   if(countEl) countEl.textContent = items.length.toString();
 
@@ -131,13 +126,54 @@ function render(){
   }).join("");
 }
 
+async function renderArtistPhoto(){
+  const wrap = document.getElementById("artistAvatar");
+  const img = document.getElementById("artistAvatarImg");
+  if(!wrap || !img) return;
+  if(typeof window.getArtistPhoto !== "function") return;
+  const photo = await window.getArtistPhoto(ARTIST);
+  if(photo){
+    const displayName = window.formatArtistName ? window.formatArtistName(ARTIST) : ARTIST;
+    img.src = photo;
+    img.alt = displayName || "Artist";
+    wrap.classList.remove("is-hidden");
+  } else {
+    wrap.classList.add("is-hidden");
+  }
+}
+
+function initBackButton(){
+  const btn = document.getElementById("artistBackBtn");
+  if(!btn) return;
+  const fallback = "/all.html";
+  let target = "";
+  const ref = document.referrer;
+  if(ref){
+    try{
+      const url = new URL(ref);
+      if(url.origin === location.origin && url.href !== location.href){
+        target = url.href;
+      }
+    }catch(_e){}
+  }
+  btn.addEventListener("click", () => {
+    if(target){
+      location.href = target;
+      return;
+    }
+    location.href = fallback;
+  });
+}
+
 async function init(){
   ARTIST = getArtistParam();
   SONGS = await loadSongs();
 
   BASE = ARTIST ? SONGS.filter(sameArtist) : SONGS;
   render();
+  renderArtistPhoto();
   updateSearchState();
+  initBackButton();
 
   const favBtn = $("#artistFavBtn");
   const favStatus = $("#artistFavStatus");
@@ -154,9 +190,7 @@ async function init(){
   };
   const updateFavBtn = () => {
     if(!favBtn) return;
-    favBtn.textContent = favActive
-      ? t("action_unfavorite_artist", "Favoriden çıkar")
-      : t("action_favorite_artist", "Sanatçıyı favorile");
+    favBtn.classList.toggle("is-favorite", favActive);
   };
   updateFavBtn();
 
@@ -225,14 +259,6 @@ async function init(){
     }
     
     updateSearchState();
-    render();
-  });
-  $("#sort")?.addEventListener("change", () => {
-    // Mobil search overlay açıkken sayfadaki listeleri güncelleme
-    if (window.__mobileSearchOverlayOpen) {
-      console.log("🚫 artist.js sort change event skipped - mobile search overlay is open");
-      return;
-    }
     render();
   });
   $("#clear")?.addEventListener("click", () => {

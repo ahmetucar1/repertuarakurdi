@@ -65,18 +65,24 @@
   <main class="container">
     <section class="resultsHeader" style="margin-top:10px;">
       <div class="resultsHeader__left">
-        <div class="resultsHeader__title" id="artistName" data-i18n="label_artist">Hunermend</div>
-        <br>
-        <div class="muted"><span id="count">0</span> <span data-i18n="label_song">Stran</span></div>
+        <div class="artistHeader">
+          <div class="artistAvatar is-hidden" id="artistAvatar">
+            <img id="artistAvatarImg" alt="">
+          </div>
+          <div class="artistMeta">
+            <div class="resultsHeader__title" id="artistName" data-i18n="label_artist">Hunermend</div>
+            <div class="muted"><span id="count">0</span> <span data-i18n="label_song">Stran</span></div>
+          </div>
+        </div>
       </div>
       <div class="resultsHeader__right" style="display:flex; gap:10px; align-items:center;">
-        <button id="artistFavBtn" class="btn btn--ghost" type="button" data-i18n="action_favorite_artist">Hunermendê favorî bike</button>
+        <button id="artistFavBtn" class="favoriteBtn" type="button" aria-label="Hunermendê favorî bike" data-i18n-aria-label="action_favorite_artist">
+          <svg class="favoriteIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
         <span id="artistFavStatus" class="muted"></span>
-        <select id="sort" class="btn btn--ghost" aria-label="Rêzkirin" data-i18n-aria-label="sort_label">
-          <option value="normal" data-i18n="sort_normal">Rêzkirin: Asayî</option>
-          <option value="az" data-i18n="sort_az">Rêzkirin: A–Z</option>
-        </select>
-        <a class="btn btn--ghost" href="/all.html" data-i18n="action_back">Vegere</a>
+        <button id="artistBackBtn" class="btn btn--ghost" type="button" data-i18n="action_back">Vegere</button>
       </div>
     </section>
 

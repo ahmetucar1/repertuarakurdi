@@ -33,6 +33,88 @@ function artistLinks(a){
   }).join(" · ");
 }
 
+async function renderStoryStrip(){
+  const track = document.getElementById("storyTrack");
+  const strip = document.querySelector(".storyStrip");
+  if(!track || typeof window.loadArtistPhotos !== "function") return;
+
+  const list = await window.loadArtistPhotos();
+  if(!Array.isArray(list) || list.length === 0){
+    if(strip) strip.style.display = "none";
+    return;
+  }
+
+  const html = list.map((item) => {
+    const name = (item?.artist || "").toString().trim();
+    const label = (item?.label || name).toString().trim();
+    const photo = (item?.photo || "").toString().trim();
+    if(!name || !photo) return "";
+    const display = window.formatArtistName ? window.formatArtistName(label) : label;
+    const href = `/artist.html?name=${encodeURIComponent(name)}`;
+    return `
+      <a class="storyBubble" href="${href}" role="listitem" aria-label="${escapeHtml(display)}">
+        <span class="storyBubble__ring">
+          <img class="storyBubble__img" src="${photo}" alt="${escapeHtml(display)}" loading="lazy" decoding="async">
+        </span>
+        <span class="storyBubble__name">${escapeHtml(display)}</span>
+      </a>
+    `;
+  }).join("");
+
+  track.innerHTML = html;
+  initStoryStripControls();
+}
+
+function initStoryStripControls(){
+  const track = document.getElementById("storyTrack");
+  const leftBtn = document.getElementById("storyArrowLeft");
+  const rightBtn = document.getElementById("storyArrowRight");
+  if(!track || !leftBtn || !rightBtn) return;
+
+  const update = () => {
+    const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+    if(maxScroll <= 2){
+      leftBtn.classList.add("is-hidden");
+      rightBtn.classList.add("is-hidden");
+      return;
+    }
+    if(track.scrollLeft <= 2){
+      leftBtn.classList.add("is-hidden");
+    } else {
+      leftBtn.classList.remove("is-hidden");
+    }
+    if(track.scrollLeft >= maxScroll - 2){
+      rightBtn.classList.add("is-hidden");
+    } else {
+      rightBtn.classList.remove("is-hidden");
+    }
+  };
+
+  if(track.dataset.arrows !== "true"){
+    const scrollByAmount = () => Math.max(160, Math.round(track.clientWidth * 0.7));
+    leftBtn.addEventListener("click", () => {
+      track.scrollBy({ left: -scrollByAmount(), behavior: "smooth" });
+    });
+    rightBtn.addEventListener("click", () => {
+      track.scrollBy({ left: scrollByAmount(), behavior: "smooth" });
+    });
+    let raf = 0;
+    const onScroll = () => {
+      if(raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        update();
+      });
+    };
+    track.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", update);
+    track.dataset.arrows = "true";
+  }
+
+  update();
+  setTimeout(update, 200);
+}
+
 function renderStats(){
   const songsN = SONGS.length;
   const artists = new Set(SONGS.flatMap(s => artistArr(s.artist)).map(a => norm(a))).size;
@@ -470,6 +552,7 @@ async function init(){
     }
 
     renderStats();
+    renderStoryStrip();
 
     // her têketinê de 10 stranên cuda
     if(SONGS && SONGS.length > 0) {

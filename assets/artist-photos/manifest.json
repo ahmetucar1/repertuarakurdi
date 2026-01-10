@@ -1,0 +1,86 @@
+[
+  {
+    "artist": "Şivan Perwer",
+    "file": "assets/artist-photos/sivan-perwer.jpg",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/%C5%9Eivan_Perwer.jpg/960px-%C5%9Eivan_Perwer.jpg",
+    "source_site": "tr.wikipedia.org",
+    "source_type": "wikipedia"
+  },
+  {
+    "artist": "Aynur Doğan",
+    "file": "assets/artist-photos/aynur-dogan.jpg",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Birlikte_-_Kundgebung_-_1620_-_Aynur_Do%C4%9Fan-0771.jpg/960px-Birlikte_-_Kundgebung_-_1620_-_Aynur_Do%C4%9Fan-0771.jpg",
+    "source_site": "tr.wikipedia.org",
+    "source_type": "wikipedia"
+  },
+  {
+    "artist": "Ciwan Haco",
+    "file": "assets/artist-photos/ciwan-haco.png",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/d/da/Ciwan_Haco.png",
+    "source_site": "tr.wikipedia.org",
+    "source_type": "wikipedia"
+  },
+  {
+    "artist": "Aram Tigran",
+    "file": "assets/artist-photos/aram-tigran.jpg",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Peyker%C3%AA_Aram%C3%AA_T%C3%AEgran_%C3%AA_Farq%C3%AEn%C3%AA_2012.JPG/960px-Peyker%C3%AA_Aram%C3%AA_T%C3%AEgran_%C3%AA_Farq%C3%AEn%C3%AA_2012.JPG",
+    "source_site": "tr.wikipedia.org",
+    "source_type": "wikipedia"
+  },
+  {
+    "artist": "Mikail Aslan",
+    "file": "assets/artist-photos/mikail-aslan.jpg",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/1/1f/2016-06-10_Goseriede_Hannover%2C_Die_LINKE%2C_DIDF%2C_Mikail_Aslan%2C_Dieter_Dehm%2C_%28126%29.JPG",
+    "source_site": "tr.wikipedia.org",
+    "source_type": "wikipedia"
+  },
+  {
+    "artist": "Mehmet Atlı",
+    "file": "assets/artist-photos/mehmet-atli.jpg",
+    "source": "https://commons.wikimedia.org/wiki/Special:FilePath/Aynur%2C_Mehmet_Atli%2C_Tara_Caf.JPG?width=800",
+    "source_site": "commons.wikimedia.org",
+    "source_type": "commons"
+  },
+  {
+    "artist": "Agirê Jiyan",
+    "file": "assets/artist-photos/agire-jiyan.jpg",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Agir%C3%AA_Jiyan_1.JPG/960px-Agir%C3%AA_Jiyan_1.JPG",
+    "source_site": "tr.wikipedia.org",
+    "source_type": "wikipedia"
+  },
+  {
+    "artist": "Rojda",
+    "file": "assets/artist-photos/rojda.jpg",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/20150703-TFF-Rudolstadt-Rojda-Senses-5957.jpg/960px-20150703-TFF-Rudolstadt-Rojda-Senses-5957.jpg",
+    "source_site": "tr.wikipedia.org",
+    "source_type": "wikipedia"
+  },
+  {
+    "artist": "Metin Kemal Kahraman",
+    "file": "assets/artist-photos/metin-kemal-kahraman.jpg",
+    "source": "https://commons.wikimedia.org/wiki/Special:FilePath/Metin_Kahraman_in_Hasankeyf%2C_2008.jpg?width=800",
+    "source_site": "commons.wikimedia.org",
+    "source_type": "commons"
+  },
+  {
+    "artist": "Xero Abbas",
+    "file": "assets/artist-photos/xero-abbas.jpg",
+    "source": "https://commons.wikimedia.org/wiki/Special:FilePath/X%C3%AAro_Abbas.jpg?width=800",
+    "source_site": "commons.wikimedia.org",
+    "source_type": "commons"
+  },
+  {
+    "artist": "Grup Yorum",
+    "file": "assets/artist-photos/grup-yorum.jpg",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Ibrahim_-_inan.jpg/960px-Ibrahim_-_inan.jpg",
+    "source_site": "tr.wikipedia.org",
+    "source_type": "wikipedia"
+  },
+  {
+    "artist": "Tara Jaff",
+    "file": "assets/artist-photos/tara-jaff.jpg",
+    "source": "https://commons.wikimedia.org/wiki/Special:FilePath/Tara_Caf.jpg?width=800",
+    "source_site": "commons.wikimedia.org",
+    "source_type": "commons"
+  }
+]

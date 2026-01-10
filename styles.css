@@ -988,6 +988,167 @@ body {
 .profileActions{ display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
 .profileEdit{ margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
 
+/* Story Strip */
+.storyStrip{
+  position: relative;
+  margin: 8px 0 6px;
+  padding: 6px 0 6px;
+}
+.storyStrip::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: linear-gradient(90deg, rgba(244,163,64,.16), rgba(224,88,47,.12), rgba(67,186,160,.12));
+  opacity: 0.45;
+  filter: blur(18px);
+  pointer-events: none;
+}
+.storyStrip__track{
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 8px 28px 12px;
+  margin: 0;
+  scroll-padding-left: 28px;
+  scroll-padding-right: 28px;
+  scroll-snap-type: x proximity;
+}
+.storyStrip__track::-webkit-scrollbar{
+  height: 6px;
+}
+.storyStrip__track::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.18);
+  border-radius: 999px;
+}
+.storyStrip__track::-webkit-scrollbar-track{
+  background: transparent;
+}
+.storyBubble{
+  flex: 0 0 auto;
+  width: 76px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  color: var(--muted);
+  scroll-snap-align: start;
+}
+.storyBubble__ring{
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  padding: 2px;
+  background: conic-gradient(from 120deg, var(--accent), var(--accent2), #3bb7a1, var(--accent));
+  box-shadow: 0 10px 24px rgba(0,0,0,.35);
+  display: grid;
+  place-items: center;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.storyBubble__img{
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  object-fit: cover;
+  background: #0e1219;
+  border: 2px solid rgba(12,16,22,.9);
+  filter: saturate(1.06) contrast(1.05);
+}
+.storyBubble__name{
+  max-width: 76px;
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.storyBubble:hover .storyBubble__ring{
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(0,0,0,.4);
+}
+.storyBubble:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+.storyArrow{
+  position: absolute;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.28);
+  background: rgba(12,16,22,.55);
+  color: rgba(255,255,255,.8);
+  display: grid;
+  place-items: center;
+  z-index: 3;
+  transform: translateY(-50%);
+  box-shadow: 0 8px 18px rgba(0,0,0,.35);
+  backdrop-filter: blur(4px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+.storyArrow svg{
+  width: 16px;
+  height: 16px;
+}
+.storyArrow--left{
+  left: 10px;
+}
+.storyArrow--right{
+  right: 10px;
+}
+.storyArrow.is-hidden{
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) scale(0.95);
+}
+
+@media (max-width: 639px) {
+  .storyStrip{
+    margin: -2px 0 2px;
+    padding: 0 0 4px;
+  }
+  .storyStrip__track{
+    padding: 4px 14px 8px;
+    scroll-padding-left: 14px;
+    scroll-padding-right: 14px;
+  }
+  .storyBubble{
+    width: 68px;
+  }
+  .storyBubble__ring{
+    width: 56px;
+    height: 56px;
+  }
+  .storyBubble__img{
+    width: 50px;
+    height: 50px;
+  }
+  .storyBubble__name{
+    font-size: 10px;
+  }
+  .artistHeader{
+    gap: 10px;
+  }
+  .artistAvatar{
+    width: 60px;
+    height: 60px;
+  }
+  .artistAvatar img{
+    width: 54px;
+    height: 54px;
+    filter: saturate(1.06) contrast(1.05);
+  }
+  .storyArrow{
+    display: none;
+  }
+}
+
 /* Home */
 .homeIntro{
   margin-top: 0;
@@ -1249,6 +1410,37 @@ body {
   align-items: flex-start;
   text-align: left;
   flex: 1 1 auto;
+}
+
+.artistHeader{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.artistAvatar{
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  padding: 3px;
+  background: conic-gradient(from 120deg, var(--accent), var(--accent2), #3bb7a1, var(--accent));
+  box-shadow: 0 10px 24px rgba(0,0,0,.35);
+  display: grid;
+  place-items: center;
+}
+.artistAvatar img{
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  object-fit: cover;
+  background: #0e1219;
+  border: 2px solid rgba(12,16,22,.9);
+  filter: saturate(1.06) contrast(1.05);
+}
+.artistAvatar.is-hidden{
+  display: none;
+}
+.artistHeader .muted{
+  display: block;
 }
 
 .resultsHeader__right{
