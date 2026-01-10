@@ -111,6 +111,9 @@ body {
   body {
     padding-top: 120px; /* Mobilde topbar yüksekliği (2 satır + gap) */
   }
+  .topbar__actions .topbarAbout {
+    display: none !important;
+  }
   
   /* Mobilde topbardaki search inputu ASLA görünmesin, sadece icon olsun */
   .topbar__actions .search--header .search__input {
@@ -2900,6 +2903,8 @@ main.container > .footer {
 .sectionHeader{ display:flex; flex-direction:column; gap:6px; margin-bottom: var(--space-2); }
 .sectionTitle{ margin:0; font-size: clamp(22px, 2.6vw, 32px); letter-spacing:-.02em; }
 .sectionSub{ margin:0; color:var(--muted); }
+.aboutBody{ display:flex; flex-direction:column; gap:12px; }
+.aboutText{ margin:0; color:var(--text); line-height:1.75; }
 .sourcesRow{
   display:flex;
   flex-wrap:wrap;

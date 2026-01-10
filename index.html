@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="icon" type="image/png" href="/assets/images/favicon.png">
-  <link rel="stylesheet" href="/styles.css?v=2.2" />
+  <link rel="stylesheet" href="/styles.css?v=2.6" />
 </head>
 <body>
   <div class="home-page">
@@ -51,6 +51,7 @@
         <a class="btn btn--ghost btn--lg" href="#contact" data-i18n="nav_contact">Peywendî</a>
         <a id="adminLink" class="btn btn--ghost btn--lg" href="/admin.html" style="display:none;" data-i18n="nav_admin">Rêveber</a>
         <a id="authOpen" class="btn btn--ghost btn--lg" href="/login.html?return=/index.html" data-i18n="nav_login">Têkev</a>
+        <a class="btn btn--ghost btn--lg topbarAbout" href="#about" data-i18n="nav_about">Derbarê</a>
         <div class="search search--header" aria-label="Lêgerîn" data-i18n-aria-label="search_label">
           <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
@@ -215,6 +216,17 @@
       </div>
     </section>
 
+    <section id="about" class="section">
+      <div class="sectionHeader">
+        <h2 class="sectionTitle" data-i18n="about_title">Derbarê Me</h2>
+      </div>
+      <div class="aboutBody">
+        <p class="aboutText" data-i18n="about_p1">Evîn û şertên vê malperê ji hewldaneke bi dil û bi muzîkê re hatine avakirin. Armanca me ew e ku akor û repertûara stranên kurdî bi awayekî hêsan, gihandî û hêsabkirî bigihînin hemû kesên ku dixwazin gitarê bi muzîka xwe re bikar bînin. Ev malper ne tenê cihê akoran e; ew hewceyeke parastin û belavkirina bîra muzîka kurdî ye.</p>
+        <p class="aboutText" data-i18n="about_p2">Di vê rê de, Helezonîk Kreşendo ji bo me çavkaniyeke girîng û hêja bû. Bi awayê wan yê akademîk û bi rêz û şertên wan yên muzîkî, wan rê li pêşiya vê projeyê vekir. Ji bo ku em karibin vê arşîvê bi rêz û bi şertên rast bi giştî re parve bikin, em bi rêz û sipasên xwe bi dil ji wan re radigihînin.</p>
+        <p class="aboutText" data-i18n="about_p3">Her weha, em bi taybetî spas dikin Serdar Y. Türkmen ku bi zanîn, tecrûbe û xebata xwe ya dirêj di warê muzîka kurdî de, ji bo gelek xwendekar û muzîkvanan bûye çavkaniyek. Bi heman awayî, em spasên xwe ji hemû xwendekarên Med Sanat Merkezi re radigihînin; her yek ji wan bi hewldan û evîna xwe ya bi muzîkê re, beşdariyeke girîng di şertên ku vê projeyê gihandî ye de kiriye. Ev malper bi hevkariya wan, bi rêz û bi vîjdana muzîkî, her roj hîn dibe û fireh dibe.</p>
+      </div>
+    </section>
+
     <section id="sources" class="section">
       <div class="sectionHeader">
         <h2 class="sectionTitle" data-i18n="sources_title">Çavkaniyên</h2>
@@ -334,7 +346,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-storage-compat.js"></script>
   <script src="/firebase.js?v=2.2"></script>
-  <script src="/common.js?v=2.5"></script>
+  <script src="/common.js?v=2.7"></script>
   <script src="/app.js?v=2.5"></script>
   <script>
     // Zêdeke butonunu giriş durumuna göre yönlendir
