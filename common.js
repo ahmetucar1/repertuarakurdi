@@ -47,6 +47,15 @@ const I18N = {
     action_add_song_short: "Stran Zêde Bike",
     action_login: "Têkeve",
     action_favorite: "Favorî bike",
+    seo_site_name: "Repertûara Kurdî",
+    seo_home_title: "Repertûara Kurdî | Akorên Stranên Kurdî û Gotinên Stranan",
+    seo_home_desc: "Akor û gotinên stranên kurdî bibîne. Repertûara Kurdî bi ton û govend.",
+    seo_all_title: "Hemû Stranên Kurdî | Repertûara Kurdî",
+    seo_all_desc: "Repertûara Kurdî: hemû stranên kurdî bi akor, gotin, ton û govend.",
+    seo_artist_title: "{artist} — Stranên Kurdî û Akor | Repertûara Kurdî",
+    seo_artist_desc: "{artist} ji bo gotin, akor, ton û govendên stranên kurdî.",
+    seo_song_title: "{song} — {artist} | Gotin û Akor",
+    seo_song_desc: "{song} ji {artist}. Gotin, akor, tonê orîjînal û govend.",
     search_placeholder: "Stran an hunermend bigere…",
     search_placeholder_artist: "Di nav stranên vî hunermendî de bigere…",
     home_kicker: "Hûn bi xêr hatin",
@@ -325,6 +334,15 @@ const I18N = {
     action_add_song_short: "Şarkı Ekle",
     action_login: "Giriş",
     action_favorite: "Favoriye ekle",
+    seo_site_name: "Repertuar Kürdi",
+    seo_home_title: "Repertuar Kürdi | Kürtçe Akorlar ve Kürtçe Şarkı Sözleri",
+    seo_home_desc: "Kürtçe şarkı sözleri, akorlar, orijinal ton ve ritim bilgileri. Kürtçe repertuar burada.",
+    seo_all_title: "Tüm Kürtçe Şarkılar | Repertuar Kürdi",
+    seo_all_desc: "Kürtçe repertuar: şarkı sözleri, akorlar, ton ve ritim.",
+    seo_artist_title: "{artist} — Kürtçe Şarkılar ve Akorlar | Repertuar Kürdi",
+    seo_artist_desc: "{artist} için kürtçe şarkı sözleri, akorlar ve repertuar.",
+    seo_song_title: "{song} sözleri ve akorları — {artist} | Repertuar Kürdi",
+    seo_song_desc: "{song} {artist} kürtçe sözleri, akorları, orijinal ton ve ritim bilgisi.",
     search_placeholder: "Şarkı veya sanatçı ara…",
     search_placeholder_artist: "Bu sanatçının şarkılarında ara…",
     home_kicker: "Hoş geldin",
@@ -577,8 +595,21 @@ const I18N = {
 };
 
 const DEFAULT_LANG = "ku";
-let currentLang = (localStorage.getItem("lang") || DEFAULT_LANG).toLowerCase();
+let urlLang = "";
+try{
+  const params = new URLSearchParams(window.location.search);
+  urlLang = (params.get("lang") || "").toLowerCase();
+  if(urlLang !== "tr" && urlLang !== "ku") urlLang = "";
+}catch(_e){
+  urlLang = "";
+}
+let currentLang = (urlLang || localStorage.getItem("lang") || DEFAULT_LANG).toLowerCase();
 if(!I18N[currentLang]) currentLang = DEFAULT_LANG;
+if(urlLang){
+  try{
+    localStorage.setItem("lang", currentLang);
+  }catch(_e){}
+}
 
 function t(key, vars = {}){
   const table = I18N[currentLang] || I18N[DEFAULT_LANG] || {};
@@ -626,6 +657,52 @@ function updateLangToggle(){
   });
 }
 
+function syncLangParam(){
+  try{
+    const url = new URL(window.location.href);
+    if(currentLang === "tr"){
+      url.searchParams.set("lang", "tr");
+    }else{
+      url.searchParams.delete("lang");
+    }
+    const next = url.pathname + (url.searchParams.toString() ? `?${url.searchParams}` : "") + url.hash;
+    const current = window.location.pathname + window.location.search + window.location.hash;
+    if(next !== current){
+      window.history.replaceState(null, "", next);
+    }
+  }catch(_e){}
+}
+
+function appendLangParam(url){
+  if(!url || url === "#" || url.startsWith("#")) return url;
+  if(/^(mailto:|tel:|javascript:)/i.test(url)) return url;
+  try{
+    const parsed = new URL(url, window.location.origin);
+    if(parsed.origin !== window.location.origin) return url;
+    if(currentLang === "tr"){
+      parsed.searchParams.set("lang", "tr");
+    }else{
+      parsed.searchParams.delete("lang");
+    }
+    const search = parsed.searchParams.toString();
+    return parsed.pathname + (search ? `?${search}` : "") + (parsed.hash || "");
+  }catch(_e){
+    return url;
+  }
+}
+
+function applyLangToLinks(root = document){
+  if(!root) return;
+  const links = root.querySelectorAll("a[href]");
+  links.forEach((link) => {
+    const href = link.getAttribute("href");
+    const next = appendLangParam(href || "");
+    if(next && href !== next){
+      link.setAttribute("href", next);
+    }
+  });
+}
+
 function setLanguage(lang){
   if(!I18N[lang]) return;
   currentLang = lang;
@@ -633,6 +710,11 @@ function setLanguage(lang){
   document.documentElement.setAttribute("lang", lang === "tr" ? "tr" : "ku");
   applyTranslations();
   updateLangToggle();
+  syncLangParam();
+  applyLangToLinks();
+  if(typeof window.refreshSeo === "function"){
+    window.refreshSeo();
+  }
 }
 
 function initLanguageToggle(){
@@ -648,6 +730,8 @@ function initI18n(){
   document.documentElement.setAttribute("lang", currentLang === "tr" ? "tr" : "ku");
   applyTranslations();
   initLanguageToggle();
+  syncLangParam();
+  applyLangToLinks();
   document.documentElement.classList.remove("i18n-pending");
 }
 
@@ -660,6 +744,202 @@ if(document.readyState === "loading"){
 window.t = t;
 window.setLanguage = setLanguage;
 window.getLanguage = () => currentLang;
+
+const SEO_DOMAIN = "https://repertuarakurdi.com";
+const SEO_DEFAULT_IMAGE = `${SEO_DOMAIN}/assets/logo_web_assets/logo-512.webp`;
+
+function normalizeSeoPath(path){
+  if(!path) return "/";
+  let out = path.startsWith("/") ? path : `/${path}`;
+  if(out === "/index.html") return "/";
+  return out;
+}
+
+function toAbsoluteUrl(url){
+  if(!url) return "";
+  if(/^https?:\/\//i.test(url)) return url;
+  return `${SEO_DOMAIN}${normalizeSeoPath(url)}`;
+}
+
+function buildSeoUrlForLang(lang, baseUrl){
+  let parsed;
+  try{
+    parsed = baseUrl ? new URL(baseUrl, SEO_DOMAIN) : new URL(window.location.href);
+  }catch(_e){
+    const fallbackPath = normalizeSeoPath(window.location.pathname || "/");
+    return `${SEO_DOMAIN}${fallbackPath}`;
+  }
+  parsed.protocol = "https:";
+  parsed.host = new URL(SEO_DOMAIN).host;
+  if(lang === "tr"){
+    parsed.searchParams.set("lang", "tr");
+  }else{
+    parsed.searchParams.delete("lang");
+  }
+  const path = normalizeSeoPath(parsed.pathname);
+  const search = parsed.searchParams.toString();
+  return `${SEO_DOMAIN}${path}${search ? `?${search}` : ""}`;
+}
+
+function ensureMeta(attr, key){
+  const selector = `meta[${attr}="${key}"]`;
+  let tag = document.head.querySelector(selector);
+  if(!tag){
+    tag = document.createElement("meta");
+    tag.setAttribute(attr, key);
+    document.head.appendChild(tag);
+  }
+  return tag;
+}
+
+function setMeta(name, content){
+  if(!content) return;
+  ensureMeta("name", name).setAttribute("content", content);
+}
+
+function setMetaProperty(property, content){
+  if(!content) return;
+  ensureMeta("property", property).setAttribute("content", content);
+}
+
+function ensureLink(rel, attrs = {}){
+  let selector = `link[rel="${rel}"]`;
+  if(attrs.hreflang) selector += `[hreflang="${attrs.hreflang}"]`;
+  let link = document.head.querySelector(selector);
+  if(!link){
+    link = document.createElement("link");
+    link.setAttribute("rel", rel);
+    if(attrs.hreflang) link.setAttribute("hreflang", attrs.hreflang);
+    document.head.appendChild(link);
+  }
+  if(attrs.href) link.setAttribute("href", attrs.href);
+  return link;
+}
+
+function setJsonLd(data, id = "seo-jsonld"){
+  if(!data) return;
+  let script = document.getElementById(id);
+  if(!script){
+    script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = id;
+    document.head.appendChild(script);
+  }
+  script.textContent = JSON.stringify(data);
+}
+
+function setSeoData(options = {}){
+  const title = options.title || document.title || t("seo_site_name");
+  const description = options.description || "";
+  const canonical = options.canonical ? toAbsoluteUrl(options.canonical) : buildSeoUrlForLang(currentLang);
+  const image = options.image || SEO_DEFAULT_IMAGE;
+  const ogType = options.ogType || "website";
+  const robots = options.robots || "index, follow";
+  const locale = currentLang === "tr" ? "tr_TR" : "ku";
+
+  if(title) document.title = title;
+  if(description) setMeta("description", description);
+  setMeta("robots", robots);
+  setMetaProperty("og:site_name", t("seo_site_name"));
+  if(title){
+    setMetaProperty("og:title", title);
+    setMeta("twitter:title", title);
+  }
+  if(description){
+    setMetaProperty("og:description", description);
+    setMeta("twitter:description", description);
+  }
+  setMetaProperty("og:type", ogType);
+  if(canonical) setMetaProperty("og:url", canonical);
+  if(image){
+    setMetaProperty("og:image", image);
+    setMeta("twitter:image", image);
+  }
+  setMetaProperty("og:locale", locale);
+  setMeta("twitter:card", "summary_large_image");
+
+  if(canonical){
+    ensureLink("canonical", { href: canonical });
+    const kuUrl = buildSeoUrlForLang("ku", canonical);
+    const trUrl = buildSeoUrlForLang("tr", canonical);
+    ensureLink("alternate", { hreflang: "ku", href: kuUrl });
+    ensureLink("alternate", { hreflang: "tr", href: trUrl });
+    ensureLink("alternate", { hreflang: "x-default", href: kuUrl });
+  }
+
+  if(options.jsonLd){
+    setJsonLd(options.jsonLd, options.jsonLdId || "seo-jsonld");
+  }
+}
+
+function applySeoBase(){
+  const path = window.location.pathname || "/";
+  const isHome = path === "/" || path.endsWith("/index.html");
+  const isAll = path.endsWith("/all.html");
+  const isArtist = path.endsWith("/artist.html");
+  const isSong = path.endsWith("/song.html") || path.startsWith("/song/");
+  const isLogin = path.endsWith("/login.html");
+  const isAdmin = path.endsWith("/admin.html");
+  const isProfile = path.endsWith("/profile.html");
+
+  if(isLogin || isAdmin || isProfile){
+    setSeoData({ title: document.title, description: "", robots: "noindex, nofollow" });
+    return;
+  }
+
+  if(isHome){
+    setSeoData({
+      title: t("seo_home_title"),
+      description: t("seo_home_desc"),
+      ogType: "website"
+    });
+    const websiteLd = {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: t("seo_site_name"),
+      url: buildSeoUrlForLang(currentLang)
+    };
+    setJsonLd(websiteLd, "seo-jsonld");
+    return;
+  }
+
+  if(isAll){
+    setSeoData({
+      title: t("seo_all_title"),
+      description: t("seo_all_desc"),
+      ogType: "website"
+    });
+    return;
+  }
+
+  if(isArtist){
+    setSeoData({
+      title: t("seo_artist_title", { artist: t("label_artist") }),
+      description: t("seo_artist_desc", { artist: t("label_artist") }),
+      ogType: "profile"
+    });
+    return;
+  }
+
+  if(isSong){
+    setSeoData({
+      title: t("seo_song_title", { song: t("label_song"), artist: t("label_artist") }),
+      description: t("seo_song_desc", { song: t("label_song"), artist: t("label_artist") }),
+      ogType: "music.song"
+    });
+  }
+}
+
+window.setSeoData = setSeoData;
+window.buildSeoUrlForLang = buildSeoUrlForLang;
+window.toAbsoluteUrl = toAbsoluteUrl;
+window.refreshSeo = () => {
+  applySeoBase();
+  if(typeof window.__applySeoOverrides === "function"){
+    window.__applySeoOverrides();
+  }
+};
+window.refreshSeo();
 
 // Fail-safe: overlay açık kalmışsa kapalı başlat
 document.body?.classList.remove("auth-open");
@@ -1054,6 +1334,36 @@ function songId(song){
   const page = song?.page_original;
   if(pdf && page != null && page !== "") return `${pdf}|${page}`;
   return "";
+}
+
+function slugifySongTitle(title){
+  return (title || "")
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ı/g, "i")
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function buildSongUrl(song){
+  const id = typeof song === "string" ? song : songId(song);
+  const title = typeof song === "string" ? "" : (song?.song || song?.title || "");
+  const slug = slugifySongTitle(title) || "song";
+  const isLocal = typeof window !== "undefined" && (
+    window.location.protocol === "file:" ||
+    ["localhost", "127.0.0.1", "0.0.0.0", "::1"].includes(window.location.hostname)
+  );
+  let url = "";
+  if(isLocal){
+    url = id ? `/song.html?id=${encodeURIComponent(id)}` : "/song.html";
+  }else{
+    url = id ? `/song/${slug}?id=${encodeURIComponent(id)}` : `/song/${slug}`;
+  }
+  return appendLangParam(url);
 }
 
 function toMs(ts){
@@ -1511,6 +1821,10 @@ async function toggleFavoriteSong(song){
 }
 
 window.songId = songId;
+window.slugifySongTitle = slugifySongTitle;
+window.buildSongUrl = buildSongUrl;
+window.appendLangParam = appendLangParam;
+window.applyLangToLinks = applyLangToLinks;
 window.loadSongs = loadSongs;
 window.clearSongsCache = clearSongsCache;
 window.formatSongTitle = formatSongTitle;
@@ -2421,7 +2735,9 @@ window.initAddSongPanel = initAddSongPanel;
           panel.classList.remove("is-hidden");
           panel.scrollIntoView({ behavior: "smooth", block: "start" });
         } else {
-          window.location.href = "/index.html#add-song";
+          window.location.href = window.appendLangParam
+            ? window.appendLangParam("/index.html#add-song")
+            : "/index.html#add-song";
         }
       }
     };
@@ -2847,19 +3163,13 @@ window.initAddSongPanel = initAddSongPanel;
   
   // Têkev butonunu login sayfasına yönlendir (eğer link ise)
   if(openBtn && openBtn.tagName === "A") {
-    // Mevcut href'i koru, eğer yoksa ekle
-    if(!openBtn.href || openBtn.href.includes("#") || openBtn.href === window.location.origin + "/login.html") {
-      openBtn.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
-    }
+    openBtn.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
   }
   
   // Zêdeke butonunu login sayfasına yönlendir (giriş yapmamışsa)
   const addSongBtn = document.getElementById("addSongMenuBtn");
   if(addSongBtn && addSongBtn.tagName === "A") {
-    // Mevcut href'i kontrol et, eğer login sayfasına yönlendirmiyorsa güncelle
-    if(!addSongBtn.href || addSongBtn.href.includes("#") || !addSongBtn.href.includes("/login.html")) {
-      addSongBtn.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
-    }
+    addSongBtn.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
   }
   
   const setLoggedOut = () => {
@@ -3103,14 +3413,17 @@ window.updateFilterOptions = updateFilterOptions;
     });
     
     const songId = window.songId || ((s) => s._id || s.sourceId || "");
+    const buildUrl = window.buildSongUrl || ((song) => {
+      const id = songId(song);
+      return id ? `/song.html?id=${encodeURIComponent(id)}` : "#";
+    });
     
     resultsContainer.innerHTML = `
       <div class="search-overlay__section-title">${t("search_overlay_results")} (${results.length})</div>
       ${results.map(song => {
-      const id = songId(song);
       const title = song.song || t("label_no_title");
       const artist = artistText(song.artist) || t("label_no_artist");
-      const url = id ? `/song.html?id=${encodeURIComponent(id)}` : "#";
+      const url = buildUrl(song);
       
         return `
           <a href="${url}" class="search-overlay__result-item">
@@ -3289,14 +3602,17 @@ window.updateFilterOptions = updateFilterOptions;
     });
     
     const songId = window.songId || ((s) => s._id || s.sourceId || "");
+    const buildUrl = window.buildSongUrl || ((song) => {
+      const id = songId(song);
+      return id ? `/song.html?id=${encodeURIComponent(id)}` : "#";
+    });
     
     resultsContainer.innerHTML = `
       <div class="search-overlay__section-title">${t("search_overlay_suggestions")}</div>
       ${suggestions.map(song => {
-        const id = songId(song);
         const title = song.song || t("label_no_title");
         const artist = artistText(song.artist) || t("label_no_artist");
-        const url = id ? `/song.html?id=${encodeURIComponent(id)}` : "#";
+        const url = buildUrl(song);
         
         return `
           <a href="${url}" class="search-overlay__result-item">

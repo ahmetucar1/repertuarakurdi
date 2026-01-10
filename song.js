@@ -6,7 +6,14 @@ function makeId(s){
   if(typeof songId === "function") return songId(s);
   return s?.id || "";
 }
-function openLink(s){ return `/song.html?id=${encodeURIComponent(makeId(s))}`; }
+function openLink(s){
+  if(typeof window.buildSongUrl === "function") return window.buildSongUrl(s);
+  return `/song.html?id=${encodeURIComponent(makeId(s))}`;
+}
+function isSongPath(){
+  const path = window.location.pathname || "";
+  return path === "/song.html" || path.startsWith("/song/");
+}
 
 function artistArr(a){
   const fmt = window.formatArtistName;
@@ -30,7 +37,8 @@ function artistLinks(a){
   const arr = artistArr(a);
   if(!arr.length) return "—";
   return arr.map(name => {
-    const href = `/artist.html?name=${encodeURIComponent(name)}`;
+    const raw = `/artist.html?name=${encodeURIComponent(name)}`;
+    const href = window.appendLangParam ? window.appendLangParam(raw) : raw;
     return `<a class="artistLink" href="${href}" title="${t("artist_link_title", "Ji bo dîtina stranên hunermendê bikeve")}">${escapeHtml(name)}</a>`;
   }).join(" · ");
 }
@@ -61,6 +69,58 @@ function escapeHtml(str){
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
+}
+
+function updateSongSeo(current, currentId){
+  if(!current) return;
+  const songTitle = window.formatSongTitle ? window.formatSongTitle(current.song) : (current.song || "");
+  const artists = artistArr(current.artist);
+  const artistName = artists.join(", ");
+  const fallbackTitle = songTitle && artistName
+    ? `${songTitle} — ${artistName}`
+    : (songTitle || t("label_song", "Stran"));
+  const seoTitle = t(
+    "seo_song_title",
+    fallbackTitle,
+    { song: songTitle || t("label_song", "Stran"), artist: artistName || t("label_artist", "Hunermend") }
+  );
+  const fallbackDesc = songTitle
+    ? `${songTitle} ${artistName || ""}`.trim()
+    : t("seo_song_desc", "Stran");
+  const seoDesc = t(
+    "seo_song_desc",
+    fallbackDesc,
+    { song: songTitle || t("label_song", "Stran"), artist: artistName || t("label_artist", "Hunermend") }
+  );
+  const rel = typeof window.buildSongUrl === "function"
+    ? window.buildSongUrl({ ...current, id: currentId })
+    : `/song.html?id=${encodeURIComponent(currentId || "")}`;
+  const canonical = window.toAbsoluteUrl ? window.toAbsoluteUrl(rel) : rel;
+  const byArtist = artists.length
+    ? (artists.length === 1
+      ? { "@type": "MusicGroup", name: artistName }
+      : artists.map(name => ({ "@type": "MusicGroup", name })))
+    : undefined;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "MusicComposition",
+    name: songTitle || fallbackTitle,
+    url: canonical,
+    inLanguage: "ku",
+    genre: "Kurdish music"
+  };
+  if(byArtist) jsonLd.byArtist = byArtist;
+  if(current?.key) jsonLd.musicalKey = current.key;
+
+  if(typeof window.setSeoData === "function"){
+    window.setSeoData({
+      title: seoTitle,
+      description: seoDesc,
+      canonical,
+      ogType: "music.song",
+      jsonLd
+    });
+  }
 }
 
 // Transpose helpers
@@ -241,6 +301,12 @@ function getIdParam(){
   const p = new URLSearchParams(location.search);
   return p.get("id") || "";
 }
+function getSlugFromPath(){
+  const path = window.location.pathname || "";
+  if(!path.startsWith("/song/")) return "";
+  const parts = path.split("/").filter(Boolean);
+  return parts.length > 1 ? parts[1] : "";
+}
 
 const TEXT_SLUG_OVERRIDES = {
   "pdf2.pdf|68": "beritan-koma-amara",
@@ -298,7 +364,13 @@ async function init(){
   }
 
   const id = getIdParam();
-  const current = SONGS.find(s => makeId(s) === id) || SONGS[0];
+  const slugFromPath = getSlugFromPath();
+  const slugifyForUrl = typeof window.slugifySongTitle === "function"
+    ? window.slugifySongTitle
+    : slugifySongTitle;
+  const current = (id ? SONGS.find(s => makeId(s) === id) : null)
+    || (slugFromPath ? SONGS.find(s => slugifyForUrl(s.song) === slugFromPath) : null)
+    || SONGS[0];
   const nextWrap = document.getElementById("nextSong");
   const nextBtn = document.getElementById("nextSongBtn");
   const nextTitle = document.getElementById("nextSongTitle");
@@ -311,6 +383,17 @@ async function init(){
   const statSongsInline = document.getElementById("statSongsInline");
   const statArtistsInline = document.getElementById("statArtistsInline");
 
+  if(currentId && typeof window.buildSongUrl === "function"){
+    const prettyUrl = window.buildSongUrl({ ...current, id: currentId });
+    if(prettyUrl){
+      const target = `${prettyUrl}${window.location.hash || ""}`;
+      const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+      if(currentUrl !== target){
+        window.history.replaceState(null, "", target);
+      }
+    }
+  }
+
   if(statSongsInline) statSongsInline.textContent = SONGS.length.toString();
   if(statArtistsInline){
     const uniqueArtists = new Set();
@@ -319,6 +402,9 @@ async function init(){
     });
     statArtistsInline.textContent = uniqueArtists.size.toString();
   }
+
+  updateSongSeo(current, currentId);
+  window.__applySeoOverrides = () => updateSongSeo(current, currentId);
 
   const songNameEl = document.getElementById("songName");
   const songArtistEl = document.getElementById("songArtist");
@@ -752,15 +838,19 @@ async function init(){
         }
       } else {
         // Panel bu sayfada yok, song.html'e yönlendir (mobilde de burada açılmalı)
-        if(window.location.pathname !== "/song.html"){
+        if(!isSongPath()){
           // Başka bir sayfadaysak, song.html'e yönlendir
-          window.location.href = "/song.html#add-song";
+          window.location.href = window.appendLangParam
+            ? window.appendLangParam("/song.html#add-song")
+            : "/song.html#add-song";
         } else if(typeof window.openAddSongPanel === "function"){
           // Panel yok ama global fonksiyon var, onu kullan
           window.openAddSongPanel();
         } else {
           // Hiçbiri yok, anasayfaya yönlendir
-          location.href = "/index.html#add-song";
+          location.href = window.appendLangParam
+            ? window.appendLangParam("/index.html#add-song")
+            : "/index.html#add-song";
         }
       }
     });

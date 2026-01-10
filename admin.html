@@ -7,7 +7,12 @@
   <script>
     (function(){
       try {
-        var lang = (localStorage.getItem("lang") || "ku").toLowerCase();
+        var params = new URLSearchParams(window.location.search);
+        var urlLang = (params.get("lang") || "").toLowerCase();
+        if (urlLang !== "tr" && urlLang !== "ku") urlLang = "";
+        var stored = (localStorage.getItem("lang") || "ku").toLowerCase();
+        var lang = (urlLang || stored || "ku").toLowerCase();
+        if (urlLang) localStorage.setItem("lang", lang);
         document.documentElement.setAttribute("lang", lang === "tr" ? "tr" : "ku");
         if (lang === "tr") document.documentElement.classList.add("i18n-pending");
       } catch (e) {}
@@ -166,7 +171,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore-compat.js"></script>
   <script src="/firebase.js?v=2.2"></script>
-  <script src="/common.js?v=2.2"></script>
+  <script src="/common.js?v=2.5"></script>
   <script src="/admin.js?v=2.2"></script>
 </body>
 </html>

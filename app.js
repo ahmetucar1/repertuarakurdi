@@ -12,7 +12,10 @@ function makeId(s){
   if(typeof songId === "function") return songId(s);
   return s?.id || "";
 }
-function openLink(s){ return `/song.html?id=${encodeURIComponent(makeId(s))}`; }
+function openLink(s){
+  if(typeof window.buildSongUrl === "function") return window.buildSongUrl(s);
+  return `/song.html?id=${encodeURIComponent(makeId(s))}`;
+}
 
 function artistArr(a){
   if(Array.isArray(a)) return a.filter(Boolean).map(String);
@@ -28,7 +31,8 @@ function artistLinks(a){
   const arr = artistArr(a).map(name => fmt ? fmt(name) : name);
   if(!arr.length) return "—";
   return arr.map(name => {
-    const href = `/artist.html?name=${encodeURIComponent(name)}`;
+    const raw = `/artist.html?name=${encodeURIComponent(name)}`;
+    const href = window.appendLangParam ? window.appendLangParam(raw) : raw;
     return `<a class="artistLink" href="${href}">${escapeHtml(name)}</a>`;
   }).join(" · ");
 }
@@ -56,7 +60,8 @@ function renderStoryStripItems(list){
     const photo = (item?.photo || "").toString().trim();
     if(!name || !photo) return "";
     const display = window.formatArtistName ? window.formatArtistName(label) : label;
-    const href = `/artist.html?name=${encodeURIComponent(name)}`;
+    const raw = `/artist.html?name=${encodeURIComponent(name)}`;
+    const href = window.appendLangParam ? window.appendLangParam(raw) : raw;
     return `
       <a class="storyBubble" href="${href}" role="listitem" aria-label="${escapeHtml(display)}">
         <span class="storyBubble__ring">
@@ -926,7 +931,9 @@ async function init(){
           panel.classList.remove("is-hidden");
           panel.scrollIntoView({ behavior: "smooth", block: "start" });
         } else {
-          window.location.href = "/index.html#add-song";
+          window.location.href = window.appendLangParam
+            ? window.appendLangParam("/index.html#add-song")
+            : "/index.html#add-song";
         }
       }
     };
@@ -969,7 +976,9 @@ async function init(){
           panel.classList.remove("is-hidden");
           panel.scrollIntoView({ behavior: "smooth", block: "start" });
         } else {
-          window.location.href = "/index.html#add-song";
+          window.location.href = window.appendLangParam
+            ? window.appendLangParam("/index.html#add-song")
+            : "/index.html#add-song";
         }
       }
     }, true); // capture phase'de de dinle

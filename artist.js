@@ -9,7 +9,10 @@ function makeId(s){
   if(typeof songId === "function") return songId(s);
   return s?.id || "";
 }
-function openLink(s){ return `/song.html?id=${encodeURIComponent(makeId(s))}`; }
+function openLink(s){
+  if(typeof window.buildSongUrl === "function") return window.buildSongUrl(s);
+  return `/song.html?id=${encodeURIComponent(makeId(s))}`;
+}
 
 function artistArr(a){
   if(Array.isArray(a)) return a.filter(Boolean).map(String);
@@ -25,7 +28,8 @@ function artistLinks(a){
   const arr = artistArr(a).map(name => fmt ? fmt(name) : name);
   if(!arr.length) return "—";
   return arr.map(name => {
-    const href = `/artist.html?name=${encodeURIComponent(name)}`;
+    const raw = `/artist.html?name=${encodeURIComponent(name)}`;
+    const href = window.appendLangParam ? window.appendLangParam(raw) : raw;
     return `<a class="artistLink" href="${href}">${escapeHtml(name)}</a>`;
   }).join(" · ");
 }
@@ -37,6 +41,41 @@ function escapeHtml(str){
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
+}
+
+function updateArtistSeo(){
+  if(!ARTIST) return;
+  const displayName = window.formatArtistName ? window.formatArtistName(ARTIST) : ARTIST;
+  const fallbackTitle = displayName || t("label_artist", "Hunermend");
+  const seoTitle = t(
+    "seo_artist_title",
+    fallbackTitle,
+    { artist: displayName || t("label_artist", "Hunermend") }
+  );
+  const seoDesc = t(
+    "seo_artist_desc",
+    fallbackTitle,
+    { artist: displayName || t("label_artist", "Hunermend") }
+  );
+  const raw = `/artist.html?name=${encodeURIComponent(ARTIST)}`;
+  const rel = window.appendLangParam ? window.appendLangParam(raw) : raw;
+  const canonical = window.toAbsoluteUrl ? window.toAbsoluteUrl(rel) : rel;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "MusicGroup",
+    name: displayName,
+    url: canonical,
+    genre: "Kurdish music"
+  };
+  if(typeof window.setSeoData === "function"){
+    window.setSeoData({
+      title: seoTitle,
+      description: seoDesc,
+      canonical,
+      ogType: "profile",
+      jsonLd
+    });
+  }
 }
 
 function artistKey(name){
@@ -174,6 +213,8 @@ async function init(){
   renderArtistPhoto();
   updateSearchState();
   initBackButton();
+  updateArtistSeo();
+  window.__applySeoOverrides = updateArtistSeo;
 
   const favBtn = $("#artistFavBtn");
   const favStatus = $("#artistFavStatus");

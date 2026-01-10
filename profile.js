@@ -20,7 +20,10 @@ function escapeHtml(str){
     .replaceAll("'","&#039;");
 }
 
-function openSong(id){
+function openSong(id, title){
+  if(typeof window.buildSongUrl === "function"){
+    return window.buildSongUrl({ id, song: title || "" });
+  }
   return `/song.html?id=${encodeURIComponent(id)}`;
 }
 
@@ -89,7 +92,7 @@ function renderFavorites(list, items){
         <div class="item__sub">${escapeHtml(artistText(f.artist) || "—")}</div>
       </div>
       <div class="badges">
-        <a class="open" href="${openSong(f.songId || "")}">${t("action_open", "Veke")}</a>
+        <a class="open" href="${openSong(f.songId || "", f.song)}">${t("action_open", "Veke")}</a>
       </div>
     </div>
   `).join("");
@@ -119,7 +122,8 @@ function renderArtistFavorites(list, items){
   list.innerHTML = items.map(a => {
     const artistName = a.artist || "";
     const artistKeyValue = artistKey(artistName);
-    const artistLink = `/artist.html?name=${encodeURIComponent(artistName)}`;
+    const raw = `/artist.html?name=${encodeURIComponent(artistName)}`;
+    const artistLink = window.appendLangParam ? window.appendLangParam(raw) : raw;
     return `
     <div class="item" data-artist-key="${escapeHtml(artistKeyValue)}">
       <div class="item__left">
@@ -205,7 +209,7 @@ function renderSubmissions(list, items, emptyLabel, onDelete){
         </div>
         <div class="badges">
           ${statusBadge(s.status)}
-          <a class="open" href="${openSong(id)}">${t("action_open", "Veke")}</a>
+          <a class="open" href="${openSong(id, s.song)}">${t("action_open", "Veke")}</a>
           ${canDelete ? `<button class="btn btn--danger btn--small" data-action="delete" data-id="${s._id}" type="button">${t("action_delete", "Jê bibe")}</button>` : ""}
         </div>
       </div>
