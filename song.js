@@ -396,21 +396,6 @@ async function init(){
   const editArtistSuggest = document.getElementById("editArtistSuggest");
   const editKey = document.getElementById("editKey");
   const editText = document.getElementById("editText");
-  if(editPanel && !editPanel.dataset.enhanced && window.initEditPanelEnhancements){
-    window.initEditPanelEnhancements(
-      "edit",
-      "editText",
-      "editCharCount",
-      "editChordCount",
-      "editValidation",
-      "editPreview",
-      "editPreviewToggle"
-    );
-    if(window.initChordDictionary){
-      window.initChordDictionary("chordDictionaryEdit", "editText");
-    }
-    editPanel.dataset.enhanced = "true";
-  }
 
   if(editArtist && editArtistSuggest && window.initArtistSuggest){
     window.initArtistSuggest(editArtist, editArtistSuggest);

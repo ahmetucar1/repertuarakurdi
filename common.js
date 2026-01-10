@@ -47,8 +47,6 @@ const I18N = {
     action_add_song_short: "Stran Zêde Bike",
     action_login: "Têkeve",
     action_favorite: "Favorî bike",
-    action_focus: "Modê fokusê",
-    action_exit_focus: "Şêwazê normal",
     search_placeholder: "Stran an hunermend bigere…",
     search_placeholder_artist: "Di nav stranên vî hunermendî de bigere…",
     home_kicker: "Hûn bi xêr hatin",
@@ -110,8 +108,6 @@ const I18N = {
     template_chorus: "Chorus",
     template_bridge: "Bridge",
     chords_label: "Akorlar",
-    chords_quick: "Akorên bilez",
-    chords_wrap_title: "Akorên [ ]",
     preview_label: "Önizleme",
     keyboard_hint: "Ctrl+S: Kaydet | Esc: Kapat",
     status_requires_login_favorite: "Ji bo favorî divê tu têkevî.",
@@ -329,8 +325,6 @@ const I18N = {
     action_add_song_short: "Şarkı Ekle",
     action_login: "Giriş",
     action_favorite: "Favoriye ekle",
-    action_focus: "Odak modu",
-    action_exit_focus: "Normal",
     search_placeholder: "Şarkı veya sanatçı ara…",
     search_placeholder_artist: "Bu sanatçının şarkılarında ara…",
     home_kicker: "Hoş geldin",
@@ -392,8 +386,6 @@ const I18N = {
     template_chorus: "Nakarat",
     template_bridge: "Köprü",
     chords_label: "Akorlar",
-    chords_quick: "Hızlı akorlar",
-    chords_wrap_title: "Akor modu [ ]",
     preview_label: "Önizleme",
     keyboard_hint: "Ctrl+S: Kaydet | Esc: Kapat",
     status_requires_login_favorite: "Favori için giriş yapmalısın.",
@@ -1911,23 +1903,10 @@ function initAddSongPanel(onSaved){
 // EDIT PANEL ENHANCEMENTS
 // ============================================
 
-const CHORD_TOKEN_PATTERN = "[A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\\d*(?:\\/[A-G](?:#|b)?)?";
-const CHORD_MATCH_RE = new RegExp(`\\[(${CHORD_TOKEN_PATTERN})\\]|\\b(${CHORD_TOKEN_PATTERN})\\b`, "g");
-
-function extractChordTokens(text){
-  const tokens = [];
-  if(!text) return tokens;
-  CHORD_MATCH_RE.lastIndex = 0;
-  for(const match of text.matchAll(CHORD_MATCH_RE)){
-    const chord = match[1] || match[2];
-    if(chord) tokens.push(chord);
-  }
-  return tokens;
-}
-
 // Chord validation
 function validateChords(text){
-  const matches = extractChordTokens(text);
+  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\b/g;
+  const matches = text.match(chordPattern) || [];
   const validRoots = ["C","C#","Db","D","D#","Eb","E","F","F#","Gb","G","G#","Ab","A","A#","Bb","B"];
   const errors = [];
   const warnings = [];
@@ -1955,21 +1934,15 @@ function validateChords(text){
 
 // Extract chords from text
 function extractChords(text){
-  const matches = extractChordTokens(text);
+  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\b/g;
+  const matches = text.match(chordPattern) || [];
   return [...new Set(matches)];
 }
 
 // Highlight chords in text (for preview)
 function highlightChordsInText(text){
-  const escaped = escapeHtml(text);
-  CHORD_MATCH_RE.lastIndex = 0;
-  return escaped.replace(CHORD_MATCH_RE, (full, bracketed, plain) => {
-    const chord = bracketed || plain || "";
-    if(bracketed){
-      return `<strong class="chordTok chordTok--bracket">[${chord}]</strong>`;
-    }
-    return `<strong class="chordTok">${chord}</strong>`;
-  });
+  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\b/g;
+  return escapeHtml(text).replace(chordPattern, '<strong class="chordTok">$1</strong>');
 }
 
 // Song templates - akorlar sözlerin üstünde, parantez yok
@@ -2022,49 +1995,6 @@ function initChordDictionary(containerId, textareaId){
     
     // Trigger input event for validation
     textareaEl.dispatchEvent(new Event("input"));
-  });
-}
-
-function insertAtCursor(textarea, insertText){
-  if(!textarea) return;
-  const start = textarea.selectionStart ?? 0;
-  const end = textarea.selectionEnd ?? 0;
-  const text = textarea.value || "";
-  textarea.value = text.slice(0, start) + insertText + text.slice(end);
-  const nextPos = start + insertText.length;
-  textarea.selectionStart = textarea.selectionEnd = nextPos;
-  textarea.focus();
-  textarea.dispatchEvent(new Event("input"));
-}
-
-function initQuickChords(textareaId){
-  const textarea = document.getElementById(textareaId);
-  if(!textarea) return;
-  const groups = document.querySelectorAll(`.quickChords[data-target="${textareaId}"]`);
-  groups.forEach(group => {
-    if(group.dataset.bound === "true") return;
-    group.dataset.bound = "true";
-    group.dataset.wrap = group.dataset.wrap || "false";
-
-    const toggleBtn = group.querySelector('[data-action="wrap"]');
-    if(toggleBtn){
-      toggleBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        const next = group.dataset.wrap !== "true";
-        group.dataset.wrap = next ? "true" : "false";
-        toggleBtn.setAttribute("aria-pressed", next ? "true" : "false");
-        toggleBtn.classList.toggle("is-active", next);
-      });
-    }
-
-    group.addEventListener("click", (e) => {
-      const btn = e.target.closest(".quickChordBtn");
-      if(!btn || btn.dataset.action) return;
-      const chord = btn.dataset.chord;
-      if(!chord) return;
-      const wrap = group.dataset.wrap === "true";
-      insertAtCursor(textarea, wrap ? `[${chord}]` : chord);
-    });
   });
 }
 
@@ -2197,35 +2127,6 @@ function initEditPanelEnhancements(panelPrefix, textareaId, charCountId, chordCo
     });
   }
 
-  const focusToggle = document.getElementById(`${panelPrefix === "add" ? "addSong" : "edit"}FocusToggle`);
-  const panel = textarea.closest(".editPanel");
-  if(focusToggle && panel){
-    const syncFocusLabel = () => {
-      const isFocus = panel.classList.contains("is-focus");
-      focusToggle.textContent = isFocus ? t("action_exit_focus") : t("action_focus");
-      focusToggle.setAttribute("aria-pressed", isFocus ? "true" : "false");
-    };
-    syncFocusLabel();
-    focusToggle.addEventListener("click", () => {
-      const next = !panel.classList.contains("is-focus");
-      panel.classList.toggle("is-focus", next);
-      document.body.classList.toggle("edit-panel-focus", next);
-      syncFocusLabel();
-      if(next){
-        setTimeout(() => textarea.focus(), 50);
-      }
-    });
-
-    const focusObserver = new MutationObserver(() => {
-      if(panel.classList.contains("is-hidden")){
-        panel.classList.remove("is-focus");
-        document.body.classList.remove("edit-panel-focus");
-        syncFocusLabel();
-      }
-    });
-    focusObserver.observe(panel, { attributes: true, attributeFilter: ["class"] });
-  }
-  
   // Template buttons
   const verseBtn = document.getElementById(`${panelPrefix === "add" ? "add" : "edit"}TemplateVerse`);
   const chorusBtn = document.getElementById(`${panelPrefix === "add" ? "add" : "edit"}TemplateChorus`);
@@ -2279,32 +2180,8 @@ function initEditPanelEnhancements(panelPrefix, textareaId, charCountId, chordCo
     });
   }
 
-  initQuickChords(textareaId);
-  
   // Keyboard shortcuts
   textarea.addEventListener("keydown", (e) => {
-    if(e.key === "Tab"){
-      e.preventDefault();
-      const start = textarea.selectionStart ?? 0;
-      const end = textarea.selectionEnd ?? 0;
-      const text = textarea.value || "";
-      if(e.shiftKey){
-        const lineStart = text.lastIndexOf("\n", start - 1) + 1;
-        const prefix = text.slice(lineStart, lineStart + 2);
-        if(prefix === "  "){
-          textarea.value = text.slice(0, lineStart) + text.slice(lineStart + 2);
-          const nextPos = Math.max(lineStart, start - 2);
-          textarea.selectionStart = textarea.selectionEnd = nextPos;
-        }
-      } else {
-        const before = text.slice(0, start);
-        const after = text.slice(end);
-        textarea.value = before + "  " + after;
-        textarea.selectionStart = textarea.selectionEnd = start + 2;
-      }
-      updateCounts();
-      return;
-    }
     // Ctrl/Cmd + S: Save
     if((e.ctrlKey || e.metaKey) && e.key === "s"){
       e.preventDefault();
