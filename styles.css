@@ -1843,6 +1843,13 @@ body {
   color: var(--accent);
   font-size: 14px;
 }
+.rhythmBtn{
+  display: none;
+  margin-top: 0;
+}
+.rhythmBtn.is-visible{
+  display: inline-flex;
+}
 .transposeActions{
   display: flex;
   align-items: center;
@@ -2651,6 +2658,15 @@ main.container > .footer {
 }
 .footerRow{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
 .footer .homeGrid{ margin-top:0; }
+.footerCredit a{
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dotted rgba(255,255,255,.35);
+}
+.footerCredit a:hover{
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
 
 /* Sections */
 .section{
@@ -4883,6 +4899,31 @@ main.container{ animation: fadeUp .2s ease; }
   gap: 4px;
 }
 
+.quickChords{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.quickLabel{
+  font-size: 10px;
+  color: #94a3b8;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin-right: 2px;
+}
+.quickChordBtn{
+  min-width: 36px;
+}
+.quickChordBtn--toggle{
+  min-width: auto;
+}
+.quickChordBtn--toggle.is-active{
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+}
+
 .chordDictionary {
   position: relative;
   margin-left: auto;
@@ -5104,6 +5145,9 @@ main.container{ animation: fadeUp .2s ease; }
     border-width: 1.5px;
     border-left-width: 3px;
   }
+  .quickLabel{
+    display: none;
+  }
 }
 
 
@@ -5137,6 +5181,37 @@ main.container{ animation: fadeUp .2s ease; }
   font-weight: 700;
   color: #f97316;
 }
+.editPreview .chordTok{
+  font-weight: 700;
+  color: #f97316;
+}
+.editPreview .chordTok--bracket{
+  background: rgba(249,115,22,.12);
+  border-radius: 4px;
+  padding: 0 3px;
+}
+
+body.edit-panel-focus{
+  overflow: hidden;
+}
+.editPanel.is-focus{
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  margin: 0;
+  border-radius: 0;
+  overflow: auto;
+}
+.editPanel.is-focus .editTextareaWrapper .editTextarea{
+  min-height: 65vh;
+  font-size: 15px;
+  line-height: 2.2;
+}
+.editPanel.is-focus .editPreview{
+  font-size: 15px;
+  line-height: 2.2;
+}
+
 
 /* Validation Status */
 .validationStatus {

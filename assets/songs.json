@@ -1328,5 +1328,869 @@
     "key": "Dm",
     "ritim": "3/4",
     "id": "pdf2.pdf|99"
+  },
+  {
+    "song": "ÇÎROKA WÊ BAYÊ",
+    "artist": "AGÎT IŞIK",
+    "key": "Am",
+    "ritim": "Polka",
+    "ritimVideo": "https://www.youtube.com/watch?v=YRBKDA0M6N4&feature=youtu.be",
+    "id": "pdf3.pdf|9"
+  },
+  {
+    "song": "BER DERÊ KÎ Û KÎ",
+    "artist": "AGÎT IŞIK",
+    "key": "G",
+    "ritim": "6/8 Govend",
+    "ritimVideo": "https://www.youtube.com/watch?v=joy1HqRQsKE",
+    "id": "pdf3.pdf|10"
+  },
+  {
+    "song": "DÎJLOKA MIN",
+    "artist": "ANADOLU QUARTET & MEHTAP ARSLANARGÛN",
+    "key": "Am",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|11"
+  },
+  {
+    "song": "PEYMAN JI YARÊ",
+    "artist": "ANADOLU QUARTET&SAKÎNA",
+    "key": "Dm",
+    "ritim": "6/8 Govend",
+    "ritimVideo": "https://www.youtube.com/watch?v=joy1HqRQsKE",
+    "id": "pdf3.pdf|12"
+  },
+  {
+    "song": "DE PÎRO",
+    "artist": "AWAZÊ ÇÎYA",
+    "key": "Em",
+    "ritim": "Polka",
+    "ritimVideo": "https://www.youtube.com/watch?v=YRBKDA0M6N4&feature=youtu.be",
+    "id": "pdf3.pdf|13"
+  },
+  {
+    "song": "EM BERNADIN VÊ DÎLANÊ",
+    "artist": "AWAZÊ ÇÎYA",
+    "key": "Am",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|14"
+  },
+  {
+    "song": "REWEND",
+    "artist": "AYNÛR DOGAN",
+    "key": "Am",
+    "ritim": "6/8 Govend",
+    "ritimVideo": "https://www.youtube.com/watch?v=joy1HqRQsKE",
+    "id": "pdf3.pdf|15"
+  },
+  {
+    "song": "DÛR",
+    "artist": "BABETNA",
+    "key": "Em",
+    "ritim": "6/8",
+    "ritimVideo": "https://youtu.be/jdTT398zSho",
+    "id": "pdf3.pdf|16"
+  },
+  {
+    "song": "DÎYARBEKIR",
+    "artist": "BAJAR",
+    "key": "Em",
+    "ritim": "Pop 1",
+    "ritimVideo": "https://www.youtube.com/watch?v=1XkjRdVSfl4&feature=youtu.be",
+    "id": "pdf3.pdf|17"
+  },
+  {
+    "song": "SÎ Û ÇAR HEB",
+    "artist": "BAJAR",
+    "key": "Dm",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|18"
+  },
+  {
+    "song": "NEWROZ",
+    "artist": "BAJAR",
+    "key": "Dm",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|19"
+  },
+  {
+    "song": "GER",
+    "artist": "BERFÎN AKTAY",
+    "key": "Am",
+    "ritim": "6/8",
+    "ritimVideo": "https://www.youtube.com/watch?v=Es5tnOqNQtE",
+    "id": "pdf3.pdf|20"
+  },
+  {
+    "song": "KOÇBER",
+    "artist": "BERFÎN MAMEDOVA",
+    "key": "Eb",
+    "ritim": "6/8",
+    "ritimVideo": "https://youtu.be/jdTT398zSho",
+    "id": "pdf3.pdf|21"
+  },
+  {
+    "song": "TENÊBÛN",
+    "artist": "BÛRHAN BERKEN",
+    "key": "Em",
+    "ritim": "Pop 1",
+    "ritimVideo": "https://www.youtube.com/watch?v=1XkjRdVSfl4&feature=youtu.be",
+    "id": "pdf3.pdf|22"
+  },
+  {
+    "song": "GEROK",
+    "artist": "BÛRHAN BERKEN",
+    "key": "Em",
+    "ritim": "Polka",
+    "ritimVideo": "https://www.youtube.com/watch?v=YRBKDA0M6N4&feature=youtu.be",
+    "id": "pdf3.pdf|23"
+  },
+  {
+    "song": "HÎVA ZERÎ",
+    "artist": "CEMÎL QOÇGIRÎ",
+    "key": "Am",
+    "ritim": "6/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=SMFKchF_ftI",
+    "id": "pdf3.pdf|24"
+  },
+  {
+    "song": "TU KÎ YÎ",
+    "artist": "DEVRÎM DEMÎR",
+    "key": "Bb",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|25"
+  },
+  {
+    "song": "EVÎNDAR IM",
+    "artist": "DILJEN RONÎ",
+    "key": "C",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|26"
+  },
+  {
+    "song": "ŞERVAN",
+    "artist": "DR. AHMET KAYA & MEHMET AKBAŞ",
+    "key": "Dm",
+    "ritim": "6/8",
+    "ritimVideo": "https://www.youtube.com/watch?v=Es5tnOqNQtE",
+    "id": "pdf3.pdf|27"
+  },
+  {
+    "song": "KÛÇIK HATIN",
+    "artist": "ERCAN BÎNGOL",
+    "key": "G",
+    "ritim": "Pop 3",
+    "ritimVideo": "https://youtu.be/20Zu0xeHbs4",
+    "id": "pdf3.pdf|28"
+  },
+  {
+    "song": "PAYÎZ",
+    "artist": "ERDAL MED",
+    "key": "Dm",
+    "ritim": "6/8",
+    "ritimVideo": "https://www.youtube.com/watch?v=Es5tnOqNQtE",
+    "id": "pdf3.pdf|29"
+  },
+  {
+    "song": "ÎNSANÊ KAMIL",
+    "artist": "ERDOGAN EMÎR",
+    "key": "Am",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|30"
+  },
+  {
+    "song": "ELKANA VAYI",
+    "artist": "ERDOGAN EMÎR",
+    "key": "Em",
+    "ritim": "6/8",
+    "ritimVideo": "https://www.youtube.com/watch?v=Es5tnOqNQtE",
+    "id": "pdf3.pdf|31"
+  },
+  {
+    "song": "RASTHATINEK",
+    "artist": "FERÎD SEVÎM",
+    "key": "Am",
+    "ritim": "Shuffle",
+    "ritimVideo": "https://youtu.be/yv2b32OSaCs",
+    "id": "pdf3.pdf|32"
+  },
+  {
+    "song": "ROBOSKÎ",
+    "artist": "FIRAT MED",
+    "key": "Am",
+    "ritim": "6/8",
+    "ritimVideo": "https://www.youtube.com/watch?v=Es5tnOqNQtE",
+    "id": "pdf3.pdf|33"
+  },
+  {
+    "song": "PASSÎFLORA KURDÎ",
+    "artist": "FÎKRÎ KUTLAY",
+    "key": "Am",
+    "ritim": "9/8",
+    "ritimVideo": "https://youtu.be/WxlF_R-6iCg",
+    "id": "pdf3.pdf|34"
+  },
+  {
+    "song": "EM MIROV IN",
+    "artist": "GRUP MUNZUR",
+    "key": "G",
+    "ritim": "Shuffle",
+    "ritimVideo": "https://youtu.be/yv2b32OSaCs",
+    "id": "pdf3.pdf|35"
+  },
+  {
+    "song": "VENGÊ TO",
+    "artist": "GRUP VARDÎYA",
+    "key": "Am",
+    "ritim": "Pop 3",
+    "ritimVideo": "https://youtu.be/20Zu0xeHbs4",
+    "id": "pdf3.pdf|36"
+  },
+  {
+    "song": "DEV JÊ BERDE",
+    "artist": "GULBAHAR KAVCÛ",
+    "key": "Dm",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|37"
+  },
+  {
+    "song": "XENGILOK",
+    "artist": "HARÛN ELKÎ",
+    "key": "Am",
+    "ritim": "Rock",
+    "ritimVideo": "https://youtu.be/bTFYoUij9fE",
+    "id": "pdf3.pdf|38"
+  },
+  {
+    "song": "REV",
+    "artist": "HARÛN ELKÎ",
+    "key": "Em",
+    "ritim": "Rock",
+    "ritimVideo": "https://youtu.be/bTFYoUij9fE",
+    "id": "pdf3.pdf|39"
+  },
+  {
+    "song": "HERE",
+    "artist": "HARÛN ELKÎ",
+    "key": "G",
+    "ritim": "Polka",
+    "ritimVideo": "https://www.youtube.com/watch?v=YRBKDA0M6N4&feature=youtu.be",
+    "id": "pdf3.pdf|40"
+  },
+  {
+    "song": "DERÎ LÊ KET",
+    "artist": "HÊJA",
+    "key": "Am",
+    "ritim": "Polka",
+    "ritimVideo": "https://www.youtube.com/watch?v=YRBKDA0M6N4&feature=youtu.be",
+    "id": "pdf3.pdf|41"
+  },
+  {
+    "song": "EVÎN",
+    "artist": "HÎVRON",
+    "key": "Cm",
+    "ritim": "6/8",
+    "ritimVideo": "https://youtu.be/jdTT398zSho",
+    "id": "pdf3.pdf|42"
+  },
+  {
+    "song": "JARO",
+    "artist": "HÎVRON",
+    "key": "Em",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|43"
+  },
+  {
+    "song": "LI QAMIŞLO LI BER DERÎ",
+    "artist": "HUNERGEHA WELAT",
+    "key": "A",
+    "ritim": "6/8 Govend",
+    "ritimVideo": "https://www.youtube.com/watch?v=joy1HqRQsKE",
+    "id": "pdf3.pdf|44"
+  },
+  {
+    "song": "SERÊKANÎYÊ Û AVAŞÎN",
+    "artist": "HUNERGEHA WELAT",
+    "key": "Em",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|45"
+  },
+  {
+    "song": "ŞERVANO",
+    "artist": "HUNERGEHA WELAT",
+    "key": "Am",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|46"
+  },
+  {
+    "song": "XEWREVÎN",
+    "artist": "JAN ARSLAN",
+    "key": "Am",
+    "ritim": "Rock",
+    "ritimVideo": "https://youtu.be/bTFYoUij9fE",
+    "id": "pdf3.pdf|47"
+  },
+  {
+    "song": "ZERÎBA",
+    "artist": "JAN AXÎN",
+    "key": "Am",
+    "ritim": "Pop 1",
+    "ritimVideo": "https://www.youtube.com/watch?v=1XkjRdVSfl4&feature=youtu.be",
+    "id": "pdf3.pdf|48"
+  },
+  {
+    "song": "BÊJE",
+    "artist": "JEHRMAR",
+    "key": "Em",
+    "ritim": "Reggae",
+    "ritimVideo": "https://youtu.be/L1v6Op4nJvk",
+    "id": "pdf3.pdf|49"
+  },
+  {
+    "song": "EZ JÎN IM",
+    "artist": "JINMA",
+    "key": "Am",
+    "ritim": "6/8 Govend",
+    "ritimVideo": "https://www.youtube.com/watch?v=joy1HqRQsKE",
+    "id": "pdf3.pdf|50"
+  },
+  {
+    "song": "HEVAL HATIN",
+    "artist": "KADÎR ÇAT",
+    "key": "Em",
+    "ritim": "Pop 1",
+    "ritimVideo": "https://www.youtube.com/watch?v=1XkjRdVSfl4&feature=youtu.be",
+    "id": "pdf3.pdf|51"
+  },
+  {
+    "song": "ŞODIRÊ HARDO",
+    "artist": "KALDIRIM",
+    "key": "C",
+    "ritim": "6/8",
+    "ritimVideo": "https://youtu.be/jdTT398zSho",
+    "id": "pdf3.pdf|52"
+  },
+  {
+    "song": "NOŞ",
+    "artist": "KALÊ BADÎ",
+    "key": "G",
+    "ritim": "6/8",
+    "ritimVideo": "https://youtu.be/jdTT398zSho",
+    "id": "pdf3.pdf|53"
+  },
+  {
+    "song": "RÊ",
+    "artist": "KASIM TAŞDOGAN",
+    "key": "Bm",
+    "ritim": "Pop 3",
+    "ritimVideo": "https://youtu.be/20Zu0xeHbs4",
+    "id": "pdf3.pdf|54"
+  },
+  {
+    "song": "VÎNA SOR",
+    "artist": "KASIM TAŞDOGAN",
+    "key": "A",
+    "ritim": "Shuffle",
+    "ritimVideo": "https://youtu.be/yv2b32OSaCs",
+    "id": "pdf3.pdf|55"
+  },
+  {
+    "song": "REŞKÊ",
+    "artist": "KASIM TAŞDOGAN",
+    "key": "Am",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|56"
+  },
+  {
+    "song": "KEÇA PERÎ",
+    "artist": "KEREM GERDENZERÎ",
+    "key": "Em",
+    "ritim": "Pop 1",
+    "ritimVideo": "https://www.youtube.com/watch?v=1XkjRdVSfl4&feature=youtu.be",
+    "id": "pdf3.pdf|57"
+  },
+  {
+    "song": "PERPERIK",
+    "artist": "KEREM SEVÎNÇ",
+    "key": "C#m",
+    "ritim": "Trîplet Arpej",
+    "ritimVideo": "https://www.youtube.com/watch?v=tmCG79JwN5A",
+    "id": "pdf3.pdf|58"
+  },
+  {
+    "song": "BAO",
+    "artist": "KEREM SEVÎNÇ",
+    "key": "Bm",
+    "ritim": "Polka",
+    "ritimVideo": "https://www.youtube.com/watch?v=YRBKDA0M6N4&feature=youtu.be",
+    "id": "pdf3.pdf|59"
+  },
+  {
+    "song": "DE RABIN",
+    "artist": "ARYEN KOM",
+    "key": "Dm",
+    "ritim": "6/8 Govend",
+    "ritimVideo": "https://www.youtube.com/watch?v=joy1HqRQsKE",
+    "id": "pdf3.pdf|60"
+  },
+  {
+    "song": "WERNE RAYÊ",
+    "artist": "LAWJE",
+    "key": "Bm",
+    "ritim": "Pop 1",
+    "ritimVideo": "https://www.youtube.com/watch?v=1XkjRdVSfl4&feature=youtu.be",
+    "id": "pdf3.pdf|61"
+  },
+  {
+    "song": "KAM SONO",
+    "artist": "MAVÎŞ GUNEŞER",
+    "key": "Gm",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|62"
+  },
+  {
+    "song": "BERDE",
+    "artist": "MEHMET AKBAŞ & HANI",
+    "key": "Bm",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|63"
+  },
+  {
+    "song": "GULA DIL",
+    "artist": "MEHMET ATLI",
+    "key": "Em",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|64"
+  },
+  {
+    "song": "MORÎ MIRCAN",
+    "artist": "MEHMET ATLI",
+    "key": "Em",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|65"
+  },
+  {
+    "song": "STRANA NÎVÇE",
+    "artist": "MEHMET ATLI",
+    "key": "Em",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|66"
+  },
+  {
+    "song": "XAÇIREK",
+    "artist": "MEM ARARAT",
+    "key": "Em",
+    "ritim": "6/8 Govend",
+    "ritimVideo": "https://www.youtube.com/watch?v=joy1HqRQsKE",
+    "id": "pdf3.pdf|67"
+  },
+  {
+    "song": "KULÎLK",
+    "artist": "MEM ARARAT",
+    "key": "Em",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|68"
+  },
+  {
+    "song": "DIL DISOJE",
+    "artist": "MEM ARARAT",
+    "key": "Em",
+    "ritim": "6/8",
+    "ritimVideo": "https://www.youtube.com/watch?v=Es5tnOqNQtE",
+    "id": "pdf3.pdf|69"
+  },
+  {
+    "song": "ÇEMO VANO",
+    "artist": "MIKAÎL ASLAN",
+    "key": "Em",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|70"
+  },
+  {
+    "song": "MÎRAZ",
+    "artist": "MIKAÎL ASLAN",
+    "key": "Em",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|72"
+  },
+  {
+    "song": "WAY DELALÊ",
+    "artist": "MIRADY",
+    "key": "Am",
+    "ritim": "Bolero",
+    "ritimVideo": "https://www.youtube.com/watch?v=inPgMmYPVn8&feature=youtu.be",
+    "id": "pdf3.pdf|73"
+  },
+  {
+    "song": "ÊŞA ROJAVA",
+    "artist": "MIZGÎN TAHIR & NIZAMETTIN ARIÇ & NEZÎR PALO",
+    "key": "Am",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|74"
+  },
+  {
+    "song": "EFO BERZ",
+    "artist": "MUCAHÎD GOKER",
+    "key": "Em",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|75"
+  },
+  {
+    "song": "EVDALO",
+    "artist": "MUCAHÎD GOKER",
+    "key": "Em",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|76"
+  },
+  {
+    "song": "DEV JÊ BERDA",
+    "artist": "OLGÛN EREN",
+    "key": "Em",
+    "ritim": "Bolero",
+    "ritimVideo": "https://www.youtube.com/watch?v=inPgMmYPVn8&feature=youtu.be",
+    "id": "pdf3.pdf|77"
+  },
+  {
+    "song": "BÎRANÎNA AZADÎYÊ",
+    "artist": "OZAN IRMAK",
+    "key": "Em",
+    "ritim": "6/8",
+    "ritimVideo": "https://youtu.be/jdTT398zSho",
+    "id": "pdf3.pdf|79"
+  },
+  {
+    "song": "AZADÎ",
+    "artist": "PRAKSÎS",
+    "key": "Am",
+    "ritim": "Reggae",
+    "ritimVideo": "https://youtu.be/L1v6Op4nJvk",
+    "id": "pdf3.pdf|80"
+  },
+  {
+    "song": "SÎNOR",
+    "artist": "PRAKSÎS",
+    "key": "D",
+    "ritim": "Pop 3",
+    "ritimVideo": "https://youtu.be/20Zu0xeHbs4",
+    "id": "pdf3.pdf|81"
+  },
+  {
+    "song": "ZAROKÊN ŞER",
+    "artist": "RAPERÎN",
+    "key": "Em",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|82"
+  },
+  {
+    "song": "XUÇÊ",
+    "artist": "REWŞAN ÇELÎKER & TARA MAMEDOVA",
+    "key": "D",
+    "ritim": "Bolero",
+    "ritimVideo": "https://www.youtube.com/watch?v=inPgMmYPVn8&feature=youtu.be",
+    "id": "pdf3.pdf|83"
+  },
+  {
+    "song": "WEXT LAZIM BÛ",
+    "artist": "REWŞAN ÇELÎKER",
+    "key": "Em",
+    "ritim": "Marş",
+    "ritimVideo": "https://www.youtube.com/watch?v=oK-9KtHnZYs",
+    "id": "pdf3.pdf|84"
+  },
+  {
+    "song": "TAWANBAR",
+    "artist": "ROHAT CIWAN",
+    "key": "Am",
+    "ritim": "Pop 1",
+    "ritimVideo": "https://www.youtube.com/watch?v=1XkjRdVSfl4&feature=youtu.be",
+    "id": "pdf3.pdf|85"
+  },
+  {
+    "song": "ŞENGAL",
+    "artist": "ROJDA",
+    "key": "-",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|86"
+  },
+  {
+    "song": "DÎLBERA NAZIK",
+    "artist": "RÛKEN YILMAZ",
+    "key": "Am",
+    "ritim": "Vals",
+    "ritimVideo": "https://www.youtube.com/watch?v=kNHml8V_or0",
+    "id": "pdf3.pdf|87"
+  },
+  {
+    "song": "RABE",
+    "artist": "RÛŞEN ALKAR",
+    "key": "Am",
+    "ritim": "Rock",
+    "ritimVideo": "https://youtu.be/bTFYoUij9fE",
+    "id": "pdf3.pdf|88"
+  },
+  {
+    "song": "KO",
+    "artist": "SAKÎNA",
+    "key": "Am",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|89"
+  },
+  {
+    "song": "ÊSÎR",
+    "artist": "SERDAR ALAZ",
+    "key": "Em",
+    "ritim": "Pop 3",
+    "ritimVideo": "https://youtu.be/20Zu0xeHbs4",
+    "id": "pdf3.pdf|91"
+  },
+  {
+    "song": "AWÊNE",
+    "artist": "SEYDA PERÎNÇEK & LAVÎN",
+    "key": "Dm",
+    "ritim": "6/8",
+    "ritimVideo": "https://www.youtube.com/watch?v=Es5tnOqNQtE",
+    "id": "pdf3.pdf|92"
+  },
+  {
+    "song": "ÇI HACET",
+    "artist": "SEYÎDXAN SEVÎNÇ",
+    "key": "Em",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|93"
+  },
+  {
+    "song": "BÊJE",
+    "artist": "SÎDAR",
+    "key": "Em",
+    "ritim": "Rock",
+    "ritimVideo": "https://youtu.be/bTFYoUij9fE",
+    "id": "pdf3.pdf|94"
+  },
+  {
+    "song": "NÎV",
+    "artist": "SÎDAR FERÎD",
+    "key": "F#m",
+    "ritim": "Pop 3",
+    "ritimVideo": "https://youtu.be/20Zu0xeHbs4",
+    "id": "pdf3.pdf|95"
+  },
+  {
+    "song": "BIRÎNA REŞ",
+    "artist": "SÎMIR RÛDAN",
+    "key": "A",
+    "ritim": "6/8",
+    "ritimVideo": "https://youtu.be/jdTT398zSho",
+    "id": "pdf3.pdf|96"
+  },
+  {
+    "song": "TU XEM NEKŞÎNE",
+    "artist": "SIYA ŞEVÊ",
+    "key": "Dm",
+    "ritim": "6/8",
+    "ritimVideo": "https://www.youtube.com/watch?v=Es5tnOqNQtE",
+    "id": "pdf3.pdf|97"
+  },
+  {
+    "song": "GURÎ",
+    "artist": "SIYA ŞEVÊ",
+    "key": "Em",
+    "ritim": "6/8",
+    "ritimVideo": "https://youtu.be/yv2b32OSaCs",
+    "id": "pdf3.pdf|98"
+  },
+  {
+    "song": "RÛPAYÎZ",
+    "artist": "SIYA ŞEVÊ",
+    "key": "Am",
+    "ritim": "Shuffle",
+    "ritimVideo": "https://youtu.be/jdTT398zSho",
+    "id": "pdf3.pdf|99"
+  },
+  {
+    "song": "HER WAREK BI BILBILEK",
+    "artist": "TARA JAFF",
+    "key": "Am",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|100"
+  },
+  {
+    "song": "SÎNO",
+    "artist": "TARA MAMEDOVA",
+    "key": "Dm",
+    "ritim": "Polka",
+    "ritimVideo": "https://www.youtube.com/watch?v=YRBKDA0M6N4&feature=youtu.be",
+    "id": "pdf3.pdf|101"
+  },
+  {
+    "song": "ÇAR ZAROK",
+    "artist": "TEQ Û REQ",
+    "key": "Em",
+    "ritim": "Rock",
+    "ritimVideo": "https://youtu.be/bTFYoUij9fE",
+    "id": "pdf3.pdf|102"
+  },
+  {
+    "song": "XEWNEREŞK",
+    "artist": "TEQ Û REQ",
+    "key": "Am",
+    "ritim": "Rock",
+    "ritimVideo": "https://youtu.be/bTFYoUij9fE",
+    "id": "pdf3.pdf|103"
+  },
+  {
+    "song": "BI KÎJAN MEQAMÎ",
+    "artist": "TEŞQELE",
+    "key": "Em",
+    "ritim": "Reggae",
+    "ritimVideo": "https://youtu.be/L1v6Op4nJvk",
+    "id": "pdf3.pdf|104"
+  },
+  {
+    "song": "BALADA ŞIVANEKÎ",
+    "artist": "VEDAT TANIŞ",
+    "key": "Am",
+    "ritim": "Rock",
+    "ritimVideo": "https://youtu.be/bTFYoUij9fE",
+    "id": "pdf3.pdf|105"
+  },
+  {
+    "song": "GEWRÊ",
+    "artist": "XALIT TARÎ",
+    "key": "Bm",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|106"
+  },
+  {
+    "song": "DIMEŞÎYA",
+    "artist": "XÊRO ABBAS",
+    "key": "Dm",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|107"
+  },
+  {
+    "song": "MAHÎTAB",
+    "artist": "YAHHYA",
+    "key": "Bm",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|108"
+  },
+  {
+    "song": "AZADÎ",
+    "artist": "YÛNIS DAS",
+    "key": "Em",
+    "ritim": "Polka",
+    "ritimVideo": "https://www.youtube.com/watch?v=YRBKDA0M6N4&feature=youtu.be",
+    "id": "pdf3.pdf|109"
+  },
+  {
+    "song": "MIJ Û BERF",
+    "artist": "YÛNIS DAS",
+    "key": "Dm",
+    "ritim": "9/8",
+    "ritimVideo": "https://youtu.be/WxlF_R-6iCg",
+    "id": "pdf3.pdf|110"
+  },
+  {
+    "song": "DERMAN",
+    "artist": "YÛNÛS DÎŞKAYA",
+    "key": "Dm",
+    "ritim": "Polka",
+    "ritimVideo": "https://www.youtube.com/watch?v=YRBKDA0M6N4&feature=youtu.be",
+    "id": "pdf3.pdf|111"
+  },
+  {
+    "song": "GULÊ",
+    "artist": "YÛNÛS DÎŞKAYA",
+    "key": "Am",
+    "ritim": "9/8",
+    "ritimVideo": "https://youtu.be/WxlF_R-6iCg",
+    "id": "pdf3.pdf|112"
+  },
+  {
+    "song": "LI ÇI DIGERÎ",
+    "artist": "YÛNÛS DÎŞKAYA",
+    "key": "Dm",
+    "ritim": "9/8",
+    "ritimVideo": "https://youtu.be/WxlF_R-6iCg",
+    "id": "pdf3.pdf|113"
+  },
+  {
+    "song": "CEMÎLA MIN",
+    "artist": "ZE TIJE",
+    "key": "Bm",
+    "ritim": "2/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=99VoyzePMPg&feature=youtu.be",
+    "id": "pdf3.pdf|114"
+  },
+  {
+    "song": "BIHUYÊ",
+    "artist": "ZE TIJE",
+    "key": "Bm",
+    "ritim": "Pop 1",
+    "ritimVideo": "https://www.youtube.com/watch?v=1XkjRdVSfl4&feature=youtu.be",
+    "id": "pdf3.pdf|115"
+  },
+  {
+    "song": "WARWAY",
+    "artist": "ZE TIJE",
+    "key": "Bm",
+    "ritim": "10/8",
+    "ritimVideo": "https://www.youtube.com/watch?v=9KTxrtB4F4M",
+    "id": "pdf3.pdf|116"
+  },
+  {
+    "song": "MESELE NE EVA",
+    "artist": "ABBAS AHMED",
+    "key": "C",
+    "ritim": "Reggae",
+    "ritimVideo": "https://youtu.be/L1v6Op4nJvk",
+    "id": "pdf3.pdf|117"
+  },
+  {
+    "song": "SER KIZ NAKEM",
+    "artist": "HOGIR FATÎH RASUL",
+    "key": "C",
+    "ritim": "Pop 2",
+    "ritimVideo": "https://www.youtube.com/watch?v=8upBdTZg0Sc&feature=youtu.be",
+    "id": "pdf3.pdf|118"
+  },
+  {
+    "song": "KUL Û KULÎLK",
+    "artist": "JAN AXÎN",
+    "key": "Am",
+    "ritim": "4/4",
+    "ritimVideo": "https://www.youtube.com/watch?v=Gktt924WYZE",
+    "id": "pdf3.pdf|119"
   }
 ]

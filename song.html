@@ -94,6 +94,7 @@
             <span class="muted" data-i18n="label_original_key">Orjînal:</span> <strong id="origKey">—</strong>
             <span class="muted" data-i18n="label_current_key">Niha:</span> <strong id="curKey">—</strong>
             <span class="muted" data-i18n="label_rhythm">Govend:</span> <strong id="songRhythm">—</strong>
+            <a id="ritimVideoBtn" class="btn btn--ghost btn--sm rhythmBtn" href="#" target="_blank" rel="noopener noreferrer" data-i18n="action_rhythm_video">Ritim videosu</a>
             <div class="keyGrid" id="keyGrid">
               <button type="button" class="keyBtn" data-key="C">C</button>
               <button type="button" class="keyBtn" data-key="Db">Db</button>
@@ -189,6 +190,19 @@
                 <button type="button" class="btn btn--compact" id="editTemplateChorus" data-i18n="template_chorus">Chorus</button>
                 <button type="button" class="btn btn--compact" id="editTemplateBridge" data-i18n="template_bridge">Bridge</button>
               </div>
+              <div class="quickChords" data-target="editText">
+                <span class="quickLabel" data-i18n="chords_quick">Hızlı akorlar</span>
+                <button type="button" class="btn btn--compact quickChordBtn" data-chord="Am">Am</button>
+                <button type="button" class="btn btn--compact quickChordBtn" data-chord="Dm">Dm</button>
+                <button type="button" class="btn btn--compact quickChordBtn" data-chord="Em">Em</button>
+                <button type="button" class="btn btn--compact quickChordBtn" data-chord="G">G</button>
+                <button type="button" class="btn btn--compact quickChordBtn" data-chord="C">C</button>
+                <button type="button" class="btn btn--compact quickChordBtn" data-chord="F">F</button>
+                <button type="button" class="btn btn--compact quickChordBtn" data-chord="D">D</button>
+                <button type="button" class="btn btn--compact quickChordBtn" data-chord="A">A</button>
+                <button type="button" class="btn btn--compact quickChordBtn" data-chord="Bm">Bm</button>
+                <button type="button" class="btn btn--compact quickChordBtn quickChordBtn--toggle" data-action="wrap" aria-pressed="false" data-i18n-title="chords_wrap_title">[ ]</button>
+              </div>
               <div class="chordDictionary">
                 <button type="button" class="btn btn--compact" id="toggleChordDictEdit" data-i18n="chords_label">Akorlar</button>
                 <div id="chordDictionaryEdit" class="chordDictionaryPanel is-hidden">
@@ -205,6 +219,7 @@
                 <span id="editCharCount" class="charCount muted">0 karakter</span>
                 <span id="editChordCount" class="chordCount muted">0 akor</span>
                 <button type="button" class="btn btn--tiny btn--ghost" id="editPreviewToggle" data-i18n="preview_label">Önizleme</button>
+                <button type="button" class="btn btn--tiny btn--ghost" id="editFocusToggle" data-i18n="action_focus">Odak modu</button>
               </div>
             </div>
             <div class="editTextareaWrapper">
@@ -313,7 +328,7 @@
                     <div class="stat__t muted" data-i18n="footer_stat_artists">Hunermend</div>
                   </div>
                   <div class="stat">
-                    <div class="stat__n" id="statUpdated">2</div>
+                    <div class="stat__n" id="statUpdated">3</div>
                     <div class="stat__t muted" data-i18n="footer_stat_repertoire">Repertûar</div>
                   </div>
                 </div>
@@ -322,7 +337,7 @@
           </section>
           <div class="footerRow" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
             <span class="muted" style="text-align:left;"><span data-i18n="footer_copyright">© Repertûara Kurdî</span></span>
-            <span class="muted" style="text-align:right;"><span data-i18n="footer_credit">Pêşvebir: Ahmet Uçar</span></span>
+            <span class="muted" style="text-align:right;"><span class="footerCredit" data-i18n-html="footer_credit">Developer:<a class="footerLink" href="https://x.com/ahmetucarx" target="_blank" rel="noopener noreferrer">Ahmet Uçar</a></span></span>
           </div>
         </div>
       </footer>
@@ -385,6 +400,19 @@
               <button type="button" class="btn btn--compact" id="addTemplateChorus" data-i18n="template_chorus">Chorus</button>
               <button type="button" class="btn btn--compact" id="addTemplateBridge" data-i18n="template_bridge">Bridge</button>
             </div>
+            <div class="quickChords" data-target="addSongText">
+              <span class="quickLabel" data-i18n="chords_quick">Hızlı akorlar</span>
+              <button type="button" class="btn btn--compact quickChordBtn" data-chord="Am">Am</button>
+              <button type="button" class="btn btn--compact quickChordBtn" data-chord="Dm">Dm</button>
+              <button type="button" class="btn btn--compact quickChordBtn" data-chord="Em">Em</button>
+              <button type="button" class="btn btn--compact quickChordBtn" data-chord="G">G</button>
+              <button type="button" class="btn btn--compact quickChordBtn" data-chord="C">C</button>
+              <button type="button" class="btn btn--compact quickChordBtn" data-chord="F">F</button>
+              <button type="button" class="btn btn--compact quickChordBtn" data-chord="D">D</button>
+              <button type="button" class="btn btn--compact quickChordBtn" data-chord="A">A</button>
+              <button type="button" class="btn btn--compact quickChordBtn" data-chord="Bm">Bm</button>
+              <button type="button" class="btn btn--compact quickChordBtn quickChordBtn--toggle" data-action="wrap" aria-pressed="false" data-i18n-title="chords_wrap_title">[ ]</button>
+            </div>
             <div class="chordDictionary">
               <button type="button" class="btn btn--compact" id="toggleChordDict" data-i18n="chords_label">Akorlar</button>
               <div id="chordDictionary" class="chordDictionaryPanel is-hidden">
@@ -401,6 +429,7 @@
               <span id="addSongCharCount" class="charCount muted">0 karakter</span>
               <span id="addSongChordCount" class="chordCount muted">0 akor</span>
               <button type="button" class="btn btn--tiny btn--ghost" id="addSongPreviewToggle" data-i18n="preview_label">Önizleme</button>
+              <button type="button" class="btn btn--tiny btn--ghost" id="addSongFocusToggle" data-i18n="action_focus">Odak modu</button>
             </div>
           </div>
           <div class="editTextareaWrapper">

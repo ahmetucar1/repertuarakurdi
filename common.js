@@ -36,6 +36,7 @@ const I18N = {
     action_save: "Tomar bike",
     action_send: "Bişîne",
     action_shuffle: "Nû bike",
+    action_rhythm_video: "Vîdeoya rîtmê",
     action_select_all: "Hemûyan hilbijêre",
     action_approve_all: "Hemûyan pejirîne",
     action_approve_selected: "Hilbijartiyan pejirîne",
@@ -46,6 +47,8 @@ const I18N = {
     action_add_song_short: "Stran Zêde Bike",
     action_login: "Têkeve",
     action_favorite: "Favorî bike",
+    action_focus: "Modê fokusê",
+    action_exit_focus: "Şêwazê normal",
     search_placeholder: "Stran an hunermend bigere…",
     search_placeholder_artist: "Di nav stranên vî hunermendî de bigere…",
     home_kicker: "Hûn bi xêr hatin",
@@ -81,7 +84,7 @@ const I18N = {
     footer_stat_songs: "Stran",
     footer_stat_artists: "Hunermend",
     footer_stat_repertoire: "Repertûar",
-    footer_credit: "Pêşvebir: Ahmet Uçar",
+    footer_credit: "Developer:<a class=\"footerLink\" href=\"https://x.com/ahmetucarx\" target=\"_blank\" rel=\"noopener noreferrer\">Ahmet Uçar</a>",
     status_loading_songs: "Stran tên barkirinê...",
     status_no_results: "Tınne",
     status_error_prefix: "Çewtî",
@@ -107,6 +110,8 @@ const I18N = {
     template_chorus: "Chorus",
     template_bridge: "Bridge",
     chords_label: "Akorlar",
+    chords_quick: "Akorên bilez",
+    chords_wrap_title: "Akorên [ ]",
     preview_label: "Önizleme",
     keyboard_hint: "Ctrl+S: Kaydet | Esc: Kapat",
     status_requires_login_favorite: "Ji bo favorî divê tu têkevî.",
@@ -313,6 +318,7 @@ const I18N = {
     action_save: "Kaydet",
     action_send: "Gönder",
     action_shuffle: "Yenile",
+    action_rhythm_video: "Ritim videosu",
     action_select_all: "Tümünü seç",
     action_approve_all: "Tümünü onayla",
     action_approve_selected: "Seçileni onayla",
@@ -323,6 +329,8 @@ const I18N = {
     action_add_song_short: "Şarkı Ekle",
     action_login: "Giriş",
     action_favorite: "Favoriye ekle",
+    action_focus: "Odak modu",
+    action_exit_focus: "Normal",
     search_placeholder: "Şarkı veya sanatçı ara…",
     search_placeholder_artist: "Bu sanatçının şarkılarında ara…",
     home_kicker: "Hoş geldin",
@@ -358,7 +366,7 @@ const I18N = {
     footer_stat_songs: "Şarkı",
     footer_stat_artists: "Sanatçı",
     footer_stat_repertoire: "Repertuar",
-    footer_credit: "Geliştirici: Ahmet Uçar",
+    footer_credit: "Developer:<a class=\"footerLink\" href=\"https://x.com/ahmetucarx\" target=\"_blank\" rel=\"noopener noreferrer\">Ahmet Uçar</a>",
     status_loading_songs: "Şarkılar yükleniyor...",
     status_no_results: "Bulunamadı",
     status_error_prefix: "Hata",
@@ -384,6 +392,8 @@ const I18N = {
     template_chorus: "Nakarat",
     template_bridge: "Köprü",
     chords_label: "Akorlar",
+    chords_quick: "Hızlı akorlar",
+    chords_wrap_title: "Akor modu [ ]",
     preview_label: "Önizleme",
     keyboard_hint: "Ctrl+S: Kaydet | Esc: Kapat",
     status_requires_login_favorite: "Favori için giriş yapmalısın.",
@@ -1573,6 +1583,7 @@ function initAddSongPanel(onSaved){
   if(artistInfoIcon && addSongArtist){
     let tooltipElement = null;
     let tooltipVisible = false;
+    let tooltipDismissed = false;
     
     const createTooltip = () => {
       if(tooltipElement) return tooltipElement;
@@ -1588,40 +1599,49 @@ function initAddSongPanel(onSaved){
       // Kapatma butonuna tıklayınca kapat
       tooltip.querySelector(".tooltip-close").addEventListener("click", (e) => {
         e.stopPropagation();
-        hideTooltip();
+        hideTooltip({ dismiss: true, focusInput: true });
       });
       
       return tooltip;
     };
     
-    const showTooltip = () => {
+    const showTooltip = (force = false) => {
       if(tooltipVisible) return;
+      if(tooltipDismissed && !force) return;
       tooltipVisible = true;
       const tooltip = createTooltip();
       tooltip.classList.add("tooltip-visible");
       artistInfoIcon.classList.add("tooltip-active");
+      if(force) tooltipDismissed = false;
     };
     
-    const hideTooltip = () => {
-      if(!tooltipVisible) return;
+    const hideTooltip = ({ dismiss = false, focusInput = false } = {}) => {
+      if(!tooltipVisible){
+        if(dismiss) tooltipDismissed = true;
+        return;
+      }
       tooltipVisible = false;
       if(tooltipElement) {
         tooltipElement.classList.remove("tooltip-visible");
       }
       artistInfoIcon.classList.remove("tooltip-active");
+      if(dismiss) tooltipDismissed = true;
+      if(focusInput){
+        setTimeout(() => addSongArtist.focus(), 0);
+      }
     };
     
     // Input'a focus olduğunda göster
-    addSongArtist.addEventListener("focus", showTooltip);
+    addSongArtist.addEventListener("focus", () => showTooltip(false));
     
     // Icon'a tıklayınca toggle
     artistInfoIcon.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       if(tooltipVisible) {
-        hideTooltip();
+        hideTooltip({ dismiss: true });
       } else {
-        showTooltip();
+        showTooltip(true);
       }
     });
     
@@ -1638,6 +1658,7 @@ function initAddSongPanel(onSaved){
     const panelObserver = new MutationObserver(() => {
       if(addPanel.classList.contains("is-hidden")) {
         hideTooltip();
+        tooltipDismissed = false;
         if(tooltipElement) {
           tooltipElement.remove();
           tooltipElement = null;
@@ -1890,10 +1911,23 @@ function initAddSongPanel(onSaved){
 // EDIT PANEL ENHANCEMENTS
 // ============================================
 
+const CHORD_TOKEN_PATTERN = "[A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\\d*(?:\\/[A-G](?:#|b)?)?";
+const CHORD_MATCH_RE = new RegExp(`\\[(${CHORD_TOKEN_PATTERN})\\]|\\b(${CHORD_TOKEN_PATTERN})\\b`, "g");
+
+function extractChordTokens(text){
+  const tokens = [];
+  if(!text) return tokens;
+  CHORD_MATCH_RE.lastIndex = 0;
+  for(const match of text.matchAll(CHORD_MATCH_RE)){
+    const chord = match[1] || match[2];
+    if(chord) tokens.push(chord);
+  }
+  return tokens;
+}
+
 // Chord validation
 function validateChords(text){
-  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\b/g;
-  const matches = text.match(chordPattern) || [];
+  const matches = extractChordTokens(text);
   const validRoots = ["C","C#","Db","D","D#","Eb","E","F","F#","Gb","G","G#","Ab","A","A#","Bb","B"];
   const errors = [];
   const warnings = [];
@@ -1921,15 +1955,21 @@ function validateChords(text){
 
 // Extract chords from text
 function extractChords(text){
-  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\b/g;
-  const matches = text.match(chordPattern) || [];
+  const matches = extractChordTokens(text);
   return [...new Set(matches)];
 }
 
 // Highlight chords in text (for preview)
 function highlightChordsInText(text){
-  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\b/g;
-  return escapeHtml(text).replace(chordPattern, '<strong class="chordTok">$1</strong>');
+  const escaped = escapeHtml(text);
+  CHORD_MATCH_RE.lastIndex = 0;
+  return escaped.replace(CHORD_MATCH_RE, (full, bracketed, plain) => {
+    const chord = bracketed || plain || "";
+    if(bracketed){
+      return `<strong class="chordTok chordTok--bracket">[${chord}]</strong>`;
+    }
+    return `<strong class="chordTok">${chord}</strong>`;
+  });
 }
 
 // Song templates - akorlar sözlerin üstünde, parantez yok
@@ -1982,6 +2022,49 @@ function initChordDictionary(containerId, textareaId){
     
     // Trigger input event for validation
     textareaEl.dispatchEvent(new Event("input"));
+  });
+}
+
+function insertAtCursor(textarea, insertText){
+  if(!textarea) return;
+  const start = textarea.selectionStart ?? 0;
+  const end = textarea.selectionEnd ?? 0;
+  const text = textarea.value || "";
+  textarea.value = text.slice(0, start) + insertText + text.slice(end);
+  const nextPos = start + insertText.length;
+  textarea.selectionStart = textarea.selectionEnd = nextPos;
+  textarea.focus();
+  textarea.dispatchEvent(new Event("input"));
+}
+
+function initQuickChords(textareaId){
+  const textarea = document.getElementById(textareaId);
+  if(!textarea) return;
+  const groups = document.querySelectorAll(`.quickChords[data-target="${textareaId}"]`);
+  groups.forEach(group => {
+    if(group.dataset.bound === "true") return;
+    group.dataset.bound = "true";
+    group.dataset.wrap = group.dataset.wrap || "false";
+
+    const toggleBtn = group.querySelector('[data-action="wrap"]');
+    if(toggleBtn){
+      toggleBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const next = group.dataset.wrap !== "true";
+        group.dataset.wrap = next ? "true" : "false";
+        toggleBtn.setAttribute("aria-pressed", next ? "true" : "false");
+        toggleBtn.classList.toggle("is-active", next);
+      });
+    }
+
+    group.addEventListener("click", (e) => {
+      const btn = e.target.closest(".quickChordBtn");
+      if(!btn || btn.dataset.action) return;
+      const chord = btn.dataset.chord;
+      if(!chord) return;
+      const wrap = group.dataset.wrap === "true";
+      insertAtCursor(textarea, wrap ? `[${chord}]` : chord);
+    });
   });
 }
 
@@ -2113,6 +2196,35 @@ function initEditPanelEnhancements(panelPrefix, textareaId, charCountId, chordCo
         : t("action_edit");
     });
   }
+
+  const focusToggle = document.getElementById(`${panelPrefix === "add" ? "addSong" : "edit"}FocusToggle`);
+  const panel = textarea.closest(".editPanel");
+  if(focusToggle && panel){
+    const syncFocusLabel = () => {
+      const isFocus = panel.classList.contains("is-focus");
+      focusToggle.textContent = isFocus ? t("action_exit_focus") : t("action_focus");
+      focusToggle.setAttribute("aria-pressed", isFocus ? "true" : "false");
+    };
+    syncFocusLabel();
+    focusToggle.addEventListener("click", () => {
+      const next = !panel.classList.contains("is-focus");
+      panel.classList.toggle("is-focus", next);
+      document.body.classList.toggle("edit-panel-focus", next);
+      syncFocusLabel();
+      if(next){
+        setTimeout(() => textarea.focus(), 50);
+      }
+    });
+
+    const focusObserver = new MutationObserver(() => {
+      if(panel.classList.contains("is-hidden")){
+        panel.classList.remove("is-focus");
+        document.body.classList.remove("edit-panel-focus");
+        syncFocusLabel();
+      }
+    });
+    focusObserver.observe(panel, { attributes: true, attributeFilter: ["class"] });
+  }
   
   // Template buttons
   const verseBtn = document.getElementById(`${panelPrefix === "add" ? "add" : "edit"}TemplateVerse`);
@@ -2166,9 +2278,33 @@ function initEditPanelEnhancements(panelPrefix, textareaId, charCountId, chordCo
       }
     });
   }
+
+  initQuickChords(textareaId);
   
   // Keyboard shortcuts
   textarea.addEventListener("keydown", (e) => {
+    if(e.key === "Tab"){
+      e.preventDefault();
+      const start = textarea.selectionStart ?? 0;
+      const end = textarea.selectionEnd ?? 0;
+      const text = textarea.value || "";
+      if(e.shiftKey){
+        const lineStart = text.lastIndexOf("\n", start - 1) + 1;
+        const prefix = text.slice(lineStart, lineStart + 2);
+        if(prefix === "  "){
+          textarea.value = text.slice(0, lineStart) + text.slice(lineStart + 2);
+          const nextPos = Math.max(lineStart, start - 2);
+          textarea.selectionStart = textarea.selectionEnd = nextPos;
+        }
+      } else {
+        const before = text.slice(0, start);
+        const after = text.slice(end);
+        textarea.value = before + "  " + after;
+        textarea.selectionStart = textarea.selectionEnd = start + 2;
+      }
+      updateCounts();
+      return;
+    }
     // Ctrl/Cmd + S: Save
     if((e.ctrlKey || e.metaKey) && e.key === "s"){
       e.preventDefault();
@@ -2943,6 +3079,7 @@ window.updateFilterOptions = updateFilterOptions;
           type="search" 
           placeholder="${t("search_placeholder")}" 
           autocomplete="off" 
+          enterkeyhint="done"
         />
         <button id="searchOverlayClear" class="search-overlay__clear" type="button" aria-label="${t("search_overlay_clear")}">✕</button>
         <button class="search-overlay__close" type="button" aria-label="${t("search_overlay_close")}">&larr;</button>
@@ -3322,10 +3459,12 @@ window.updateFilterOptions = updateFilterOptions;
     
     log("✅ Search overlay setup complete");
     
-    // Close butonuna tıklayınca kapat
+    // Close butonu: sadece klavyeyi kapat, overlay'i kapatma
     if (closeBtn) {
-      closeBtn.addEventListener("click", () => {
-        toggleSearchOverlay(false);
+      closeBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        input.blur();
       });
     }
     
@@ -3346,6 +3485,9 @@ window.updateFilterOptions = updateFilterOptions;
     }
     
     let isComposing = false;
+    const isDoneKey = (key) => (
+      key === "Enter" || key === "Go" || key === "Done" || key === "Search"
+    );
     const scheduleOverlaySearch = (value) => {
       updateClearButton(input);
       lastOverlayQuery = value;
@@ -3376,18 +3518,31 @@ window.updateFilterOptions = updateFilterOptions;
     
     input.addEventListener("keyup", (e) => {
       if (isComposing) return;
+      if (isDoneKey(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        input.blur();
+        return;
+      }
       scheduleOverlaySearch(e.target.value);
     });
     
     input.addEventListener("search", (e) => {
       if (isComposing) return;
       scheduleOverlaySearch(e.target.value);
+      input.blur();
     });
     
-    // ESC tuşu ile kapat
+    // ESC tuşu ile kapat, Enter/Go ile klavyeyi kapat (navigasyon yapma)
     input.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         toggleSearchOverlay(false);
+        return;
+      }
+      if (isDoneKey(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        input.blur();
       }
     });
     

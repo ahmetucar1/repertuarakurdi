@@ -243,7 +243,13 @@ function getIdParam(){
 }
 
 const TEXT_SLUG_OVERRIDES = {
-  "pdf2.pdf|68": "beritan-koma-amara"
+  "pdf2.pdf|68": "beritan-koma-amara",
+  "pdf3.pdf|15": "rewend-aynur-dogan",
+  "pdf3.pdf|17": "diyarbekir-bajar",
+  "pdf3.pdf|19": "newroz-bajar",
+  "pdf3.pdf|57": "keca-peri-kerem-gerdenzeri",
+  "pdf3.pdf|94": "beje-sidar",
+  "pdf3.pdf|109": "azadi-yunis-das"
 };
 
 function slugifySongTitle(title){
@@ -317,6 +323,7 @@ async function init(){
   const songNameEl = document.getElementById("songName");
   const songArtistEl = document.getElementById("songArtist");
   const rhythmEl = document.getElementById("songRhythm");
+  const rhythmVideoBtn = document.getElementById("ritimVideoBtn");
   
   if(songNameEl){
     songNameEl.textContent = window.formatSongTitle ? window.formatSongTitle(current?.song) : (current?.song || "—");
@@ -330,6 +337,15 @@ async function init(){
   }
   if(rhythmEl){
     rhythmEl.textContent = current?.ritim || "-";
+  }
+  if(rhythmVideoBtn){
+    const url = (current?.ritimVideo || "").toString().trim();
+    if(url){
+      rhythmVideoBtn.href = url;
+      rhythmVideoBtn.classList.add("is-visible");
+    } else {
+      rhythmVideoBtn.classList.remove("is-visible");
+    }
   }
   const pendingBadge = document.getElementById("songPending");
   if(pendingBadge){
@@ -380,6 +396,21 @@ async function init(){
   const editArtistSuggest = document.getElementById("editArtistSuggest");
   const editKey = document.getElementById("editKey");
   const editText = document.getElementById("editText");
+  if(editPanel && !editPanel.dataset.enhanced && window.initEditPanelEnhancements){
+    window.initEditPanelEnhancements(
+      "edit",
+      "editText",
+      "editCharCount",
+      "editChordCount",
+      "editValidation",
+      "editPreview",
+      "editPreviewToggle"
+    );
+    if(window.initChordDictionary){
+      window.initChordDictionary("chordDictionaryEdit", "editText");
+    }
+    editPanel.dataset.enhanced = "true";
+  }
 
   if(editArtist && editArtistSuggest && window.initArtistSuggest){
     window.initArtistSuggest(editArtist, editArtistSuggest);
@@ -1011,8 +1042,8 @@ async function init(){
     const preferred = pool.filter(s =>
       artistArr(s.artist).some(a => curArtists.has(norm(a)))
     );
-    const first = pickRandom(preferred, 6);
-    const need = Math.max(0, 6 - first.length);
+    const first = pickRandom(preferred, 10);
+    const need = Math.max(0, 10 - first.length);
     const restPool = pool.filter(s => !first.some(x => makeId(x) === makeId(s)));
     const recs = first.concat(pickRandom(restPool, need));
     renderRecList(recEl, recs);
