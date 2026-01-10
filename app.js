@@ -33,17 +33,23 @@ function artistLinks(a){
   }).join(" · ");
 }
 
-async function renderStoryStrip(){
+function renderStoryStripSkeleton(track, count = 10){
+  if(!track || track.dataset.skeleton === "true") return;
+  const items = Array.from({ length: count }).map(() => `
+    <div class="storyBubble is-skeleton" role="listitem" aria-hidden="true">
+      <span class="storyBubble__ring">
+        <span class="storyBubble__img"></span>
+      </span>
+      <span class="storyBubble__name"></span>
+    </div>
+  `);
+  track.innerHTML = items.join("");
+  track.dataset.skeleton = "true";
+}
+
+function renderStoryStripItems(list){
   const track = document.getElementById("storyTrack");
-  const strip = document.querySelector(".storyStrip");
-  if(!track || typeof window.loadArtistPhotos !== "function") return;
-
-  const list = await window.loadArtistPhotos();
-  if(!Array.isArray(list) || list.length === 0){
-    if(strip) strip.style.display = "none";
-    return;
-  }
-
+  if(!track) return;
   const html = list.map((item) => {
     const name = (item?.artist || "").toString().trim();
     const label = (item?.label || name).toString().trim();
@@ -60,8 +66,25 @@ async function renderStoryStrip(){
       </a>
     `;
   }).join("");
-
   track.innerHTML = html;
+  track.dataset.skeleton = "false";
+}
+
+async function renderStoryStrip(){
+  const track = document.getElementById("storyTrack");
+  if(!track || typeof window.loadArtistPhotos !== "function") return;
+
+  const cached = window.getArtistPhotosCache?.() || [];
+  if(cached.length){
+    renderStoryStripItems(cached);
+  } else {
+    renderStoryStripSkeleton(track);
+  }
+
+  const list = await window.loadArtistPhotos();
+  if(Array.isArray(list) && list.length){
+    renderStoryStripItems(list);
+  }
   initStoryStripControls();
 }
 
@@ -505,6 +528,7 @@ function initContactForm(){
 
 async function init(){
   log("=== INIT STARTED ===");
+  renderStoryStrip();
   try {
     log("Loading songs...");
     const shouldForceRefresh = window.location.search.includes("refresh=true");
@@ -969,6 +993,10 @@ window.openLink = openLink;
 
 log("=== APP.JS LOADED ===");
 log("Calling init()...");
+
+if(typeof window.loadArtistPhotos === "function"){
+  window.loadArtistPhotos();
+}
 
 init().catch(err => {
   error("=== INIT ERROR ===", err);

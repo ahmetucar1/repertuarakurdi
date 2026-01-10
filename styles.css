@@ -1053,6 +1053,7 @@ body {
   height: 58px;
   border-radius: 999px;
   object-fit: cover;
+  display: block;
   background: #0e1219;
   border: 2px solid rgba(12,16,22,.9);
   filter: saturate(1.06) contrast(1.05);
@@ -1074,6 +1075,32 @@ body {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
   border-radius: 12px;
+}
+.storyBubble.is-skeleton{
+  pointer-events: none;
+}
+.storyBubble.is-skeleton .storyBubble__ring{
+  background: rgba(255,255,255,.08);
+  box-shadow: none;
+}
+.storyBubble.is-skeleton .storyBubble__img{
+  border: 0;
+  filter: none;
+  background: linear-gradient(90deg, rgba(255,255,255,.08), rgba(255,255,255,.18), rgba(255,255,255,.08));
+  background-size: 200% 100%;
+  animation: storyShimmer 1.4s ease-in-out infinite;
+}
+.storyBubble.is-skeleton .storyBubble__name{
+  height: 8px;
+  width: 52px;
+  border-radius: 6px;
+  background: rgba(255,255,255,.12);
+  color: transparent;
+}
+
+@keyframes storyShimmer{
+  0%{ background-position: 0% 50%; }
+  100%{ background-position: 200% 50%; }
 }
 .storyArrow{
   position: absolute;

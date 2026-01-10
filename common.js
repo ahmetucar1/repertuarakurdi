@@ -685,24 +685,58 @@ const norm = (s) => (s || "")
   .replace(/ö/g, "o")
   .replace(/ç/g, "c");
 
-const ARTIST_PHOTOS_URL = "/assets/artist-photos/artist-photos.json?v=1";
+const ARTIST_PHOTOS_URL = "/assets/artist-photos/artist-photos.json?v=2";
+const ARTIST_PHOTOS_CACHE_KEY = "artistPhotosCache.v1";
 let __artistPhotosPromise = null;
 let __artistPhotoMap = null;
+
+function buildArtistPhotoMap(list){
+  const map = {};
+  (Array.isArray(list) ? list : []).forEach((item) => {
+    if(!item || !item.artist || !item.photo) return;
+    map[norm(item.artist)] = item.photo;
+  });
+  return map;
+}
+
+function readArtistPhotosCache(){
+  try{
+    const raw = localStorage.getItem(ARTIST_PHOTOS_CACHE_KEY);
+    if(!raw) return null;
+    const list = JSON.parse(raw);
+    return Array.isArray(list) ? list : null;
+  }catch(_e){
+    return null;
+  }
+}
+
+function writeArtistPhotosCache(list){
+  try{
+    if(!Array.isArray(list)) return;
+    localStorage.setItem(ARTIST_PHOTOS_CACHE_KEY, JSON.stringify(list));
+  }catch(_e){}
+}
+
+function getArtistPhotosCache(){
+  return readArtistPhotosCache() || [];
+}
 
 async function loadArtistPhotos(){
   if(__artistPhotosPromise) return __artistPhotosPromise;
   __artistPhotosPromise = fetch(ARTIST_PHOTOS_URL)
     .then((res) => res.ok ? res.json() : [])
     .then((list) => {
-      const map = {};
-      (Array.isArray(list) ? list : []).forEach((item) => {
-        if(!item || !item.artist || !item.photo) return;
-        map[norm(item.artist)] = item.photo;
-      });
-      __artistPhotoMap = map;
-      return Array.isArray(list) ? list : [];
+      const safeList = Array.isArray(list) ? list : [];
+      __artistPhotoMap = buildArtistPhotoMap(safeList);
+      writeArtistPhotosCache(safeList);
+      return safeList;
     })
     .catch(() => {
+      const cached = readArtistPhotosCache();
+      if(cached && cached.length){
+        __artistPhotoMap = buildArtistPhotoMap(cached);
+        return cached;
+      }
       __artistPhotoMap = {};
       return [];
     });
@@ -1483,6 +1517,7 @@ window.formatSongTitle = formatSongTitle;
 window.norm = norm;
 window.loadArtistPhotos = loadArtistPhotos;
 window.getArtistPhoto = getArtistPhoto;
+window.getArtistPhotosCache = getArtistPhotosCache;
 window.pickRandom = pickRandom;
 window.artistArr = artistArr;
 window.escapeHtml = escapeHtml;
