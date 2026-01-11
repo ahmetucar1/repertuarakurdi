@@ -756,7 +756,7 @@ window.setLanguage = setLanguage;
 window.getLanguage = () => currentLang;
 
 const SEO_DOMAIN = "https://repertuarakurdi.com";
-const SEO_DEFAULT_IMAGE = `${SEO_DOMAIN}/assets/logo_web_assets/logo-512.webp`;
+const SEO_DEFAULT_IMAGE = `${SEO_DOMAIN}/assets/og/og-image.png`;
 
 function normalizeSeoPath(path){
   if(!path) return "/";
@@ -863,7 +863,12 @@ function setSeoData(options = {}){
   if(canonical) setMetaProperty("og:url", canonical);
   if(image){
     setMetaProperty("og:image", image);
+    setMetaProperty("og:image:secure_url", image);
+    setMetaProperty("og:image:type", "image/png");
+    setMetaProperty("og:image:width", "1200");
+    setMetaProperty("og:image:height", "630");
     setMeta("twitter:image", image);
+    if(title) setMeta("twitter:image:alt", title);
   }
   setMetaProperty("og:locale", locale);
   setMeta("twitter:card", "summary_large_image");
