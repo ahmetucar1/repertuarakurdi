@@ -216,7 +216,8 @@ function highlightChords(text){
 
 function renderText(preEl, baseText, semis){
   if(!preEl || baseText == null) return;
-  const transposed = transposePlainText(baseText, semis);
+  const cleaned = baseText.toString().replace(/_/g, " ");
+  const transposed = transposePlainText(cleaned, semis);
   preEl.innerHTML = highlightChords(transposed);
 }
 
@@ -1096,9 +1097,10 @@ async function init(){
   
   try{
     const rawText = current?.text ? current.text : await loadSongText(slug);
+    const cleanedText = rawText.toString().replace(/_/g, " ");
     if(textPre){
-      textPre.dataset.baseText = rawText;
-      renderText(textPre, rawText, semitones);
+      textPre.dataset.baseText = cleanedText;
+      renderText(textPre, cleanedText, semitones);
     }
   }catch(err){
     console.error("Metin yükleme hatası:", err, "slug:", slug);

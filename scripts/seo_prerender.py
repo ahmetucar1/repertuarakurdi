@@ -121,6 +121,7 @@ def build_song_page(template, song):
   text_slug = get_text_slug(song)
   text_path = TEXT_DIR / f"{text_slug}.txt"
   song_text = text_path.read_text() if text_path.exists() else ""
+  song_text = re.sub(r"_", " ", song_text)
 
   slug = build_song_slug(song)
   canonical = f"{SEO_DOMAIN}/song/{slug}"
