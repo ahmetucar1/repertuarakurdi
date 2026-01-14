@@ -764,6 +764,28 @@ function applyLangToLinks(root = document){
   });
 }
 
+function bindLangLink(selector, target){
+  const links = document.querySelectorAll(selector);
+  links.forEach((link) => {
+    const next = appendLangParam(target);
+    if(next) link.setAttribute("href", next);
+    if(link.dataset.langBound) return;
+    link.addEventListener("click", (e) => {
+      const resolved = appendLangParam(target);
+      if(resolved){
+        e.preventDefault();
+        window.location.href = resolved;
+      }
+    });
+    link.dataset.langBound = "true";
+  });
+}
+
+function updateLangLinks(){
+  bindLangLink('a[data-i18n="nav_all"]', "/all.html");
+  bindLangLink('a[data-i18n="home_view_all"]', "/all.html");
+}
+
 function setLanguage(lang){
   if(!I18N[lang]) return;
   currentLang = lang;
@@ -773,6 +795,7 @@ function setLanguage(lang){
   updateLangToggle();
   syncLangParam();
   applyLangToLinks();
+  updateLangLinks();
   if(typeof window.refreshSeo === "function"){
     window.refreshSeo();
   }
@@ -793,6 +816,7 @@ function initI18n(){
   initLanguageToggle();
   syncLangParam();
   applyLangToLinks();
+  updateLangLinks();
   document.documentElement.classList.remove("i18n-pending");
 }
 
