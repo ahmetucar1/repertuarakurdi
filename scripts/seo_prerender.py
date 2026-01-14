@@ -141,6 +141,8 @@ def build_song_page(template, song):
   if song.get("ritimVideo"):
     page = page.replace('id="ritimVideoBtn" class="btn btn--ghost btn--sm rhythmBtn" href="#"',
                         f'id="ritimVideoBtn" class="btn btn--ghost btn--sm rhythmBtn is-visible" href="{html.escape(song.get("ritimVideo"))}"')
+  else:
+    page = re.sub(r'<a[^>]*\bid="ritimVideoBtn"[^>]*>.*?</a>', "", page, flags=re.S)
 
   return slug, page
 

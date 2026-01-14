@@ -450,6 +450,7 @@ async function init(){
       rhythmVideoBtn.classList.add("is-visible");
     } else {
       rhythmVideoBtn.classList.remove("is-visible");
+      rhythmVideoBtn.remove();
     }
   }
   const pendingBadge = document.getElementById("songPending");
