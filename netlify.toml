@@ -13,6 +13,46 @@
   force = true
 
 [[redirects]]
+  from = "/tr"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/tr/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/tr/all.html"
+  to = "/all.html"
+  status = 200
+
+[[redirects]]
+  from = "/tr/artist.html"
+  to = "/artist.html"
+  status = 200
+
+[[redirects]]
+  from = "/tr/song/*"
+  to = "/song.html"
+  status = 200
+
+[[redirects]]
+  from = "/tr/login.html"
+  to = "/login.html"
+  status = 200
+
+[[redirects]]
+  from = "/tr/admin.html"
+  to = "/admin.html"
+  status = 200
+
+[[redirects]]
+  from = "/tr/profile.html"
+  to = "/profile.html"
+  status = 200
+
+[[redirects]]
   from = "/song/*"
   to = "/song.html"
   status = 200

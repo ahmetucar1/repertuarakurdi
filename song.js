@@ -302,7 +302,8 @@ function getIdParam(){
   return p.get("id") || "";
 }
 function getSlugFromPath(){
-  const path = window.location.pathname || "";
+  const rawPath = window.location.pathname || "";
+  const path = rawPath.startsWith("/tr/") ? rawPath.slice(3) : rawPath;
   if(!path.startsWith("/song/")) return "";
   const parts = path.split("/").filter(Boolean);
   return parts.length > 1 ? parts[1] : "";
@@ -368,8 +369,25 @@ async function init(){
   const slugifyForUrl = typeof window.slugifySongTitle === "function"
     ? window.slugifySongTitle
     : slugifySongTitle;
+  const buildSlug = typeof window.buildSongSlug === "function"
+    ? window.buildSongSlug
+    : (song) => {
+      const base = slugifyForUrl(song?.song || "");
+      const artist = slugifyForUrl(song?.artist || "");
+      return [base, artist].filter(Boolean).join("-");
+    };
+  const legacySlug = (song) => slugifyForUrl(song?.song || "");
+  const legacyArtistSlug = (song) => {
+    const base = slugifyForUrl(song?.song || "");
+    const artist = slugifyForUrl(song?.artist || "");
+    return [base, artist].filter(Boolean).join("-");
+  };
   const current = (id ? SONGS.find(s => makeId(s) === id) : null)
-    || (slugFromPath ? SONGS.find(s => slugifyForUrl(s.song) === slugFromPath) : null)
+    || (slugFromPath ? SONGS.find(s => (
+      buildSlug(s) === slugFromPath ||
+      legacySlug(s) === slugFromPath ||
+      legacyArtistSlug(s) === slugFromPath
+    )) : null)
     || SONGS[0];
   const nextWrap = document.getElementById("nextSong");
   const nextBtn = document.getElementById("nextSongBtn");

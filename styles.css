@@ -2905,6 +2905,8 @@ main.container > .footer {
 .sectionSub{ margin:0; color:var(--muted); }
 .aboutBody{ display:flex; flex-direction:column; gap:12px; }
 .aboutText{ margin:0; color:var(--text); line-height:1.75; }
+.seoBlurb{ margin-top: var(--space-3); }
+.seoText{ margin:0; color:var(--muted); line-height:1.7; }
 .sourcesRow{
   display:flex;
   flex-wrap:wrap;

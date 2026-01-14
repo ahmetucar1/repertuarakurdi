@@ -14,7 +14,8 @@
   
   // Return URL'i al (giriş sonrası nereye dönülecek)
   const urlParams = new URLSearchParams(window.location.search);
-  const returnUrl = urlParams.get("return") || "/index.html";
+  const fallbackReturn = window.appendLangParam ? window.appendLangParam("/index.html") : "/index.html";
+  const returnUrl = urlParams.get("return") || fallbackReturn;
   
   // Giriş yapmış kullanıcıyı yönlendir
   function checkAuthState() {

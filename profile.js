@@ -435,7 +435,8 @@ function init(){
           return;
         }
         await auth.signOut();
-        window.location.href = "/index.html";
+        const target = window.appendLangParam ? window.appendLangParam("/index.html") : "/index.html";
+        window.location.href = target;
       }catch(err){
         console.error("Derketin çewtiyek:", err);
         if(profilePhotoStatus){

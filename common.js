@@ -62,6 +62,8 @@ const I18N = {
     home_kicker: "Hûn bi xêr hatin",
     home_title: "Akorên stranên kurdî li yek rûpelê bibîne.",
     home_subtitle: "Bigere, keşf bike, bitikîne, bibîne",
+    home_seo_title: "Repertûara Kurdî li yek rûpelê",
+    home_seo_text: "Li vir akorên stranên kurdî, gotinên stranên kurdî, tonê orîjînal û govend hene. Repertûara kurdî bi awayekî hêsan ji bo gitarê û muzîkvanan tê amade kirin.",
     home_results_default: "Yên Berçav",
     home_results_search: "Encamên lêgerînê",
     home_results_count: "encam",
@@ -342,9 +344,9 @@ const I18N = {
     action_favorite: "Favoriye ekle",
     seo_site_name: "Repertuar Kürdi",
     seo_home_title: "Repertuar Kürdi | Kürtçe Akorlar ve Kürtçe Şarkı Sözleri",
-    seo_home_desc: "Kürtçe şarkı sözleri, akorlar, orijinal ton ve ritim bilgileri. Kürtçe repertuar burada.",
+    seo_home_desc: "Kürtçe şarkı akorları ve kürtçe şarkı sözleri burada. Orijinal ton ve ritim bilgileriyle Kürtçe repertuar.",
     seo_all_title: "Tüm Kürtçe Şarkılar | Repertuar Kürdi",
-    seo_all_desc: "Kürtçe repertuar: şarkı sözleri, akorlar, ton ve ritim.",
+    seo_all_desc: "Tüm Kürtçe şarkılar: akorlar, sözler, ton ve ritim. Kürtçe şarkı akorları repertuarı.",
     seo_artist_title: "{artist} — Kürtçe Şarkılar ve Akorlar | Repertuar Kürdi",
     seo_artist_desc: "{artist} için kürtçe şarkı sözleri, akorlar ve repertuar.",
     seo_song_title: "{song} sözleri ve akorları — {artist} | Repertuar Kürdi",
@@ -354,6 +356,8 @@ const I18N = {
     home_kicker: "Hoş geldin",
     home_title: "Kürtçe şarkı akorlarını tek sayfada bul.",
     home_subtitle: "Ara, keşfet, tıkla, gör",
+    home_seo_title: "Kürtçe şarkı akorları ve sözleri",
+    home_seo_text: "Repertuar Kürdi’de kürtçe şarkı akorları, kürtçe şarkı sözleri, orijinal ton ve ritim bilgileri var. Kürtçe repertuarı gitar ve müzik için tek yerde topluyoruz.",
     home_results_default: "Öne Çıkanlar",
     home_results_search: "Arama Sonuçları",
     home_results_count: "sonuç",
@@ -605,17 +609,54 @@ const I18N = {
 };
 
 const DEFAULT_LANG = "ku";
+const LANG_PATH_PREFIX = "/tr";
+
+function getLangFromPath(pathname){
+  if(!pathname) return "";
+  if(pathname === LANG_PATH_PREFIX || pathname.startsWith(`${LANG_PATH_PREFIX}/`)) return "tr";
+  return "";
+}
+
+function stripLangPrefix(pathname){
+  if(!pathname) return "/";
+  if(pathname === LANG_PATH_PREFIX) return "/";
+  if(pathname.startsWith(`${LANG_PATH_PREFIX}/`)){
+    const stripped = pathname.slice(LANG_PATH_PREFIX.length);
+    return stripped ? stripped : "/";
+  }
+  return pathname;
+}
+
+function applyLangPrefix(pathname, lang){
+  const normalized = stripLangPrefix(pathname || "/");
+  if(lang === "tr"){
+    if(normalized === "/") return `${LANG_PATH_PREFIX}/`;
+    return `${LANG_PATH_PREFIX}${normalized}`;
+  }
+  return normalized;
+}
+
+function isLocalEnv(){
+  if(typeof window === "undefined") return false;
+  if(window.location.protocol === "file:") return true;
+  const host = window.location.hostname;
+  return ["localhost", "127.0.0.1", "0.0.0.0", "::1"].includes(host);
+}
+
+let pathLang = "";
 let urlLang = "";
 try{
+  pathLang = getLangFromPath(window.location.pathname || "");
   const params = new URLSearchParams(window.location.search);
   urlLang = (params.get("lang") || "").toLowerCase();
   if(urlLang !== "tr" && urlLang !== "ku") urlLang = "";
 }catch(_e){
+  pathLang = "";
   urlLang = "";
 }
-let currentLang = (urlLang || localStorage.getItem("lang") || DEFAULT_LANG).toLowerCase();
+let currentLang = (pathLang || urlLang || localStorage.getItem("lang") || DEFAULT_LANG).toLowerCase();
 if(!I18N[currentLang]) currentLang = DEFAULT_LANG;
-if(urlLang){
+if(pathLang || urlLang){
   try{
     localStorage.setItem("lang", currentLang);
   }catch(_e){}
@@ -670,10 +711,15 @@ function updateLangToggle(){
 function syncLangParam(){
   try{
     const url = new URL(window.location.href);
-    if(currentLang === "tr"){
-      url.searchParams.set("lang", "tr");
+    if(isLocalEnv()){
+      if(currentLang === "tr"){
+        url.searchParams.set("lang", "tr");
+      }else{
+        url.searchParams.delete("lang");
+      }
     }else{
       url.searchParams.delete("lang");
+      url.pathname = applyLangPrefix(url.pathname, currentLang);
     }
     const next = url.pathname + (url.searchParams.toString() ? `?${url.searchParams}` : "") + url.hash;
     const current = window.location.pathname + window.location.search + window.location.hash;
@@ -689,10 +735,15 @@ function appendLangParam(url){
   try{
     const parsed = new URL(url, window.location.origin);
     if(parsed.origin !== window.location.origin) return url;
-    if(currentLang === "tr"){
-      parsed.searchParams.set("lang", "tr");
+    if(isLocalEnv()){
+      if(currentLang === "tr"){
+        parsed.searchParams.set("lang", "tr");
+      }else{
+        parsed.searchParams.delete("lang");
+      }
     }else{
       parsed.searchParams.delete("lang");
+      parsed.pathname = applyLangPrefix(parsed.pathname, currentLang);
     }
     const search = parsed.searchParams.toString();
     return parsed.pathname + (search ? `?${search}` : "") + (parsed.hash || "");
@@ -762,6 +813,8 @@ function normalizeSeoPath(path){
   if(!path) return "/";
   let out = path.startsWith("/") ? path : `/${path}`;
   if(out === "/index.html") return "/";
+  if(out === "/tr/index.html") return "/tr/";
+  if(out === "/tr") return "/tr/";
   return out;
 }
 
@@ -781,11 +834,8 @@ function buildSeoUrlForLang(lang, baseUrl){
   }
   parsed.protocol = "https:";
   parsed.host = new URL(SEO_DOMAIN).host;
-  if(lang === "tr"){
-    parsed.searchParams.set("lang", "tr");
-  }else{
-    parsed.searchParams.delete("lang");
-  }
+  parsed.searchParams.delete("lang");
+  parsed.pathname = applyLangPrefix(parsed.pathname, lang);
   const path = normalizeSeoPath(parsed.pathname);
   const search = parsed.searchParams.toString();
   return `${SEO_DOMAIN}${path}${search ? `?${search}` : ""}`;
@@ -888,7 +938,8 @@ function setSeoData(options = {}){
 }
 
 function applySeoBase(){
-  const path = window.location.pathname || "/";
+  const rawPath = window.location.pathname || "/";
+  const path = stripLangPrefix(rawPath);
   const isHome = path === "/" || path.endsWith("/index.html");
   const isAll = path.endsWith("/all.html");
   const isArtist = path.endsWith("/artist.html");
@@ -1364,10 +1415,32 @@ function slugifySongTitle(title){
     .replace(/^-|-$/g, "");
 }
 
+function songIdToSlug(id){
+  return (id || "")
+    .toString()
+    .toLowerCase()
+    .replace(/\.pdf/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function buildSongSlug(song){
+  if(!song) return "song";
+  const title = song?.song || song?.title || "";
+  const artist = song?.artist || "";
+  const base = slugifySongTitle(title);
+  const artistSlug = slugifySongTitle(artist);
+  const idSlug = songIdToSlug(songId(song));
+  const parts = [base, artistSlug, idSlug].filter(Boolean);
+  return parts.join("-") || "song";
+}
+
 function buildSongUrl(song){
   const id = typeof song === "string" ? song : songId(song);
-  const title = typeof song === "string" ? "" : (song?.song || song?.title || "");
-  const slug = slugifySongTitle(title) || "song";
+  const slug = typeof song === "string"
+    ? (songIdToSlug(id) ? `song-${songIdToSlug(id)}` : "song")
+    : buildSongSlug(song);
   const isLocal = typeof window !== "undefined" && (
     window.location.protocol === "file:" ||
     ["localhost", "127.0.0.1", "0.0.0.0", "::1"].includes(window.location.hostname)
@@ -1376,7 +1449,10 @@ function buildSongUrl(song){
   if(isLocal){
     url = id ? `/song.html?id=${encodeURIComponent(id)}` : "/song.html";
   }else{
-    url = id ? `/song/${slug}?id=${encodeURIComponent(id)}` : `/song/${slug}`;
+    url = `/song/${slug || "song"}`;
+    if(typeof song === "string" && id){
+      url += `?id=${encodeURIComponent(id)}`;
+    }
   }
   return appendLangParam(url);
 }
@@ -1838,6 +1914,7 @@ async function toggleFavoriteSong(song){
 window.songId = songId;
 window.slugifySongTitle = slugifySongTitle;
 window.buildSongUrl = buildSongUrl;
+window.buildSongSlug = buildSongSlug;
 window.appendLangParam = appendLangParam;
 window.applyLangToLinks = applyLangToLinks;
 window.loadSongs = loadSongs;
@@ -1867,7 +1944,7 @@ window.isAdminUser = (user) => {
 
 (function initGlobalStats(){
   if(document.getElementById("statSongs") || document.getElementById("statArtists")){
-    const path = window.location.pathname || "";
+    const path = stripLangPrefix(window.location.pathname || "/");
     const isHome = path === "/" || path.endsWith("/index.html");
     const options = isHome ? { waitForFirebase: false } : {};
     loadSongs(options).catch(() => {});
@@ -3221,7 +3298,8 @@ window.initAddSongPanel = initAddSongPanel;
       adminLink.style.display = window.isAdminUser?.(user) ? "inline-flex" : "none";
     }
     // Zêdeke butonunu şarkı ekleme paneline yönlendir (sadece index.html'de)
-    if(addSongBtn && window.location.pathname === "/index.html" || window.location.pathname === "/") {
+    const currentPath = stripLangPrefix(window.location.pathname || "/");
+    if(addSongBtn && (currentPath === "/index.html" || currentPath === "/")) {
       if(addSongBtn.tagName === "A") {
         addSongBtn.href = "#add-song";
         addSongBtn.onclick = (e) => {
@@ -3248,7 +3326,8 @@ window.initAddSongPanel = initAddSongPanel;
       if(!ok) return;
       try{
         await auth.signOut();
-        window.location.href = "/index.html";
+        const target = window.appendLangParam ? window.appendLangParam("/index.html") : "/index.html";
+        window.location.href = target;
       }catch(err){
         error("Çıkış hatası:", err);
       }

@@ -7,12 +7,14 @@
   <script>
     (function(){
       try {
+        var path = window.location.pathname || "";
+        var pathLang = (path === "/tr" || path.startsWith("/tr/")) ? "tr" : "";
         var params = new URLSearchParams(window.location.search);
         var urlLang = (params.get("lang") || "").toLowerCase();
         if (urlLang !== "tr" && urlLang !== "ku") urlLang = "";
         var stored = (localStorage.getItem("lang") || "ku").toLowerCase();
-        var lang = (urlLang || stored || "ku").toLowerCase();
-        if (urlLang) localStorage.setItem("lang", lang);
+        var lang = (pathLang || urlLang || stored || "ku").toLowerCase();
+        if (pathLang || urlLang) localStorage.setItem("lang", lang);
         document.documentElement.setAttribute("lang", lang === "tr" ? "tr" : "ku");
         if (lang === "tr") document.documentElement.classList.add("i18n-pending");
       } catch (e) {}
@@ -28,7 +30,7 @@
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
   <meta name="theme-color" content="#0c1016">
-  <link rel="stylesheet" href="/styles.css?v=2.6" />
+  <link rel="stylesheet" href="/styles.css?v=2.7" />
 </head>
 <body>
   <div class="home-page">
@@ -146,7 +148,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore-compat.js"></script>
   <script src="/firebase.js?v=2.2"></script>
-  <script src="/common.js?v=2.9"></script>
+  <script src="/common.js?v=3.1"></script>
   <script src="/artist.js?v=2.5"></script>
 </body>
 </html>
