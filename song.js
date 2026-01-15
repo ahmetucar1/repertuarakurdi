@@ -491,6 +491,11 @@ async function init(){
   const curKeyEl = document.getElementById("curKey");
   const keyGrid = document.getElementById("keyGrid");
   const textPre = document.getElementById("songText");
+  if(textPre){
+    const currentId = (current?.id || "").toString();
+    textPre.dataset.songId = currentId;
+    textPre.classList.toggle("songText--pdf3", currentId.includes("pdf3"));
+  }
   const favBtn = document.getElementById("favBtn");
   const favoriteBtn = document.getElementById("favoriteBtn");
   const favoriteBtn2 = document.getElementById("favoriteBtn2");

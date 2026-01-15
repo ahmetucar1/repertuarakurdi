@@ -2191,6 +2191,9 @@ body {
   -webkit-overflow-scrolling: touch;
   word-wrap: normal; /* break-word DEĞİL - txt formatındaki akorlar ve sözler kırılmamalı */
 }
+.songText--pdf3{
+  text-align:left;
+}
 .chordText::after{
   content: "";
   position: absolute;

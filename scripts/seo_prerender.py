@@ -118,6 +118,7 @@ def build_song_page(template, song):
   artist = (song.get("artist") or "").strip()
   key = (song.get("key") or "-").strip()
   rhythm = (song.get("ritim") or "-").strip()
+  song_id = (song.get("id") or "").strip()
   text_slug = get_text_slug(song)
   text_path = TEXT_DIR / f"{text_slug}.txt"
   song_text = text_path.read_text() if text_path.exists() else ""
@@ -131,6 +132,13 @@ def build_song_page(template, song):
   description = f"{song_title} ji {artist}. Gotin, akor, tonê orîjînal û govend.".strip()
 
   page = template
+  class_suffix = " songText--pdf3" if "pdf3" in song_id else ""
+  data_attr = f' data-song-id="{html.escape(song_id)}"' if song_id else ""
+  page = page.replace(
+    'id="songText" class="chordText"',
+    f'id="songText" class="chordText{class_suffix}"{data_attr}',
+    1
+  )
   page = inject_head_meta(page, title, description, canonical, canonical_tr)
   page = replace_by_id(page, "songName", html.escape(song_title or "—"))
   page = replace_by_id(page, "songArtist", html.escape(artist or "—"))

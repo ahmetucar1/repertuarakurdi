@@ -383,11 +383,35 @@ function handlePaginationClick(e){
 }
 
 function updateSearchState(){
-  const input = $("#q");
-  if(!input) return;
-  const wrap = input.closest(".search");
-  if(!wrap) return;
-  wrap.classList.toggle("has-value", !!input.value);
+  const primaryInput = $("#q");
+  if(primaryInput){
+    const wrap = primaryInput.closest(".search");
+    if(wrap){
+      wrap.classList.toggle("has-value", !!primaryInput.value);
+    }
+  }
+  const altInput = $("#allSearch");
+  if(altInput){
+    const wrap = altInput.closest(".search");
+    if(wrap){
+      wrap.classList.toggle("has-value", !!altInput.value);
+    }
+  }
+}
+
+function handleSearchChange(value){
+  const primaryInput = $("#q");
+  const altInput = $("#allSearch");
+  if(primaryInput && primaryInput.value !== value){
+    primaryInput.value = value;
+  }
+  if(altInput && altInput.value !== value){
+    altInput.value = value;
+  }
+  currentPage = 1;
+  window.__currentPage = 1;
+  updateSearchState();
+  render();
 }
 
 async function init(){
@@ -438,19 +462,19 @@ async function init(){
   
   updateSearchState();
 
-  $("#q")?.addEventListener("input", () => {
-    currentPage = 1; // Dema ku lêgerîn hate kirin vegerîne rûpela yekem
-    window.__currentPage = 1;
-    updateSearchState();
-    render();
+  $("#q")?.addEventListener("input", (e) => {
+    handleSearchChange(e.target.value);
   });
   $("#clear")?.addEventListener("click", () => {
-    $("#q").value = "";
-    currentPage = 1;
-    window.__currentPage = 1;
+    handleSearchChange("");
     $("#q").focus();
-    updateSearchState();
-    render();
+  });
+  $("#allSearch")?.addEventListener("input", (e) => {
+    handleSearchChange(e.target.value);
+  });
+  $("#allSearchClear")?.addEventListener("click", () => {
+    handleSearchChange("");
+    $("#allSearch")?.focus();
   });
 
   // Responsive search - icon'a tıklayınca açılması
