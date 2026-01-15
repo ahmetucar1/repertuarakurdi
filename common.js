@@ -114,9 +114,11 @@ const I18N = {
     label_song_name: "Navê stranê",
     label_artist_name: "Navê hunermendê",
     label_key: "Tonê orîjînal",
+    label_rhythm_optional: "Govend (opsiyonel)",
     label_text: "Nivîsa stranê",
     placeholder_song_name: "Mînak: Stranên Kurdî",
     placeholder_artist_name: "Mînak: Şivan Perwer",
+    placeholder_rhythm: "Mînak: 4/4, Pop 2",
     placeholder_text: "Nivîsa bi akorê li virê bike...",
     key_select_placeholder: "Tonê hilbijêre",
     tooltip_artist: "Navê hunermendê rast binivîse, ji bo ku stran li ser rûpela hunermendê xuya bibe.",
@@ -408,9 +410,11 @@ const I18N = {
     label_song_name: "Şarkı adı",
     label_artist_name: "Sanatçı adı",
     label_key: "Orijinal ton",
+    label_rhythm_optional: "Ritim (opsiyonel)",
     label_text: "Şarkı metni",
     placeholder_song_name: "Örnek: Kürtçe Şarkılar",
     placeholder_artist_name: "Örnek: Şivan Perwer",
+    placeholder_rhythm: "Örnek: 4/4, Pop 2",
     placeholder_text: "Akorlu metni buraya yaz...",
     key_select_placeholder: "Ton seç",
     tooltip_artist: "Sanatçı adını doğru yaz, böylece şarkı sanatçı sayfasında görünür.",
@@ -2030,6 +2034,7 @@ function initAddSongPanel(onSaved){
   const addSongName = document.getElementById("addSongName");
   const addSongArtist = document.getElementById("addSongArtist");
   const addSongKey = document.getElementById("addSongKey");
+  const addSongRhythm = document.getElementById("addSongRhythm");
   const addSongText = document.getElementById("addSongText");
   const addArtistSuggest = document.getElementById("addSongArtistSuggest");
 
@@ -2051,6 +2056,7 @@ function initAddSongPanel(onSaved){
     if(addSongName) addSongName.value = "";
     if(addSongArtist) addSongArtist.value = "";
     if(addSongKey) addSongKey.value = "";
+    if(addSongRhythm) addSongRhythm.value = "";
     if(addSongText) {
       addSongText.value = "";
       adjustTextareaHeight(addSongText);
@@ -2183,7 +2189,7 @@ function initAddSongPanel(onSaved){
     
     // Mobilde klavye navigasyonu - Enter ile sonraki alana geç
     if(window.innerWidth <= 768){
-      const inputs = [addSongName, addSongArtist, addSongKey].filter(Boolean);
+      const inputs = [addSongName, addSongArtist, addSongKey, addSongRhythm].filter(Boolean);
       inputs.forEach((input, index) => {
         if(input && inputs[index + 1]){
           input.addEventListener("keydown", (e) => {
@@ -2200,7 +2206,7 @@ function initAddSongPanel(onSaved){
       });
       
       // Input'lara focus olduğunda görünür olsun
-      [addSongName, addSongArtist, addSongKey, addSongText].forEach(input => {
+      [addSongName, addSongArtist, addSongKey, addSongRhythm, addSongText].forEach(input => {
         if(input){
           input.addEventListener("focus", () => {
             setTimeout(() => {
@@ -2292,12 +2298,14 @@ function initAddSongPanel(onSaved){
     const rawArtist = (addSongArtist?.value || "").trim();
     const artist = normalizeArtistInput(rawArtist);
     const key = (addSongKey?.value || "").trim();
+    const rhythm = (addSongRhythm?.value || "").trim();
     const text = (addSongText?.value || "").toString();
     
     // Remove error classes
     if(addSongName) addSongName.classList.remove("error");
     if(addSongArtist) addSongArtist.classList.remove("error");
     if(addSongKey) addSongKey.classList.remove("error");
+    if(addSongRhythm) addSongRhythm.classList.remove("error");
     if(addSongText) addSongText.classList.remove("error");
     
     let hasError = false;
@@ -2354,6 +2362,7 @@ function initAddSongPanel(onSaved){
         song,
         artist,
         key,
+        ritim: rhythm,
         text,
         createdBy: user.uid,
         createdByEmail: user.email || "",

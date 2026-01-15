@@ -443,8 +443,9 @@ async function init(){
     songArtistEl.style.display = "block";
     songArtistEl.style.visibility = "visible";
   }
+  const rhythmValue = (current?.ritim || "").toString().trim();
   if(rhythmEl){
-    rhythmEl.textContent = current?.ritim || "-";
+    rhythmEl.textContent = rhythmValue || "-";
   }
   if(rhythmVideoBtn){
     const url = (current?.ritimVideo || "").toString().trim();
@@ -505,6 +506,7 @@ async function init(){
   const editArtistSuggest = document.getElementById("editArtistSuggest");
   const editKey = document.getElementById("editKey");
   const editText = document.getElementById("editText");
+  const editSongRhythm = document.getElementById("editSongRhythm");
 
   if(editArtist && editArtistSuggest && window.initArtistSuggest){
     window.initArtistSuggest(editArtist, editArtistSuggest);
@@ -546,12 +548,10 @@ async function init(){
     showText();
   }
 
-  if(bar && originalKey){
-    bar.style.display = "flex";
-    updateKeyLabels();
-  } else {
-    updateKeyLabels();
-  }
+  const showBar = !!originalKey || (!!rhythmValue && rhythmValue !== "-");
+  if(bar) bar.style.display = showBar ? "flex" : "none";
+  if(keyGrid) keyGrid.style.display = originalKey ? "" : "none";
+  updateKeyLabels();
 
   if(keyGrid && originalRoot && NOTE_TO_I[originalRoot] != null){
     keyGrid.addEventListener("click", (ev) => {
@@ -787,6 +787,9 @@ async function init(){
       // Textarea yüksekliğini ayarla
       setTimeout(() => adjustTextareaHeight(editText), 0);
     }
+    if(editSongRhythm){
+      editSongRhythm.value = (current?.ritim || "").trim();
+    }
     if(editNotice) editNotice.textContent = "";
   };
 
@@ -949,6 +952,7 @@ async function init(){
     const nextSong = (editSong?.value || "").trim();
     const nextArtist = parseArtistInput(editArtist?.value || "");
     const nextKey = (editKey?.value || "").trim();
+    const nextRhythm = (editSongRhythm?.value || "").trim();
     const nextText = (editText?.value || "").toString();
 
     if(!nextSong || !nextText){
@@ -982,6 +986,7 @@ async function init(){
             song: nextSong,
             artist: nextArtist,
             key: nextKey,
+            ritim: nextRhythm,
             text: nextText,
             createdBy: user.uid,
             createdByEmail: user.email || "",
@@ -1044,6 +1049,10 @@ async function init(){
         renderText(textPre, nextText, semitones);
       }else if(origKeyEl){
         origKeyEl.textContent = "—";
+      }
+      current.ritim = nextRhythm;
+      if(rhythmEl){
+        rhythmEl.textContent = nextRhythm || "-";
       }
       
       // Başarı mesajını göster
