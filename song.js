@@ -204,12 +204,12 @@ function transposeSymbol(symbol, semis, opts = {}){
 }
 
 function transposePlainText(text, semis){
-  const tokRe = /\b([A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\b/g;
+  const tokRe = /\b([A-G](?:#|b)?(?:maj|min|dim|aug|sus|add|m|M|\d+|[#b]\d+|[+\-]\d+|[+\-])*(?:\/[A-G](?:#|b)?)?(?:\([^\s)]+\))?)\b/g;
   return text.replace(tokRe, (m) => transposeSymbol(m, semis, { prefer: pickPrefer(m) }));
 }
 
 function highlightChords(text){
-  const tokRe = /\b([A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\b/g;
+  const tokRe = /\b([A-G](?:#|b)?(?:maj|min|dim|aug|sus|add|m|M|\d+|[#b]\d+|[+\-]\d+|[+\-])*(?:\/[A-G](?:#|b)?)?(?:\([^\s)]+\))?)\b/g;
   const escaped = escapeHtml(text);
   return escaped.replace(tokRe, "<strong class=\"chordTok\">$1</strong>");
 }

@@ -2402,7 +2402,7 @@ function initAddSongPanel(onSaved){
 
 // Chord validation
 function validateChords(text){
-  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\b/g;
+  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|dim|aug|sus|add|m|M|\d+|[#b]\d+|[+\-]\d+|[+\-])*(?:\/[A-G](?:#|b)?)?(?:\([^\s)]+\))?)\b/g;
   const matches = text.match(chordPattern) || [];
   const validRoots = ["C","C#","Db","D","D#","Eb","E","F","F#","Gb","G","G#","Ab","A","A#","Bb","B"];
   const errors = [];
@@ -2431,14 +2431,14 @@ function validateChords(text){
 
 // Extract chords from text
 function extractChords(text){
-  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\b/g;
+  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|dim|aug|sus|add|m|M|\d+|[#b]\d+|[+\-]\d+|[+\-])*(?:\/[A-G](?:#|b)?)?(?:\([^\s)]+\))?)\b/g;
   const matches = text.match(chordPattern) || [];
   return [...new Set(matches)];
 }
 
 // Highlight chords in text (for preview)
 function highlightChordsInText(text){
-  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|m|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?)\b/g;
+  const chordPattern = /\b([A-G](?:#|b)?(?:maj|min|dim|aug|sus|add|m|M|\d+|[#b]\d+|[+\-]\d+|[+\-])*(?:\/[A-G](?:#|b)?)?(?:\([^\s)]+\))?)\b/g;
   return escapeHtml(text).replace(chordPattern, '<strong class="chordTok">$1</strong>');
 }
 
