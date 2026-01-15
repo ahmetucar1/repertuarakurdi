@@ -3155,6 +3155,7 @@ window.initAddSongPanel = initAddSongPanel;
   const profileLink = document.getElementById("profileLink");
   const signOutBtn = document.getElementById("authSignOut");
   const adminLink = document.getElementById("adminLink");
+  const langAware = (path) => window.appendLangParam ? window.appendLangParam(path) : path;
   
   // Eğer hiçbir auth butonu yoksa, bu sayfada auth UI yok
   if(!openBtn && !profileLink && !signOutBtn && !adminLink) {
@@ -3287,14 +3288,18 @@ window.initAddSongPanel = initAddSongPanel;
   };
   
   // Têkev butonunu login sayfasına yönlendir (eğer link ise)
+  const buildLoginUrl = (returnUrl) => {
+    const base = `/login.html?return=${encodeURIComponent(returnUrl)}`;
+    return langAware(base);
+  };
   if(openBtn && openBtn.tagName === "A") {
-    openBtn.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
+    openBtn.href = buildLoginUrl(currentUrl);
   }
   
   // Zêdeke butonunu login sayfasına yönlendir (giriş yapmamışsa)
   const addSongBtn = document.getElementById("addSongMenuBtn");
   if(addSongBtn && addSongBtn.tagName === "A") {
-    addSongBtn.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
+    addSongBtn.href = buildLoginUrl(currentUrl);
   }
   
   const setLoggedOut = () => {
@@ -3315,7 +3320,7 @@ window.initAddSongPanel = initAddSongPanel;
     if(adminLink) adminLink.style.display = "none";
     // Zêdeke butonunu login sayfasına yönlendir
     if(addSongBtn && addSongBtn.tagName === "A") {
-      addSongBtn.href = `/login.html?return=${encodeURIComponent(currentUrl)}`;
+      addSongBtn.href = buildLoginUrl(currentUrl);
       addSongBtn.onclick = null;
     }
     updateHeroLoginBtn(null);
@@ -3324,11 +3329,17 @@ window.initAddSongPanel = initAddSongPanel;
   const setLoggedIn = (user) => {
     // Giriş yapmış - Têkev butonunu gizle, Profil'i göster, Derketin'i gizle
     if(openBtn) openBtn.style.display = "none";
-    if(profileLink) profileLink.style.display = "inline-flex";
+    if(profileLink){
+      profileLink.style.display = "inline-flex";
+      profileLink.href = langAware("/profile.html");
+    }
     if(signOutBtn) signOutBtn.style.display = "none"; // Derketin butonu topbarda görünmesin
     setProfileButton(user);
     if(adminLink){
       adminLink.style.display = window.isAdminUser?.(user) ? "inline-flex" : "none";
+      if(window.isAdminUser?.(user)){
+        adminLink.href = langAware("/admin.html");
+      }
     }
     // Zêdeke butonunu şarkı ekleme paneline yönlendir (sadece index.html'de)
     const currentPath = stripLangPrefix(window.location.pathname || "/");
