@@ -2410,8 +2410,10 @@ function initAddSongPanel(onSaved){
 // ============================================
 
 // Chord validation
+const CHORD_PATTERN = /(^|[^0-9\p{L}_])([A-G](?:#|b)?(?:maj|min|dim|aug|sus|add|m|M|\d+|[#b]\d+|[+\-]\d+|[+\-])*(?:\/[A-G](?:#|b)?)?(?:\([^\s)]+\))?)(?=$|[^0-9\p{L}_])/gu;
+
 function validateChords(text){
-  const chordPattern = /(^|[^A-Za-z0-9_])([A-G](?:#|b)?(?:maj|min|dim|aug|sus|add|m|M|\d+|[#b]\d+|[+\-]\d+|[+\-])*(?:\/[A-G](?:#|b)?)?(?:\([^\s)]+\))?)(?=$|[^A-Za-z0-9_])/g;
+  const chordPattern = new RegExp(CHORD_PATTERN);
   const matches = Array.from(text.matchAll(chordPattern), match => match[2]);
   const validRoots = ["C","C#","Db","D","D#","Eb","E","F","F#","Gb","G","G#","Ab","A","A#","Bb","B"];
   const errors = [];
@@ -2440,14 +2442,14 @@ function validateChords(text){
 
 // Extract chords from text
 function extractChords(text){
-  const chordPattern = /(^|[^A-Za-z0-9_])([A-G](?:#|b)?(?:maj|min|dim|aug|sus|add|m|M|\d+|[#b]\d+|[+\-]\d+|[+\-])*(?:\/[A-G](?:#|b)?)?(?:\([^\s)]+\))?)(?=$|[^A-Za-z0-9_])/g;
+  const chordPattern = new RegExp(CHORD_PATTERN);
   const matches = Array.from(text.matchAll(chordPattern), match => match[2]);
   return [...new Set(matches)];
 }
 
 // Highlight chords in text (for preview)
 function highlightChordsInText(text){
-  const chordPattern = /(^|[^A-Za-z0-9_])([A-G](?:#|b)?(?:maj|min|dim|aug|sus|add|m|M|\d+|[#b]\d+|[+\-]\d+|[+\-])*(?:\/[A-G](?:#|b)?)?(?:\([^\s)]+\))?)(?=$|[^A-Za-z0-9_])/g;
+  const chordPattern = new RegExp(CHORD_PATTERN);
   return escapeHtml(text).replace(chordPattern, (match, prefix, chord) => `${prefix}<strong class="chordTok">${chord}</strong>`);
 }
 

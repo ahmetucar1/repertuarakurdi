@@ -203,8 +203,10 @@ function transposeSymbol(symbol, semis, opts = {}){
   return tRoot + body + bassOut;
 }
 
+const SONG_CHORD_PATTERN = /(^|[^0-9\p{L}_])([A-G](?:#|b)?(?:maj|min|dim|aug|sus|add|m|M|\d+|[#b]\d+|[+\-]\d+|[+\-])*(?:\/[A-G](?:#|b)?)?(?:\([^\s)]+\))?)(?=$|[^0-9\p{L}_])/gu;
+
 function transposePlainText(text, semis){
-  const tokRe = /(^|[^A-Za-z0-9_])([A-G](?:#|b)?(?:maj|min|dim|aug|sus|add|m|M|\d+|[#b]\d+|[+\-]\d+|[+\-])*(?:\/[A-G](?:#|b)?)?(?:\([^\s)]+\))?)(?=$|[^A-Za-z0-9_])/g;
+  const tokRe = new RegExp(SONG_CHORD_PATTERN);
   return text.replace(tokRe, (match, prefix, chord) => {
     const transposed = transposeSymbol(chord, semis, { prefer: pickPrefer(chord) });
     return `${prefix}${transposed}`;
@@ -212,7 +214,7 @@ function transposePlainText(text, semis){
 }
 
 function highlightChords(text){
-  const tokRe = /(^|[^A-Za-z0-9_])([A-G](?:#|b)?(?:maj|min|dim|aug|sus|add|m|M|\d+|[#b]\d+|[+\-]\d+|[+\-])*(?:\/[A-G](?:#|b)?)?(?:\([^\s)]+\))?)(?=$|[^A-Za-z0-9_])/g;
+  const tokRe = new RegExp(SONG_CHORD_PATTERN);
   const escaped = escapeHtml(text);
   return escaped.replace(tokRe, (match, prefix, chord) => `${prefix}<strong class="chordTok">${chord}</strong>`);
 }
