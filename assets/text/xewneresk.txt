@@ -1,29 +1,21 @@
-                | F | E7 | F | E7 |
-
-
-          Am                E
-          __Dareke tuyê me __li ber devê çemekî hişk                  (x2)
-          F             E
-          __Ji zemanekî __şên û şilmayî
-
-          C
-          __Li ser şaxên min meytên
-          G                    C
-          __Hêlanên zarokan __li ba dibin             (x2)
-          G               (E7)
-          __Di şeveke sayî__
-
-
-
-
-          Am                  E
-          __Kuçeyeke tarî me __li bajarekî mezin               (x2)
-          F                E
-          __Di canê min de __evînên bi hizn
-
-          C
-          __Mirovên reşgirêdayî
-          G        		          C
-          __ Ji xewnên biçûkan __bi lempeyan              (x2)
-          G              (E7)
-          __ Çûkan didizin__
+| F | E7 | F | E7 |
+Am                E
+__Dareke tuyê me __li ber devê çemekî hişk                  (x2)
+F             E
+__Ji zemanekî __şên û şilmayî
+C
+__Li ser şaxên min meytên
+G                    C
+__Hêlanên zarokan __li ba dibin             (x2)
+G               (E7)
+__Di şeveke sayî__
+Am                  E
+__Kuçeyeke tarî me __li bajarekî mezin               (x2)
+F                E
+__Di canê min de __evînên bi hizn
+C
+__Mirovên reşgirêdayî
+G        		          C
+__ Ji xewnên biçûkan __bi lempeyan              (x2)
+G              (E7)
+__ Çûkan didizin__

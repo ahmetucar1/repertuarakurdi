@@ -1,46 +1,30 @@
-     		               | Em - C | (x3) | G |
-
-
-
-
-                                                                 Dîsgotin (x2)
-     Em                    C
-     Efo berzi berzi berzi îna berz wa erd bilerzi
-     C#m7b5                  C
-     Cê ti hîraw cêko berzi wa erd û ezmûn bilerzi
-
-
-     G                        D
-     Qisê gulerkin bik girzi zuro xu zit bulit merzi
-     C                           B7
-     Cilo peradi cuwa pê berzi raşt zehmet, zûr qê ti farzi
-
-
-     --- Dîsgotin
-
-
-     G                        D
-     Kelek aw resn ya xu şina wîyi bonc ha çotkî şina
-     C                                   B7
-     Lastik teqo ha recifyena(qelibyena) goçin bîyarên ez derzena
-
-
-     --- Dîsgotin
-
-     dîyalogên li bin akoran: | Em | C |
-
-     - Li lîya Efo, Allêy ra biters. De binê tay berz!..
-     - De şu ho!.. Qêy la mi vat se. Çi xirabîyê mi gino şimarî. Lîya
-     heyyanî ez weş bîya, mi şima bêrd wever û ard naver, berd wever
-     û ard naver. Zur mi zî royê muradîdir şî. Homa bizun eka hê
-     komîyo behr xorindê, komîyo oqyanûstê.
-     La zur şima sebên!.. Zur şima merdim kişên, zur şima kêyon şûn ra.
-     Pêy zuron şima welat şîyon ra û welat newe nîyen rû.
-     ... Zur şima!...
-
-     G                         D
-     Kelek qica bar ya giron motor pak bena zê tîron
-     C                        B7
-     Ti nîb sekên der û cîron qirbun Allêy çilê çimon
-
-           | Em - C | (x3) | G |
+| Em - C | (x3) | G |
+Dîsgotin (x2)
+Em                    C
+Efo berzi berzi berzi îna berz wa erd bilerzi
+C#m7b5                  C
+Cê ti hîraw cêko berzi wa erd û ezmûn bilerzi
+G                        D
+Qisê gulerkin bik girzi zuro xu zit bulit merzi
+C                           B7
+Cilo peradi cuwa pê berzi raşt zehmet, zûr qê ti farzi
+--- Dîsgotin
+G                        D
+Kelek aw resn ya xu şina wîyi bonc ha çotkî şina
+C                                   B7
+Lastik teqo ha recifyena(qelibyena) goçin bîyarên ez derzena
+--- Dîsgotin
+dîyalogên li bin akoran: | Em | C |
+- Li lîya Efo, Allêy ra biters. De binê tay berz!..
+- De şu ho!.. Qêy la mi vat se. Çi xirabîyê mi gino şimarî. Lîya
+heyyanî ez weş bîya, mi şima bêrd wever û ard naver, berd wever
+û ard naver. Zur mi zî royê muradîdir şî. Homa bizun eka hê
+komîyo behr xorindê, komîyo oqyanûstê.
+La zur şima sebên!.. Zur şima merdim kişên, zur şima kêyon şûn ra.
+Pêy zuron şima welat şîyon ra û welat newe nîyen rû.
+... Zur şima!...
+G                         D
+Kelek qica bar ya giron motor pak bena zê tîron
+C                        B7
+Ti nîb sekên der û cîron qirbun Allêy çilê çimon
+| Em - C | (x3) | G |

@@ -1,33 +1,22 @@
-                        | Bm | G | Em | (x2)
-                        | Bm | (x6)
-
-               Bm               G        Em
-               __Dewranî delmaş __viraşto __tale ye to
-               Bm             G         Em
-               __Dînya warway __caverdo __zonê ye to
-
-               Bm           G          Em
-               __Nêvardenê __qese bikerî __raya xo ser                    Dîsgotin (x2)
-               Bm          G            Em
-               __Nêvardenê __qese bikerî __emrê xo sero
-
-
-                     | Bm | C - Bm | (x2)
-
-               Bm               G         Em
-               __Mi fam nêkerd __a cennedê __şima ra
-               Bm             G         Em
-               __Mi nitersenû __ê cennemê __şima ra
-
-
-               --- Dîsgotin (x2)
-
-
-                     | Bm | C - Bm | (x2)
-
-               Bm           G       Em
-               __Înan vatê __a rijna __nua bî
-               Bm           G           Em
-               __De ti vaje __ni dirbetê __senê bena
-
-               --- Dîsgotin (x2)
+| Bm | G | Em | (x2)
+| Bm | (x6)
+Bm               G        Em
+__Dewranî delmaş __viraşto __tale ye to
+Bm             G         Em
+__Dînya warway __caverdo __zonê ye to
+Bm           G          Em
+__Nêvardenê __qese bikerî __raya xo ser                    Dîsgotin (x2)
+Bm          G            Em
+__Nêvardenê __qese bikerî __emrê xo sero
+| Bm | C - Bm | (x2)
+Bm               G         Em
+__Mi fam nêkerd __a cennedê __şima ra
+Bm             G         Em
+__Mi nitersenû __ê cennemê __şima ra
+--- Dîsgotin (x2)
+| Bm | C - Bm | (x2)
+Bm           G       Em
+__Înan vatê __a rijna __nua bî
+Bm           G           Em
+__De ti vaje __ni dirbetê __senê bena
+--- Dîsgotin (x2)

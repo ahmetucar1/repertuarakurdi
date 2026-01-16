@@ -496,7 +496,12 @@ async function init(){
   if(textPre){
     const currentId = (current?.id || "").toString();
     textPre.dataset.songId = currentId;
-    textPre.classList.toggle("songText--pdf3", currentId.includes("pdf3"));
+    const isPdf3 = currentId.includes("pdf3");
+    textPre.classList.toggle("songText--pdf3", isPdf3);
+    const chordSheet = document.querySelector(".chordSheet");
+    if(chordSheet){
+      chordSheet.classList.toggle("chordSheet--pdf3", isPdf3);
+    }
   }
   const favBtn = document.getElementById("favBtn");
   const favoriteBtn = document.getElementById("favoriteBtn");

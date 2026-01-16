@@ -1,35 +1,27 @@
-             | Em | Em | Am | Am | G | D | Em - D | Em |
-
-             Em                  Am			                 G
-             Kê şikandîye xeyala min? Kê kuştîye bavê min?
-             Em                  Am 		                 G
-             Kê şikandîye xeyala min? Kê kuştîye bavê min?
-
-             Am                G   Am
-             __Nemaye zaroktîya min ez pelek darê bûm
-             G		                 B7                Em E
-             __ Zer bûm, ketibûm zarokek bê xwedî bûm __
-
-             Am		              G               B7                Em
-             Ez pelek darê bûm zer bûm, ketibûm zarokek bê xwedî bûm
-
-             Am                   G		              B7               Em E
-             __ Ez pelek darê bûm zer bûm, ketibûm zarokek bê xwedî bûm __
-             B7                Em
-             Zarokek bê xwedî bûm
-
-                          | D - Em |
-
-             Em                     Am                   G
-             Kê wenda kirî pêşeroja min? Kê dizî nîgaşa min?
-             Em                     Am                   G
-             Kê wenda kirî pêşeroja min? Kê dizî nîgaşa min?
-             Am                 G
-             Belav kirîye mala min
-             Am		             G               B7               Em E
-             Ez mam bi tene hêvîya min wenda welat di nav tofan da __ (x3)
-             B7                 Em
-             Welat di nav tofan da
-
-
-                          | Am - G | D- Em | Am - G | D - Em | D - Em | D - Em | Em |
+| Em | Em | Am | Am | G | D | Em - D | Em |
+Em                  Am			                 G
+Kê şikandîye xeyala min? Kê kuştîye bavê min?
+Em                  Am 		                 G
+Kê şikandîye xeyala min? Kê kuştîye bavê min?
+Am                G   Am
+__Nemaye zaroktîya min ez pelek darê bûm
+G		                 B7                Em E
+__ Zer bûm, ketibûm zarokek bê xwedî bûm __
+Am		              G               B7                Em
+Ez pelek darê bûm zer bûm, ketibûm zarokek bê xwedî bûm
+Am                   G		              B7               Em E
+__ Ez pelek darê bûm zer bûm, ketibûm zarokek bê xwedî bûm __
+B7                Em
+Zarokek bê xwedî bûm
+| D - Em |
+Em                     Am                   G
+Kê wenda kirî pêşeroja min? Kê dizî nîgaşa min?
+Em                     Am                   G
+Kê wenda kirî pêşeroja min? Kê dizî nîgaşa min?
+Am                 G
+Belav kirîye mala min
+Am		             G               B7               Em E
+Ez mam bi tene hêvîya min wenda welat di nav tofan da __ (x3)
+B7                 Em
+Welat di nav tofan da
+| Am - G | D- Em | Am - G | D - Em | D - Em | D - Em | Em |

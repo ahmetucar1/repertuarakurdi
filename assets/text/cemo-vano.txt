@@ -1,36 +1,27 @@
-                  | Em | D | Em | Em |
-
-         D               Em              C             D
-         __ Silîyê varê, __ der û derxan __ bî pirrê laşerû
-         Em                Am             D                 Em
-         __ Tayê gewrîyê, __ tayê surîyê __ sonê dîna fetêlînê
-
-         Em             D
-         __Çemo vano, __ bota şerê
-         Em
-         __ Hona xêle rawa mi esta
-                                                    Dîsgotin (x2)
-         Am             Em
-         __ Mi raverdê, __ xo rê şerî
-          D                        Em
-         __ Derya hona xelê mi ra dûrîya
-
-         Akora derbasê: C
-
-         D             Em             C                 D
-         __ Mi va çemo __ no çi lerzo __ rengê to hona şa û belek o
-         Em                Am              D                   Em
-         __ Çemî va, rast o __ tomete nîyo __ herkes e bi rengê xo yêno
-
-         --- Dîsgotin
-
-                        | Am | Em | D | Em |
-
-         D               Em                 C               D
-         __ Rengê deryay __ kewî yo, pak o __ awa to hona gewr a, lêl a
-         Em              Am		           D              Em
-         __ Çemî va ez ke __ kewto rayê __ awa mi bena zelal, sona
-
-         --- Dîsgotin
-
-                | Em | Em | D | Em | C |
+| Em | D | Em | Em |
+D               Em              C             D
+__ Silîyê varê, __ der û derxan __ bî pirrê laşerû
+Em                Am             D                 Em
+__ Tayê gewrîyê, __ tayê surîyê __ sonê dîna fetêlînê
+Em             D
+__Çemo vano, __ bota şerê
+Em
+__ Hona xêle rawa mi esta
+Dîsgotin (x2)
+Am             Em
+__ Mi raverdê, __ xo rê şerî
+D                        Em
+__ Derya hona xelê mi ra dûrîya
+Akora derbasê: C
+D             Em             C                 D
+__ Mi va çemo __ no çi lerzo __ rengê to hona şa û belek o
+Em                Am              D                   Em
+__ Çemî va, rast o __ tomete nîyo __ herkes e bi rengê xo yêno
+--- Dîsgotin
+| Am | Em | D | Em |
+D               Em                 C               D
+__ Rengê deryay __ kewî yo, pak o __ awa to hona gewr a, lêl a
+Em              Am		           D              Em
+__ Çemî va ez ke __ kewto rayê __ awa mi bena zelal, sona
+--- Dîsgotin
+| Em | Em | D | Em | C |

@@ -1,29 +1,18 @@
-                   | Am - D | G - C | Am - Bm | C | (x2)
-                   | Em | (x2)
-
-             Em               D          Em              Am
-             __Mi xo pisnakê __beri le to __vori vore mare __bîye manê (x2)
-             Am          D G             C Am         Bm        C       Em E
-             __Ray onca mire __nere bî tarî __sekê to onca mira __kuta duri ye
-
-             Am         D G             C Am         Bm         C       Em
-             __Ray onca mire __nere bî tarî __sekê to onca mira __kuta duri ye
-
-
-                     Em      Am      D       Em         Am D         Em
-                     __Dîna zalima, __mirê zalim dîna xayina __mirê xayîn (x2)
-
-
-
-
-              Em             D       Em                 D         G
-             __ Elkana vayê __darîye we sekê vori onca __vore maser
-             Am          D G           C Am          Bm         C       Em E
-             __Ray onca mire __nere bî tarî __sekê to onca mira __kuta duri ye
-
-             Am         D G             C Am          Bm         C      Em
-             __Ray onca mire __nere bî tarî __sekê to onca mira __kuta duri ye
-
-
-                     Em      Am D            Em        Am D          Em
-                     __Dîna zalima, __mirê zalim dîna xayina __mirê xayîn (x3)
+| Am - D | G - C | Am - Bm | C | (x2)
+| Em | (x2)
+Em               D          Em              Am
+__Mi xo pisnakê __beri le to __vori vore mare __bîye manê (x2)
+Am          D G             C Am         Bm        C       Em E
+__Ray onca mire __nere bî tarî __sekê to onca mira __kuta duri ye
+Am         D G             C Am         Bm         C       Em
+__Ray onca mire __nere bî tarî __sekê to onca mira __kuta duri ye
+Em      Am      D       Em         Am D         Em
+__Dîna zalima, __mirê zalim dîna xayina __mirê xayîn (x2)
+Em             D       Em                 D         G
+__ Elkana vayê __darîye we sekê vori onca __vore maser
+Am          D G           C Am          Bm         C       Em E
+__Ray onca mire __nere bî tarî __sekê to onca mira __kuta duri ye
+Am         D G             C Am          Bm         C      Em
+__Ray onca mire __nere bî tarî __sekê to onca mira __kuta duri ye
+Em      Am D            Em        Am D          Em
+__Dîna zalima, __mirê zalim dîna xayina __mirê xayîn (x3)

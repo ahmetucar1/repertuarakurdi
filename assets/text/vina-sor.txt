@@ -1,35 +1,26 @@
-                      | F#m | (x4)
-
-             A                F#m
-             Tarîyeke reş û qîr__
-             A                 F#m
-             Hil dibe dîsa bi şûr__
-             A                      F#m              (x2)
-             Xwe’b mirinê xemiland__
-             E                 Bm E
-             Nevîçirkê Asya dûr__ __
-
-             Lê jê re bêjin ku
-
-                     F#m       E     F#m            E
-                     Dara jîyanê şîn e ava wê tê ji evîn e
-                     A            E        Bm          F#m                           Dîsgotin (x2)
-                     Rê bernade vîna sor nemre tu jî bibîne (x2)
-
-
-                   | F#m | (x4)
-
-
-             A                  F#m
-             Li ser hespên hesinî__
-             A                  F#m
-             Siwar bûne ew genî __
-                                                     (x2)
-             A                    F#m
-             Nizam xwe çi d’hesibin__
-             E                Bm E
-             Efendî yan ezbenî__ __
-
-             Lê jê re bêjin ku
-
-             --- Dîsgotin (x2)
+| F#m | (x4)
+A                F#m
+Tarîyeke reş û qîr__
+A                 F#m
+Hil dibe dîsa bi şûr__
+A                      F#m              (x2)
+Xwe’b mirinê xemiland__
+E                 Bm E
+Nevîçirkê Asya dûr__ __
+Lê jê re bêjin ku
+F#m       E     F#m            E
+Dara jîyanê şîn e ava wê tê ji evîn e
+A            E        Bm          F#m                           Dîsgotin (x2)
+Rê bernade vîna sor nemre tu jî bibîne (x2)
+| F#m | (x4)
+A                  F#m
+Li ser hespên hesinî__
+A                  F#m
+Siwar bûne ew genî __
+(x2)
+A                    F#m
+Nizam xwe çi d’hesibin__
+E                Bm E
+Efendî yan ezbenî__ __
+Lê jê re bêjin ku
+--- Dîsgotin (x2)

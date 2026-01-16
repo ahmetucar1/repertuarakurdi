@@ -1,38 +1,30 @@
-         | Em | (x8)
-         | Em | Em | D | D | (x2)
-         | C | Em | D | Em | (x2)
-
-         Em             D              D7            Em
-         __ Dil ve nas, __ jan ve dost, __ ez im sewdalî
-         Em                  D            D7            Em
-         __ Di xwe bawer, __ ji xwe razî, __ ez im meraqlî
-         Em                      D              D7         Em
-         __ Çar demsal e jîyan __ bi sê gavê, __ wek avê diçe
-         Em                  D               D7            Em
-         __ Dîsa coş dibe, __ serxweş dibe, __ straneke nîvçe
-
-         C               Em         D                 Em
-         Deng dide, her deng dide, tembûra te ya şikandî
-         C              Em        D          Em
-         Geş dibe dîsa xweş dike, kanîya çikandî
-
-
-         C             Em D            Em
-         Ji nû ve ava dibe, xanîyek hilşandî
-         C                Em D               Em
-         Şaneşîn heft reng e, tev gul û tev şahî
-
-         Em    G            Bm7
-         Na na ez pîr bibim dil nabe
-                                               (x3)
-         D     D7          C
-         Na na por spî, dil ciwan e
-
-         Em     G       Am7
-         Na na ez ê feqîr çi zane
-         F#dim Em
-         Na na na na (x2)
-
-
-         C                Em D                 Em (A7)
-         Dem diçe dewran diçe, strana min ma nîvçe (x2)
+| Em | (x8)
+| Em | Em | D | D | (x2)
+| C | Em | D | Em | (x2)
+Em             D              D7            Em
+__ Dil ve nas, __ jan ve dost, __ ez im sewdalî
+Em                  D            D7            Em
+__ Di xwe bawer, __ ji xwe razî, __ ez im meraqlî
+Em                      D              D7         Em
+__ Çar demsal e jîyan __ bi sê gavê, __ wek avê diçe
+Em                  D               D7            Em
+__ Dîsa coş dibe, __ serxweş dibe, __ straneke nîvçe
+C               Em         D                 Em
+Deng dide, her deng dide, tembûra te ya şikandî
+C              Em        D          Em
+Geş dibe dîsa xweş dike, kanîya çikandî
+C             Em D            Em
+Ji nû ve ava dibe, xanîyek hilşandî
+C                Em D               Em
+Şaneşîn heft reng e, tev gul û tev şahî
+Em    G            Bm7
+Na na ez pîr bibim dil nabe
+(x3)
+D     D7          C
+Na na por spî, dil ciwan e
+Em     G       Am7
+Na na ez ê feqîr çi zane
+F#dim Em
+Na na na na (x2)
+C                Em D                 Em (A7)
+Dem diçe dewran diçe, strana min ma nîvçe (x2)

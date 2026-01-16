@@ -1,33 +1,20 @@
-               | Dm | (x4)
-               | Dm - Gm - Dm | Dm - Gm - Dm | F - Edim | Dm | (x2)
-
-
-               Dm                   Gm          Dm
-               Ez mij im belawela teredîn li her dera (x2)
-                  A         F         A           Dm
-               Lê tu berf î çi heyf î çi heyf î weylê
-
-               Bb  Dm Bb   Dm C     Bb Dm
-               Waweylê waweylê waweylê weylê
-
-
-
-
-               Dm                        Gm          Dm
-               Reng û berê min pak e lê dilê min ne çak e (x2)
-                  A         F         A           Dm
-               Lê tu berf î çi zehf î çi zehf î weylê
-
-               Bb  Dm Bb Dm C       Bb Dm
-               Waweylê waweylê waweylê weylê
-
-
-
-
-               Dm                     Gm          Dm
-               Dizanim tevlûhev im lê li ber te dikevim (x2)
-                  A          F        A           Dm
-               Lê tu berf î tu keyf î tu keyf î weylê
-
-               Bb Dm Bb    Dm C     Bb Dm
-               Waweylê waweylê waweylê weylê
+| Dm | (x4)
+| Dm - Gm - Dm | Dm - Gm - Dm | F - Edim | Dm | (x2)
+Dm                   Gm          Dm
+Ez mij im belawela teredîn li her dera (x2)
+A         F         A           Dm
+Lê tu berf î çi heyf î çi heyf î weylê
+Bb  Dm Bb   Dm C     Bb Dm
+Waweylê waweylê waweylê weylê
+Dm                        Gm          Dm
+Reng û berê min pak e lê dilê min ne çak e (x2)
+A         F         A           Dm
+Lê tu berf î çi zehf î çi zehf î weylê
+Bb  Dm Bb Dm C       Bb Dm
+Waweylê waweylê waweylê weylê
+Dm                     Gm          Dm
+Dizanim tevlûhev im lê li ber te dikevim (x2)
+A          F        A           Dm
+Lê tu berf î tu keyf î tu keyf î weylê
+Bb Dm Bb    Dm C     Bb Dm
+Waweylê waweylê waweylê weylê

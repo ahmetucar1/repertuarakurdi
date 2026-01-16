@@ -1,30 +1,24 @@
-              | Dm | (x4)
-              | Dm | C - Am | (x2)
-              | Dm | Dm - Am | E - Am |
-
-        Am            E          Dm           E        Am
-        Çav deryaya welatê min li hembêza stara min __ (x2)
-        C            G        Dm          E
-        Ez soz û xak û evîn im li Mezrabotan vejîn im (x2)
-        Am         G          E            Am        G           E         (Am)
-        Ez Jîn im dengê jina berxwedêr im ez jîn im li enîya cengê serwer im__ (x2)
-
-              | Am - Dm | E |
-
-        Am           G           Dm           E		        Am
-        Pêt im ar im ez volqan im dîroka rast û kevnar im __ (x2)
-        C		                    C#dim
-        Ez dayîk im niştiman im dil pola û vîndar im
-        Dm
-        Li gerdûnê jîndar im
-
-
-        F          C             Gm             Dm
-        Desmala destê şervanan digirim govend û semahan (x2)
-        F			                     C            Dm
-        Dibim Sîmûrg li zinaran bask didim li ezmanan
-        F            C           A            Dm
-        Dibim Sîmûrg li zinaran bask didim li ezmanan
-
-        Am         G         E           Am         G            E         (Am)
-        Ez Jîn im dengê jina berxwedêr im ez jîn im li enîya cengê serwer im__ (x2)
+| Dm | (x4)
+| Dm | C - Am | (x2)
+| Dm | Dm - Am | E - Am |
+Am            E          Dm           E        Am
+Çav deryaya welatê min li hembêza stara min __ (x2)
+C            G        Dm          E
+Ez soz û xak û evîn im li Mezrabotan vejîn im (x2)
+Am         G          E            Am        G           E         (Am)
+Ez Jîn im dengê jina berxwedêr im ez jîn im li enîya cengê serwer im__ (x2)
+| Am - Dm | E |
+Am           G           Dm           E		        Am
+Pêt im ar im ez volqan im dîroka rast û kevnar im __ (x2)
+C		                    C#dim
+Ez dayîk im niştiman im dil pola û vîndar im
+Dm
+Li gerdûnê jîndar im
+F          C             Gm             Dm
+Desmala destê şervanan digirim govend û semahan (x2)
+F			                     C            Dm
+Dibim Sîmûrg li zinaran bask didim li ezmanan
+F            C           A            Dm
+Dibim Sîmûrg li zinaran bask didim li ezmanan
+Am         G         E           Am         G            E         (Am)
+Ez Jîn im dengê jina berxwedêr im ez jîn im li enîya cengê serwer im__ (x2)

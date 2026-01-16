@@ -1,31 +1,25 @@
-                  | B | C#m | B | A |
-
-         C#m                              F#m
-         __Perperikê mektûbanê bêname erdo
-         B                         A          C#m
-         __Na birîna mi rê derman __beno nêbeno
-         C#m                                   F#m
-         __Beno pîyê mi destanê mi gêno têpişeno
-         B                            A          C#m
-         __Sey maya mi mi rê estanikî __vano nêvano
-         B                         A         C#m
-         __Sey maya mi mi rê lorik __vano nêvano
-
-
-         C#m                        B    E
-         __Aqlêm sivik barêm girano se vajo
-         C#m                   B     C#m
-         __Tikûteyna ritûrepal o çi vajo
-
-         F#m                   C#m
-         __Çiçege rîyê xo tadenî __ez beno serxoş
-                                                                  Dîsgotin
-         B                     A             C#m
-         __Vinîbeno na dîna de __ez beno berduş
-         F#m                  C#m
-         __Hechecikê yenê şinê __ez beno serxoş
-         B                     A             C#m
-         __Vînîbeno na dîna de __ez beno berduş
-
-
-         --- Dîsgotin
+| B | C#m | B | A |
+C#m                              F#m
+__Perperikê mektûbanê bêname erdo
+B                         A          C#m
+__Na birîna mi rê derman __beno nêbeno
+C#m                                   F#m
+__Beno pîyê mi destanê mi gêno têpişeno
+B                            A          C#m
+__Sey maya mi mi rê estanikî __vano nêvano
+B                         A         C#m
+__Sey maya mi mi rê lorik __vano nêvano
+C#m                        B    E
+__Aqlêm sivik barêm girano se vajo
+C#m                   B     C#m
+__Tikûteyna ritûrepal o çi vajo
+F#m                   C#m
+__Çiçege rîyê xo tadenî __ez beno serxoş
+Dîsgotin
+B                     A             C#m
+__Vinîbeno na dîna de __ez beno berduş
+F#m                  C#m
+__Hechecikê yenê şinê __ez beno serxoş
+B                     A             C#m
+__Vînîbeno na dîna de __ez beno berduş
+--- Dîsgotin

@@ -1,31 +1,23 @@
-                       Dm          Am      Dm              Am
-              Hilberîn im ez zayîn im dîrokê di xwe de dihewînim
-                   Dm          Am       Dm        Am (Am-Bb)*
-              Ez ê zik bi zik azadîyê ji nû ve biwelidînim                      (x4)
-
-                    Dm
-              Ez ê derkevim, ez ê bigerim, ez ê bibêjim, ez ê bikenim
-              Gm                       Bb                    (C)
-              Kes nikare li ser min biryar bide ji bo min__ (x2)
-                 Dm         Am         Dm         Am        Dm            Am                   Dîsgotin
-              Ji te’r çi ye, tu kî yî, bav û bira yan mêr î, dewlet î yan dozger î
-              Dm             C           Bb        Am
-              Nas nakim, nas nakim yekî ji we nas nakim (x2)
-
-                    | Dm - C | Bb - Am | (x2)
-
-                  Dm           Am         Dm      Am
-              Ez ê ji nû ve binivîsim çarenûsa hebûna xwe
-                  Dm         Am           Dm          Am (Am-Bb)*                      (x2)
-              Ez ê tu carî qebûl nekim biryarê li ser jîyana xwe (x2)
-
-              --- Dîsgotin
-
-
-                 Dm         Am         Dm         Am         Dm           Am
-              Ji te’r çi ye, tu kî yî, bav û bira yan mêr î, dewlet î yan dozger î
-              Dm              C          Bb         Am
-              Nas nakim, nas nakim yekî ji we nas nakim (x3)
-
-
-              * Di dora 2. û 4. de wê akorên di nav kevanekê de bên lêxistin
+Dm          Am      Dm              Am
+Hilberîn im ez zayîn im dîrokê di xwe de dihewînim
+Dm          Am       Dm        Am (Am-Bb)*
+Ez ê zik bi zik azadîyê ji nû ve biwelidînim                      (x4)
+Dm
+Ez ê derkevim, ez ê bigerim, ez ê bibêjim, ez ê bikenim
+Gm                       Bb                    (C)
+Kes nikare li ser min biryar bide ji bo min__ (x2)
+Dm         Am         Dm         Am        Dm            Am                   Dîsgotin
+Ji te’r çi ye, tu kî yî, bav û bira yan mêr î, dewlet î yan dozger î
+Dm             C           Bb        Am
+Nas nakim, nas nakim yekî ji we nas nakim (x2)
+| Dm - C | Bb - Am | (x2)
+Dm           Am         Dm      Am
+Ez ê ji nû ve binivîsim çarenûsa hebûna xwe
+Dm         Am           Dm          Am (Am-Bb)*                      (x2)
+Ez ê tu carî qebûl nekim biryarê li ser jîyana xwe (x2)
+--- Dîsgotin
+Dm         Am         Dm         Am         Dm           Am
+Ji te’r çi ye, tu kî yî, bav û bira yan mêr î, dewlet î yan dozger î
+Dm              C          Bb         Am
+Nas nakim, nas nakim yekî ji we nas nakim (x3)
+* Di dora 2. û 4. de wê akorên di nav kevanekê de bên lêxistin

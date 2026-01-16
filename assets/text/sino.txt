@@ -1,36 +1,29 @@
-         Am                  Dm
-         __Lo Sîno Sîno kuro Sîno
-         Am                   Dm
-         __ Tu ne evînperset î Sîno
-         Am                         Dm
-         __Te guhê xwe daye wan bêbextan
-         Am                      Dm
-         __ Neke gazin û negirî qesta
-
-         Dm                           Am            Dm                       Am
-         __ Rabe ji ber derîyê mi here Sîno, lo Sîno __çep û rastê xwe bivîne Sîno
-         Dm                           Am             E                        Am
-         __ Rabe ji ber derîyê mi here Sîno, lo Sîno __çep û rastê xwe bivîne Sîno
-
-                Dm       G         Am
-                Berde dilo tu berde, berde berde berde
-                Dm           G        Am
-                __ Ji îro pê va wî berde
-                Dm G                Am                                   Dîsgotin
-                Berde cano tu berde, berde berde berde
-                Dm        G           Am
-                __ Xêra wî ji te ra tune
-
-
-         Am                   Dm Am                       Dm
-         __Lo Sîno ka gotinên êvara __tevda ketine kunê dîwara
-         Am                   Dm       Am                         Dm
-         __Lo Sîno ka bêje me rast e ew __ jê dikim ez guhê xwe yê rastê
-
-         Am                        Dm           Am
-         __Mi ji te ra gotibû lo lo Sîno, lo Sîno __tê rokî bimînî li wan besta
-         Dm                        Am            E                       Am
-         __Mi ji te ra gotibû lo lo Sîno, hêsîro __tê rokî bimînî li wan besta
-
-
-         --- Dîsgotin
+Am                  Dm
+__Lo Sîno Sîno kuro Sîno
+Am                   Dm
+__ Tu ne evînperset î Sîno
+Am                         Dm
+__Te guhê xwe daye wan bêbextan
+Am                      Dm
+__ Neke gazin û negirî qesta
+Dm                           Am            Dm                       Am
+__ Rabe ji ber derîyê mi here Sîno, lo Sîno __çep û rastê xwe bivîne Sîno
+Dm                           Am             E                        Am
+__ Rabe ji ber derîyê mi here Sîno, lo Sîno __çep û rastê xwe bivîne Sîno
+Dm       G         Am
+Berde dilo tu berde, berde berde berde
+Dm           G        Am
+__ Ji îro pê va wî berde
+Dm G                Am                                   Dîsgotin
+Berde cano tu berde, berde berde berde
+Dm        G           Am
+__ Xêra wî ji te ra tune
+Am                   Dm Am                       Dm
+__Lo Sîno ka gotinên êvara __tevda ketine kunê dîwara
+Am                   Dm       Am                         Dm
+__Lo Sîno ka bêje me rast e ew __ jê dikim ez guhê xwe yê rastê
+Am                        Dm           Am
+__Mi ji te ra gotibû lo lo Sîno, lo Sîno __tê rokî bimînî li wan besta
+Dm                        Am            E                       Am
+__Mi ji te ra gotibû lo lo Sîno, hêsîro __tê rokî bimînî li wan besta
+--- Dîsgotin

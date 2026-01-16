@@ -2193,6 +2193,30 @@ body {
 }
 .songText--pdf3{
   text-align:left;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+.chordSheet--pdf3{
+  padding-left: 2rem !important;
+  padding-right: 2rem !important;
+  padding-top: 1rem !important;
+  padding-bottom: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+.chordSheet--pdf3 .chordText{
+  padding: 0 !important;
+  margin: 0 !important;
+  text-align:left !important;
+}
+
+/* PDF3 songs should stay flush left even under responsive overrides */
+#songText.songText--pdf3{
+  padding: 0 !important;
+  margin: 0 !important;
+  text-align:left !important;
 }
 .chordText::after{
   content: "";

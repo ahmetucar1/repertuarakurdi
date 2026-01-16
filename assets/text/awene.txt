@@ -1,37 +1,31 @@
-              | Dm | Gm | F | Bb | Csus2 | Bb | Dm |
-              | Gm | Gm | F | Bb | Csus2 | Bb | Dm |
-
-              Dm                     Gm
-              Li me nemaye cewher wekî her difikirim
-              F                   Bb             Csus2 Bb		            Dm
-              Ne tu heyî ne jî ez em bê hest û aqil in em bê hest û aqil in (x2)
-
-              Gm
-              Awêneya min tu yî çima ez dişibim te
-              Dm                 Bb         Csus2
-              Gava ku lê dinêrim çima ez xwe nabînim
-              Bb                Dm
-              Çima her te dibînim__
-
-              Gm
-              Awêneya te ez im çima tu dişibî min
-              Dm               Bb         Csus2
-              Gava ku lê dinêrî çima tu xwe nabînî
-              Bb                Dm
-              Çima tu min dibînî__
-
-
-              Dm                    Gm
-              Rengê min û te yek e jê nayê bêhna gulan
-              F                    Bb        Csus2     Bb                Dm
-              Ez reş bim tu spî be bila geş bibe jîyan bila geş bibe jîyan__ (x2)
-
-              Gm
-              Bi vê şerm û fedîyê em ê wisa biçin kû
-              Dm                     Bb         Csus2 Bb               Dm
-              Em çi bikin pirrengîyê ez bibim ez, tu jî tu ez bibim ez, tu jî tu
-                                                                                         (x2)
-              Gm
-              Xelk firîyan çûn heyvê ez û tu man li vira
-              Dm                 Bb         Csus2        Bb        Dm
-              Em xizanê aqil in şerm e ji min û te ra şerm e ji min û te ra
+| Dm | Gm | F | Bb | Csus2 | Bb | Dm |
+| Gm | Gm | F | Bb | Csus2 | Bb | Dm |
+Dm                     Gm
+Li me nemaye cewher wekî her difikirim
+F                   Bb             Csus2 Bb		            Dm
+Ne tu heyî ne jî ez em bê hest û aqil in em bê hest û aqil in (x2)
+Gm
+Awêneya min tu yî çima ez dişibim te
+Dm                 Bb         Csus2
+Gava ku lê dinêrim çima ez xwe nabînim
+Bb                Dm
+Çima her te dibînim__
+Gm
+Awêneya te ez im çima tu dişibî min
+Dm               Bb         Csus2
+Gava ku lê dinêrî çima tu xwe nabînî
+Bb                Dm
+Çima tu min dibînî__
+Dm                    Gm
+Rengê min û te yek e jê nayê bêhna gulan
+F                    Bb        Csus2     Bb                Dm
+Ez reş bim tu spî be bila geş bibe jîyan bila geş bibe jîyan__ (x2)
+Gm
+Bi vê şerm û fedîyê em ê wisa biçin kû
+Dm                     Bb         Csus2 Bb               Dm
+Em çi bikin pirrengîyê ez bibim ez, tu jî tu ez bibim ez, tu jî tu
+(x2)
+Gm
+Xelk firîyan çûn heyvê ez û tu man li vira
+Dm                 Bb         Csus2        Bb        Dm
+Em xizanê aqil in şerm e ji min û te ra şerm e ji min û te ra
