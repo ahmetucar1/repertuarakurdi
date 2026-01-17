@@ -86,17 +86,6 @@ function renderList(listEl, items, typeLabel){
   }).join("");
 }
 
-function buildSubmissionDetail(data){
-  const userEmail = data?.createdByEmail || data?.createdBy || "Anonim";
-  const song = data?.song || "—";
-  const artist = data?.artist || data?.artistName || "—";
-  const snippet = `${song}${artist ? " (" + artist + ")" : ""}`;
-  if((data?.type || "").toLowerCase() === "new"){
-    return `${userEmail} yeni şarkı ekledi: ${snippet}`;
-  }
-  return `${userEmail} ${snippet} için düzenleme istedi.`;
-}
-
 function renderContactList(listEl, items){
   console.log(`🔍 renderContactList called: items.length=${items?.length || 0}, listEl=${!!listEl}`);
   if(!listEl) {
@@ -203,9 +192,6 @@ function init(){
   let currentNew = [];
   let currentEdits = [];
   let currentContacts = [];
-  let profilesUnsub = null;
-  let notificationsUnsub = null;
-  let notifSeeded = false;
 
   const setCounts = () => {
     if(pendingCountEl) pendingCountEl.textContent = (currentNew.length + currentEdits.length).toString();
@@ -213,20 +199,6 @@ function init(){
     if(editCountEl) editCountEl.textContent = currentEdits.length.toString();
     if(contactCountEl) contactCountEl.textContent = currentContacts.length.toString();
   };
-
-  notificationListEl?.addEventListener("click", (event) => {
-    const button = event.target.closest("button[data-action]");
-    if(!button) return;
-    const id = button.dataset.id;
-    const action = button.dataset.action;
-    if(!id || !action) return;
-    if(action === "approve" || action === "dismiss"){
-      const db = window.fbDb;
-      if(!db) return;
-      db.collection("admin_notifications").doc(id).delete().catch(err => console.error("❌ Bildirim silinemedi", err));
-    }
-  });
-
 
   const updateStatusBulk = async (ids, action) => {
     const user = auth.currentUser;
@@ -286,282 +258,8 @@ function init(){
               console.error("❌ Cache yenileme hatası:", err);
             }
           }, 500);
-  }
-}
-
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-const REAL_NOTIFICATION_TTL = ONE_DAY_MS * 60;
-const notificationMeta = {
-  edit: {
-    title: "Düzenleme isteği",
-    actions: ["view","approve"],
-    messages: [
-      "dicleyaman@gmail.com AWA SUSE şarkısında yeni bir düzenleme önerdi.",
-      "hunerci79 gitar sözlerini güncelledi ve bir düzeltme istedi.",
-      "stranalover34 sözleri tekrar yazdı, yeni düzenleme isteği gönderildi."
-    ],
-    fakeMessages: [
-      "dicleyaman@gmail AWA SUSE şarkısını düzenledi.",
-      "agirzaman@hotmail.com yeni riff ekledi, onay bekleniyor."
-    ]
-  },
-  add: {
-    title: "Yeni şarkı",
-    actions: ["view","approve"],
-    messages: [
-      "Leyla Özgür güncel repertuara Taybetî adlı şarkıyı ekledi.",
-      "Sinem Heci yeni şarkı önerisinde bulundu: Hevalên Şevê.",
-      "Rehber Studio 'Va cîran' parçasını paylaştı."
-    ],
-    fakeMessages: [
-      "gokhanbey@rise.com AWA SUSE kaydını ekledi.",
-      "kevinhunermend59 yeni şarkı önerisi gönderdi."
-    ]
-  },
-  signup: {
-    title: "Yeni kullanıcı",
-    actions: ["view"],
-    messages: [
-      "Zeynep Akay kayıt oldu. Profil onayı gerekli.",
-      "Murat Kalkan topluluğa katıldı.",
-      "Dîlan Demir yeni bir hesap açtı."
-    ],
-    fakeMessages: [
-      "serifkurdi52 yeni kayıt oluşturdu.",
-      "sevdaya@music.com sisteme kaydoldu."
-    ]
-  },
-  favorite: {
-    title: "Favorileme",
-    actions: ["view"],
-    messages: [
-      "Hozan Şerif 'Denge Dile Min' şarkısını favoriledi.",
-      "Gulistan M. 'Li Ber Deri' parçasına yıldız verdi."
-    ],
-    fakeMessages: [
-      "rozhin_29 favorilere yeni bir şarkı ekledi.",
-      "dilsuz_insan koleksiyona yeni bir favori ekledi."
-    ]
-  }
-};
-
-// 50 sahte bildirim üretimi için genişletilmiş havuz
-const fakePool = [
-  "Siye Ses: AWA SUSE için düzenleme gönderdi.",
-  "Siye Ses: Yeni şarkı önerisi paylaştı.",
-  "Siye Ses: Profilini güncelledi ve kayıt tamamlandı.",
-  "Siye Ses: 'Li Ber Deri' şarkısını favorilere ekledi.",
-  "Siye Ses: 'Denge Dile Min' akorlarını güncelledi.",
-  "Siye Ses: Yeni kayıt oluşturdu ve 2 şarkı ekledi.",
-  "Siye Ses: 'Hevalên Şevê' düzenleme isteği bıraktı.",
-  "Siye Ses: 'Azadî' için yeni şarkı ekledi.",
-  "Siye Ses: 'Li Qamislo' için düzenleme talebi gönderdi.",
-  "Siye Ses: 'Rupayiz' parçasını favorilere ekledi."
-];
-
-function formatNotificationTime(ts){
-  if(!ts) return "";
-  return new Date(ts).toLocaleString();
-}
-
-function renderNotifications(listEl, notifications){
-  if(!listEl) return;
-  if(!notifications.length){
-    listEl.innerHTML = `<div class="empty">Şu anda bildirim yok.</div>`;
-    return;
-  }
-  listEl.innerHTML = notifications.map((item) => {
-    const meta = notificationMeta[item.type] || {};
-    const actions = meta.actions || ["view"];
-    return `
-      <div class="notificationCard ${item.fake ? "notificationCard--fake" : ""}">
-        <div class="notificationCard__header">
-          <div>
-            <div class="notificationCard__title">${escapeHtml(item.title || meta.title || "Bildirim")}</div>
-            <div class="muted notificationCard__meta">${escapeHtml(item.detail)} · ${escapeHtml(formatNotificationTime(item.createdAt))}</div>
-          </div>
-          ${item.fake ? '<span class="badge badge--pending">Sahte</span>' : '<span class="badge badge--approved">Gerçek</span>'}
-        </div>
-        <div class="notificationCard__actions">
-          ${actions.map((action) => {
-            const label = action === "approve" ? "Onayla" : "İncele";
-            const btnClass = action === "approve" ? "btn--ok" : "btn--ghost";
-            return `<button class="btn ${btnClass}" data-action="${action}" data-id="${item.id}">${label}</button>`;
-          }).join("")}
-          <button class="btn btn--danger" data-action="dismiss" data-id="${item.id}">Kapat</button>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-function addNotification(type, { fake = false, detailOverride } = {}){
-  const meta = notificationMeta[type];
-  const db = window.fbDb;
-  if(!meta || !db) return;
-  const now = Date.now();
-  const baseMessages = fake ? meta.fakeMessages : meta.messages;
-  const autoMessage = (baseMessages && baseMessages.length)
-    ? baseMessages[Math.floor(Math.random() * baseMessages.length)]
-    : meta.title;
-  const message = detailOverride || autoMessage;
-  db.collection("admin_notifications").add({
-    type,
-    title: meta.title,
-    detail: message,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    expiresAt: new Date(now + (fake ? ONE_DAY_MS : REAL_NOTIFICATION_TTL)),
-    fake
-  }).catch(err => console.error("❌ addNotification Firestore error", err));
-}
-
-function updateNotificationViews(notifications){
-  renderNotifications($("#adminNotificationList"), notifications);
-  const totalEl = $("#notificationTotal");
-  if(totalEl) totalEl.textContent = notifications.length.toString();
-  const badgeEl = $("#adminNotificationBadge");
-  if(badgeEl) badgeEl.textContent = notifications.length.toString();
-}
-
-let notifications = [];
-let submissionListenerReady = false;
-let profilesListenerReady = false;
-let notificationsUnsub = null;
-
-async function seedFakeNotifications(db){
-  try{
-    const existing = await db.collection("admin_notifications").where("fake","==",true).limit(1).get();
-    if(!existing.empty) return;
-    const batch = db.batch();
-    const types = ["edit","add","signup","favorite"];
-    const now = Date.now();
-    fakePool.forEach((detail, idx) => {
-      const type = types[idx % types.length];
-      const meta = notificationMeta[type];
-      const ref = db.collection("admin_notifications").doc(`fake-${idx}`);
-      batch.set(ref, {
-        type,
-        title: meta?.title || "Bildirim",
-        detail,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        expiresAt: new Date(now + ONE_DAY_MS),
-        fake: true
-      }, { merge: true });
-    });
-    await batch.commit();
-    console.log("✅ Fake notifications seeded to Firestore");
-  } catch(err){
-    console.error("❌ Failed to seed fake notifications", err);
-  }
-}
-
-function setupNotifications(db){
-  if(!db){
-    console.warn("⚠️ admin_notifications: Firestore yok, local sahte bildirimler gösterilecek.");
-    seedLocalFakeNotifications();
-    return;
-  }
-  if(notificationsUnsub){
-    notificationsUnsub();
-    notificationsUnsub = null;
-  }
-  seedFakeNotifications(db);
-  notificationsUnsub = db.collection("admin_notifications")
-    .orderBy("createdAt","desc")
-    .limit(200)
-    .onSnapshot((snap) => {
-      const now = Date.now();
-      const items = snap.docs.map(d => {
-        const data = d.data() || {};
-        const expiresAt = data.expiresAt?.toDate ? data.expiresAt.toDate().getTime() : (data.expiresAt || 0);
-        return { _id: d.id, ...data, expiresAt };
-      }).filter(item => !item.expiresAt || item.expiresAt > now);
-      notifications = items;
-      updateNotificationViews(notifications);
-    }, (err) => {
-      console.error("❌ admin_notifications listener error", err);
-      seedLocalFakeNotifications();
-    });
-}
-
-function seedLocalFakeNotifications(){
-  const types = ["edit","add","signup","favorite"];
-  const now = Date.now();
-  notifications = fakePool.slice(0,10).map((detail, idx) => {
-    const type = types[idx % types.length];
-    const meta = notificationMeta[type];
-    return {
-      _id: `fake-local-${idx}`,
-      type,
-      title: meta?.title || "Bildirim",
-      detail,
-      createdAt: now,
-      expiresAt: now + ONE_DAY_MS,
-      fake: true
-    };
-  });
-  updateNotificationViews(notifications);
-}
-
-// Statik fallback: hiçbir şey görünmüyorsa hemen doldur
-function renderStaticFakeOnce(){
-  if(notifications.length) return;
-  const listEl = $("#adminNotificationList");
-  if(!listEl) return;
-  const types = ["edit","add","signup","favorite"];
-  const cards = fakePool.slice(0,10).map((detail, idx) => {
-    const type = types[idx % types.length];
-    const meta = notificationMeta[type];
-    return `
-      <div class="notificationCard notificationCard--fake">
-        <div class="notificationCard__header">
-          <div>
-            <div class="notificationCard__title">${escapeHtml(meta?.title || "Bildirim")}</div>
-            <div class="muted notificationCard__meta">${escapeHtml(detail)}</div>
-          </div>
-          <span class="badge badge--pending">Sahte</span>
-        </div>
-      </div>
-    `;
-  }).join("");
-  listEl.innerHTML = cards;
-  const badgeEl = $("#adminNotificationBadge");
-  if(badgeEl) badgeEl.textContent = "10";
-  const totalEl = $("#notificationTotal");
-  if(totalEl) totalEl.textContent = "10";
-}
-function handleSubmissionDocChanges(changes){
-  if(!submissionListenerReady){
-    submissionListenerReady = true;
-    return;
-  }
-  (changes || []).forEach((change) => {
-    if(change.type === "added"){
-      const data = change.doc?.data();
-      const payloadType = ((data?.type || "").toLowerCase() === "new") ? "add" : "edit";
-      addNotification(payloadType, {
-        detailOverride: buildSubmissionDetail(data),
-        fake: false
-      });
-    }
-  });
-}
-function handleProfileDocChanges(changes){
-  if(!profilesListenerReady){
-    profilesListenerReady = true;
-    return;
-  }
-  (changes || []).forEach((change) => {
-    if(change.type === "added"){
-      const data = change.doc?.data();
-      const name = data?.displayName || data?.name || data?.email || "Yeni kayıt";
-      addNotification("signup", {
-        detailOverride: `${name} kayıt oldu.`,
-        fake: false
-      });
-    }
-  });
-}
+        }
+      }
       
       setTimeout(() => {
         if(statusEl) statusEl.textContent = t("admin_status_pending", "Şandiyên li bendê");
@@ -625,8 +323,6 @@ function handleProfileDocChanges(changes){
     console.log("🔍 Admin: Auth state changed, user:", user ? user.uid : "null");
     if(unsub){ unsub(); unsub = null; }
     if(contactUnsub){ contactUnsub(); contactUnsub = null; }
-    if(profilesUnsub){ profilesUnsub(); profilesUnsub = null; }
-    if(notificationsUnsub){ notificationsUnsub(); notificationsUnsub = null; }
     if(!user){
       console.log("❌ Admin: No user");
       if(statusEl) statusEl.textContent = t("status_requires_login", "Têketin pêwîst e.");
@@ -637,7 +333,6 @@ function handleProfileDocChanges(changes){
       renderList(editListEl, [], t("admin_type_edit", "Guhartin"));
       renderContactList(contactListEl, []);
       setCounts();
-      seedLocalFakeNotifications();
       return;
     }
     
@@ -648,8 +343,6 @@ function handleProfileDocChanges(changes){
       adminEmails: window.ADMIN_EMAILS || []
     });
     
-    submissionListenerReady = false;
-    profilesListenerReady = false;
     if(!isAdmin){
       console.warn("❌ Admin: User is not admin");
       if(statusEl) statusEl.textContent = t("admin_not_authorized", "Yetkin yok.");
@@ -664,23 +357,9 @@ function handleProfileDocChanges(changes){
     }
     
     console.log("✅ Admin: User is admin, setting up listeners...");
-    submissionListenerReady = false;
-    profilesListenerReady = false;
-
-    // Hemen sahte bildirimleri göster ( canlı / local fark etmez, ilk ekranda boş kalmasın)
-    seedLocalFakeNotifications();
 
     if(statusEl) statusEl.textContent = t("admin_status_pending", "Şandiyên li bendê");
     
-    // Bildirimleri Firestore'dan çek ve sahte tohumları ekle
-    setupNotifications(db);
-    setTimeout(() => {
-      if(!notifications.length){
-        console.warn("⚠️ admin_notifications: herhangi bir bildirim yok, statik sahte seed gösteriliyor.");
-        renderStaticFakeOnce();
-      }
-    }, 800);
-
     // Önce get() ile tek seferlik veri çek (onSnapshot çalışmazsa yedek)
     const loadPendingSubmissions = async () => {
       try {
@@ -755,7 +434,6 @@ function handleProfileDocChanges(changes){
       unsub = db.collection("song_submissions")
         .where("status", "==", "pending")
         .onSnapshot((snap) => {
-          handleSubmissionDocChanges(snap.docChanges());
           console.log("✅ Admin: song_submissions snapshot received, docs:", snap.docs.length);
           try {
             const items = snap.docs.map(d => ({ _id: d.id, ...d.data() }))
@@ -789,29 +467,6 @@ function handleProfileDocChanges(changes){
       // Setup başarısız olursa get() ile yükle
       loadPendingSubmissions();
     }
-
-    // profiller için dinleyici
-    const loadProfiles = async () => {
-      try {
-        await db.collection("profiles").limit(1).get();
-      } catch(err){
-        console.warn("⚠️ Admin: profiles load err", err);
-      }
-    };
-
-    try {
-      profilesUnsub = db.collection("profiles")
-        .orderBy("createdAt","desc")
-        .limit(20)
-        .onSnapshot((snap) => {
-          handleProfileDocChanges(snap.docChanges());
-        }, (err) => {
-          console.error("❌ Admin: profiles listener error:", err);
-        });
-    } catch(err){
-      console.error("❌ Admin: Failed to set profiles listener:", err);
-    }
-    loadProfiles();
 
     // Önce get() ile tek seferlik veri çek (onSnapshot çalışmazsa yedek)
     const loadContactMessages = async () => {
@@ -1057,4 +712,3 @@ if (document.readyState === 'loading') {
   });
 }
 })();
-  const notificationListEl = $("#adminNotificationList");
