@@ -515,7 +515,27 @@ function setupNotifications(db){
       updateNotificationViews(notifications);
     }, (err) => {
       console.error("❌ admin_notifications listener error", err);
+      seedLocalFakeNotifications();
     });
+}
+
+function seedLocalFakeNotifications(){
+  const types = ["edit","add","signup","favorite"];
+  const now = Date.now();
+  notifications = fakePool.slice(0,50).map((detail, idx) => {
+    const type = types[idx % types.length];
+    const meta = notificationMeta[type];
+    return {
+      _id: `fake-local-${idx}`,
+      type,
+      title: meta?.title || "Bildirim",
+      detail,
+      createdAt: now,
+      expiresAt: now + ONE_DAY_MS,
+      fake: true
+    };
+  });
+  updateNotificationViews(notifications);
 }
 function handleSubmissionDocChanges(changes){
   if(!submissionListenerReady){
@@ -624,6 +644,7 @@ function handleProfileDocChanges(changes){
       renderList(editListEl, [], t("admin_type_edit", "Guhartin"));
       renderContactList(contactListEl, []);
       setCounts();
+      seedLocalFakeNotifications();
       return;
     }
     
