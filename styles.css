@@ -1797,6 +1797,101 @@ body {
 .adminBulk{ flex-wrap:wrap; justify-content:flex-end; }
 .adminBulk .btn{ padding:8px 10px; font-size:12px; }
 .adminSelect{ width:16px; height:16px; }
+.adminAvatar{
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-weight:600;
+  letter-spacing:.1em;
+  cursor:default;
+  margin-left:12px;
+}
+.adminAvatar__initials{
+  font-size:14px;
+  letter-spacing:.2em;
+}
+.adminAvatar__badge{
+  position:absolute;
+  top:-3px;
+  right:-3px;
+  background:var(--accent);
+  color:#111;
+  border-radius:999px;
+  padding:1px 6px;
+  font-size:11px;
+  font-weight:700;
+}
+.adminPanel{
+  margin-top:16px;
+  padding:16px;
+  border-radius:18px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+}
+.notificationList{
+  display:grid;
+  gap:12px;
+}
+.notificationCard{
+  padding:16px 18px;
+  border-radius:14px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 8px 32px rgba(0,0,0,.28);
+}
+.notificationCard--fake{
+  border-color:rgba(255,160,60,.7);
+  box-shadow:0 10px 36px rgba(255,160,60,.2);
+}
+.notificationCard__header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.notificationCard__title{
+  font-size:16px;
+  font-weight:600;
+}
+.notificationCard__meta{
+  font-size:12px;
+  margin-top:4px;
+}
+.notificationCard__actions{
+  margin-top:12px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.notificationControls{
+  margin-top:16px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+}
+.notificationControls .controlGroup{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  font-size:12px;
+}
+.notificationControls select{
+  min-width:220px;
+  padding:10px 14px;
+  border-radius:10px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  color:#fff;
+}
 .contactItem .item__sub{ white-space:normal; }
 .contactPreview{ max-height:220px; }
 .contactFiles{

@@ -86,6 +86,17 @@ function renderList(listEl, items, typeLabel){
   }).join("");
 }
 
+function buildSubmissionDetail(data){
+  const userEmail = data?.createdByEmail || data?.createdBy || "Anonim";
+  const song = data?.song || "—";
+  const artist = data?.artist || data?.artistName || "—";
+  const snippet = `${song}${artist ? " (" + artist + ")" : ""}`;
+  if((data?.type || "").toLowerCase() === "new"){
+    return `${userEmail} yeni şarkı ekledi: ${snippet}`;
+  }
+  return `${userEmail} ${snippet} için düzenleme istedi.`;
+}
+
 function renderContactList(listEl, items){
   console.log(`🔍 renderContactList called: items.length=${items?.length || 0}, listEl=${!!listEl}`);
   if(!listEl) {
@@ -192,6 +203,7 @@ function init(){
   let currentNew = [];
   let currentEdits = [];
   let currentContacts = [];
+  let profilesUnsub = null;
 
   const setCounts = () => {
     if(pendingCountEl) pendingCountEl.textContent = (currentNew.length + currentEdits.length).toString();
@@ -199,6 +211,26 @@ function init(){
     if(editCountEl) editCountEl.textContent = currentEdits.length.toString();
     if(contactCountEl) contactCountEl.textContent = currentContacts.length.toString();
   };
+
+  notifications = pruneNotifications(readNotifications());
+  ensureFakeSeeds(notifications);
+  notifications = pruneNotifications(notifications);
+  writeNotifications(notifications);
+  updateNotificationViews();
+
+  notificationListEl?.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-action]");
+    if(!button) return;
+    const id = button.dataset.id;
+    const action = button.dataset.action;
+    if(!id || !action) return;
+    if(action === "view"){
+      markNotificationViewed(id);
+    } else if(action === "approve" || action === "dismiss"){
+      removeNotification(id);
+    }
+  });
+
 
   const updateStatusBulk = async (ids, action) => {
     const user = auth.currentUser;
@@ -258,8 +290,233 @@ function init(){
               console.error("❌ Cache yenileme hatası:", err);
             }
           }, 500);
-        }
-      }
+  }
+}
+
+const ADMIN_NOTIFICATIONS_KEY = "rk_admin_notifications";
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const REAL_NOTIFICATION_TTL = ONE_DAY_MS * 60;
+const notificationMeta = {
+  edit: {
+    title: "Düzenleme isteği",
+    actions: ["view","approve"],
+    messages: [
+      "dicleyaman@gmail.com AWA SUSE şarkısında yeni bir düzenleme önerdi.",
+      "hunerci79 gitar sözlerini güncelledi ve bir düzeltme istedi.",
+      "stranalover34 sözleri tekrar yazdı, yeni düzenleme isteği gönderildi."
+    ],
+    fakeMessages: [
+      "dicleyaman@gmail AWA SUSE şarkısını düzenledi.",
+      "agirzaman@hotmail.com yeni riff ekledi, onay bekleniyor."
+    ]
+  },
+  add: {
+    title: "Yeni şarkı",
+    actions: ["view","approve"],
+    messages: [
+      "Leyla Özgür güncel repertuara Taybetî adlı şarkıyı ekledi.",
+      "Sinem Heci yeni şarkı önerisinde bulundu: Hevalên Şevê.",
+      "Rehber Studio 'Va cîran' parçasını paylaştı."
+    ],
+    fakeMessages: [
+      "gokhanbey@rise.com AWA SUSE kaydını ekledi.",
+      "kevinhunermend59 yeni şarkı önerisi gönderdi."
+    ]
+  },
+  signup: {
+    title: "Yeni kullanıcı",
+    actions: ["view"],
+    messages: [
+      "Zeynep Akay kayıt oldu. Profil onayı gerekli.",
+      "Murat Kalkan topluluğa katıldı.",
+      "Dîlan Demir yeni bir hesap açtı."
+    ],
+    fakeMessages: [
+      "serifkurdi52 yeni kayıt oluşturdu.",
+      "sevdaya@music.com sisteme kaydoldu."
+    ]
+  },
+  favorite: {
+    title: "Favorileme",
+    actions: ["view"],
+    messages: [
+      "Hozan Şerif 'Denge Dile Min' şarkısını favoriledi.",
+      "Gulistan M. 'Li Ber Deri' parçasına yıldız verdi."
+    ],
+    fakeMessages: [
+      "rozhin_29 favorilere yeni bir şarkı ekledi.",
+      "dilsuz_insan koleksiyona yeni bir favori ekledi."
+    ]
+  }
+};
+
+const defaultFakeNotifications = [
+  { id: "fake-edit-1", type: "edit", detail: notificationMeta.edit.fakeMessages[0] },
+  { id: "fake-add-1", type: "add", detail: notificationMeta.add.fakeMessages[0] },
+  { id: "fake-signup-1", type: "signup", detail: notificationMeta.signup.fakeMessages[0] },
+  { id: "fake-fav-1", type: "favorite", detail: notificationMeta.favorite.fakeMessages[0] }
+];
+
+function readNotifications(){
+  try {
+    const stored = localStorage.getItem(ADMIN_NOTIFICATIONS_KEY);
+    if(!stored) return [];
+    const list = JSON.parse(stored);
+    if(!Array.isArray(list)) return [];
+    return list;
+  } catch (err) {
+    console.warn("⚠️ Notifications parse failed", err);
+    return [];
+  }
+}
+
+function writeNotifications(list){
+  localStorage.setItem(ADMIN_NOTIFICATIONS_KEY, JSON.stringify(list));
+}
+
+function pruneNotifications(items){
+  const now = Date.now();
+  return items.filter((item) => (item?.expiresAt || 0) > now);
+}
+
+function ensureFakeSeeds(notifications){
+  const now = Date.now();
+  defaultFakeNotifications.forEach((template) => {
+    if(!notifications.some(n => n.id === template.id)){
+      notifications.unshift({
+        id: template.id,
+        type: template.type,
+        title: notificationMeta[template.type].title,
+        detail: template.detail,
+        createdAt: now,
+        expiresAt: now + ONE_DAY_MS,
+        fake: true
+      });
+    }
+  });
+}
+
+function formatNotificationTime(ts){
+  if(!ts) return "";
+  return new Date(ts).toLocaleString();
+}
+
+function renderNotifications(listEl, notifications){
+  if(!listEl) return;
+  if(!notifications.length){
+    listEl.innerHTML = `<div class="empty">Şu anda bildirim yok.</div>`;
+    return;
+  }
+  listEl.innerHTML = notifications.map((item) => {
+    const meta = notificationMeta[item.type] || {};
+    const actions = meta.actions || ["view"];
+    return `
+      <div class="notificationCard ${item.fake ? "notificationCard--fake" : ""}">
+        <div class="notificationCard__header">
+          <div>
+            <div class="notificationCard__title">${escapeHtml(item.title || meta.title || "Bildirim")}</div>
+            <div class="muted notificationCard__meta">${escapeHtml(item.detail)} · ${escapeHtml(formatNotificationTime(item.createdAt))}</div>
+          </div>
+          ${item.fake ? '<span class="badge badge--pending">Sahte</span>' : '<span class="badge badge--approved">Gerçek</span>'}
+        </div>
+        <div class="notificationCard__actions">
+          ${actions.map((action) => {
+            const label = action === "approve" ? "Onayla" : "İncele";
+            const btnClass = action === "approve" ? "btn--ok" : "btn--ghost";
+            return `<button class="btn ${btnClass}" data-action="${action}" data-id="${item.id}">${label}</button>`;
+          }).join("")}
+          <button class="btn btn--danger" data-action="dismiss" data-id="${item.id}">Kapat</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function addNotification(type, { fake = false, detailOverride } = {}){
+  const meta = notificationMeta[type];
+  if(!meta) return;
+  const now = Date.now();
+  const baseMessages = fake ? meta.fakeMessages : meta.messages;
+  const autoMessage = (baseMessages && baseMessages.length)
+    ? baseMessages[Math.floor(Math.random() * baseMessages.length)]
+    : meta.title;
+  const message = detailOverride || autoMessage;
+  const newItem = {
+    id: `${fake ? "fake" : "real"}-${type}-${now}`,
+    type,
+    title: meta.title,
+    detail: message,
+    createdAt: now,
+    expiresAt: now + (fake ? ONE_DAY_MS : REAL_NOTIFICATION_TTL),
+    fake
+  };
+  notifications.unshift(newItem);
+  notifications = pruneNotifications(notifications);
+  while(notifications.length > 50){
+    notifications.pop();
+  }
+  writeNotifications(notifications);
+  updateNotificationViews();
+}
+
+function removeNotification(id){
+  notifications = notifications.filter((item) => item.id !== id);
+  writeNotifications(notifications);
+  updateNotificationViews();
+}
+
+function markNotificationViewed(id){
+  const note = notifications.find((item) => item.id === id);
+  if(note){
+    note.viewedAt = Date.now();
+  }
+  writeNotifications(notifications);
+  updateNotificationViews();
+}
+
+function updateNotificationViews(){
+  renderNotifications($("#adminNotificationList"), notifications);
+  const totalEl = $("#notificationTotal");
+  if(totalEl) totalEl.textContent = notifications.length.toString();
+  const badgeEl = $("#adminNotificationBadge");
+  if(badgeEl) badgeEl.textContent = notifications.length.toString();
+}
+
+let notifications = [];
+let submissionListenerReady = false;
+let profilesListenerReady = false;
+function handleSubmissionDocChanges(changes){
+  if(!submissionListenerReady){
+    submissionListenerReady = true;
+    return;
+  }
+  (changes || []).forEach((change) => {
+    if(change.type === "added"){
+      const data = change.doc?.data();
+      const payloadType = ((data?.type || "").toLowerCase() === "new") ? "add" : "edit";
+      addNotification(payloadType, {
+        detailOverride: buildSubmissionDetail(data),
+        fake: false
+      });
+    }
+  });
+}
+function handleProfileDocChanges(changes){
+  if(!profilesListenerReady){
+    profilesListenerReady = true;
+    return;
+  }
+  (changes || []).forEach((change) => {
+    if(change.type === "added"){
+      const data = change.doc?.data();
+      const name = data?.displayName || data?.name || data?.email || "Yeni kayıt";
+      addNotification("signup", {
+        detailOverride: `${name} kayıt oldu.`,
+        fake: false
+      });
+    }
+  });
+}
       
       setTimeout(() => {
         if(statusEl) statusEl.textContent = t("admin_status_pending", "Şandiyên li bendê");
@@ -323,6 +580,7 @@ function init(){
     console.log("🔍 Admin: Auth state changed, user:", user ? user.uid : "null");
     if(unsub){ unsub(); unsub = null; }
     if(contactUnsub){ contactUnsub(); contactUnsub = null; }
+    if(profilesUnsub){ profilesUnsub(); profilesUnsub = null; }
     if(!user){
       console.log("❌ Admin: No user");
       if(statusEl) statusEl.textContent = t("status_requires_login", "Têketin pêwîst e.");
@@ -343,6 +601,8 @@ function init(){
       adminEmails: window.ADMIN_EMAILS || []
     });
     
+    submissionListenerReady = false;
+    profilesListenerReady = false;
     if(!isAdmin){
       console.warn("❌ Admin: User is not admin");
       if(statusEl) statusEl.textContent = t("admin_not_authorized", "Yetkin yok.");
@@ -357,6 +617,8 @@ function init(){
     }
     
     console.log("✅ Admin: User is admin, setting up listeners...");
+    submissionListenerReady = false;
+    profilesListenerReady = false;
 
     if(statusEl) statusEl.textContent = t("admin_status_pending", "Şandiyên li bendê");
     
@@ -434,6 +696,7 @@ function init(){
       unsub = db.collection("song_submissions")
         .where("status", "==", "pending")
         .onSnapshot((snap) => {
+          handleSubmissionDocChanges(snap.docChanges());
           console.log("✅ Admin: song_submissions snapshot received, docs:", snap.docs.length);
           try {
             const items = snap.docs.map(d => ({ _id: d.id, ...d.data() }))
@@ -467,6 +730,29 @@ function init(){
       // Setup başarısız olursa get() ile yükle
       loadPendingSubmissions();
     }
+
+    // profiller için dinleyici
+    const loadProfiles = async () => {
+      try {
+        await db.collection("profiles").limit(1).get();
+      } catch(err){
+        console.warn("⚠️ Admin: profiles load err", err);
+      }
+    };
+
+    try {
+      profilesUnsub = db.collection("profiles")
+        .orderBy("createdAt","desc")
+        .limit(20)
+        .onSnapshot((snap) => {
+          handleProfileDocChanges(snap.docChanges());
+        }, (err) => {
+          console.error("❌ Admin: profiles listener error:", err);
+        });
+    } catch(err){
+      console.error("❌ Admin: Failed to set profiles listener:", err);
+    }
+    loadProfiles();
 
     // Önce get() ile tek seferlik veri çek (onSnapshot çalışmazsa yedek)
     const loadContactMessages = async () => {
@@ -712,3 +998,4 @@ if (document.readyState === 'loading') {
   });
 }
 })();
+  const notificationListEl = $("#adminNotificationList");
