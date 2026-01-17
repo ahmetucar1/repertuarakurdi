@@ -679,6 +679,9 @@ function handleProfileDocChanges(changes){
     submissionListenerReady = false;
     profilesListenerReady = false;
 
+    // Hemen sahte bildirimleri göster ( canlı / local fark etmez, ilk ekranda boş kalmasın)
+    seedLocalFakeNotifications();
+
     if(statusEl) statusEl.textContent = t("admin_status_pending", "Şandiyên li bendê");
     
     // Bildirimleri Firestore'dan çek ve sahte tohumları ekle
