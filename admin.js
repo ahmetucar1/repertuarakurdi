@@ -496,6 +496,11 @@ async function seedFakeNotifications(db){
 }
 
 function setupNotifications(db){
+  if(!db){
+    console.warn("⚠️ admin_notifications: Firestore yok, local sahte bildirimler gösterilecek.");
+    seedLocalFakeNotifications();
+    return;
+  }
   if(notificationsUnsub){
     notificationsUnsub();
     notificationsUnsub = null;
@@ -678,6 +683,12 @@ function handleProfileDocChanges(changes){
     
     // Bildirimleri Firestore'dan çek ve sahte tohumları ekle
     setupNotifications(db);
+    setTimeout(() => {
+      if(!notifications.length){
+        console.warn("⚠️ admin_notifications: herhangi bir bildirim yok, local sahte seed gösteriliyor.");
+        seedLocalFakeNotifications();
+      }
+    }, 1200);
 
     // Önce get() ile tek seferlik veri çek (onSnapshot çalışmazsa yedek)
     const loadPendingSubmissions = async () => {
