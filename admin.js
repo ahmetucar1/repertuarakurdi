@@ -351,10 +351,18 @@ const notificationMeta = {
 };
 
 const defaultFakeNotifications = [
-  { id: "fake-edit-1", type: "edit", detail: notificationMeta.edit.fakeMessages[0] },
-  { id: "fake-add-1", type: "add", detail: notificationMeta.add.fakeMessages[0] },
-  { id: "fake-signup-1", type: "signup", detail: notificationMeta.signup.fakeMessages[0] },
-  { id: "fake-fav-1", type: "favorite", detail: notificationMeta.favorite.fakeMessages[0] }
+  { id: "fake-edit-1", type: "edit", detail: "dicleyaman@gmail AWA SUSE şarkısını düzenledi." },
+  { id: "fake-edit-2", type: "edit", detail: "hunerci79 gitar akorlarını güncelledi, onay bekliyor." },
+  { id: "fake-add-1", type: "add", detail: "gokhanbey@rise.com AWA SUSE kaydını ekledi." },
+  { id: "fake-add-2", type: "add", detail: "kevinhunermend59 yeni şarkı önerisi gönderdi." },
+  { id: "fake-signup-1", type: "signup", detail: "serifkurdi52 yeni kayıt oluşturdu." },
+  { id: "fake-signup-2", type: "signup", detail: "sevdaya@music.com sisteme kaydoldu." },
+  { id: "fake-fav-1", type: "favorite", detail: "rozhin_29 favorilere yeni bir şarkı ekledi." },
+  { id: "fake-fav-2", type: "favorite", detail: "dilsuz_insan koleksiyona yeni bir favori ekledi." },
+  { id: "fake-edit-3", type: "edit", detail: "klavyeci_arda 'Denge Dile Min' için düzenleme yaptı." },
+  { id: "fake-add-3", type: "add", detail: "studio_raman 'Hevalên Şevê' parçasını ekledi." },
+  { id: "fake-signup-3", type: "signup", detail: "Nalin A. topluluğa katıldı." },
+  { id: "fake-fav-3", type: "favorite", detail: "ciwanmüzik 'Li Ber Deri'yi favoriledi." }
 ];
 
 function readNotifications(){
