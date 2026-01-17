@@ -487,7 +487,7 @@ function setupNotifications(db){
 function seedLocalFakeNotifications(){
   const types = ["edit","add","signup","favorite"];
   const now = Date.now();
-  notifications = fakePool.slice(0,50).map((detail, idx) => {
+  notifications = fakePool.slice(0,10).map((detail, idx) => {
     const type = types[idx % types.length];
     const meta = notificationMeta[type];
     return {
@@ -501,6 +501,34 @@ function seedLocalFakeNotifications(){
     };
   });
   updateNotificationViews(notifications);
+}
+
+// Statik fallback: hiçbir şey görünmüyorsa hemen doldur
+function renderStaticFakeOnce(){
+  if(notifications.length) return;
+  const listEl = $("#adminNotificationList");
+  if(!listEl) return;
+  const types = ["edit","add","signup","favorite"];
+  const cards = fakePool.slice(0,10).map((detail, idx) => {
+    const type = types[idx % types.length];
+    const meta = notificationMeta[type];
+    return `
+      <div class="notificationCard notificationCard--fake">
+        <div class="notificationCard__header">
+          <div>
+            <div class="notificationCard__title">${escapeHtml(meta?.title || "Bildirim")}</div>
+            <div class="muted notificationCard__meta">${escapeHtml(detail)}</div>
+          </div>
+          <span class="badge badge--pending">Sahte</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+  listEl.innerHTML = cards;
+  const badgeEl = $("#adminNotificationBadge");
+  if(badgeEl) badgeEl.textContent = "10";
+  const totalEl = $("#notificationTotal");
+  if(totalEl) totalEl.textContent = "10";
 }
 function handleSubmissionDocChanges(changes){
   if(!submissionListenerReady){
@@ -648,10 +676,10 @@ function handleProfileDocChanges(changes){
     setupNotifications(db);
     setTimeout(() => {
       if(!notifications.length){
-        console.warn("⚠️ admin_notifications: herhangi bir bildirim yok, local sahte seed gösteriliyor.");
-        seedLocalFakeNotifications();
+        console.warn("⚠️ admin_notifications: herhangi bir bildirim yok, statik sahte seed gösteriliyor.");
+        renderStaticFakeOnce();
       }
-    }, 1200);
+    }, 800);
 
     // Önce get() ile tek seferlik veri çek (onSnapshot çalışmazsa yedek)
     const loadPendingSubmissions = async () => {
