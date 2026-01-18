@@ -1059,8 +1059,8 @@ const norm = (s) => (s || "")
   .replace(/ö/g, "o")
   .replace(/ç/g, "c");
 
-const ARTIST_PHOTOS_URL = "/assets/artist-photos/artist-photos.json?v=2";
-const ARTIST_PHOTOS_CACHE_KEY = "artistPhotosCache.v1";
+const ARTIST_PHOTOS_URL = "/assets/artist-photos/artist-photos.json?v=3";
+const ARTIST_PHOTOS_CACHE_KEY = "artistPhotosCache.v3";
 let __artistPhotosPromise = null;
 let __artistPhotoMap = null;
 
